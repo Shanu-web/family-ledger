@@ -31,8 +31,12 @@ if os.path.exists(_ENV_FILE):
 DB_PATH = os.environ.get("FL_DB", "family.db")
 VAULT_DIR = os.environ.get("FL_VAULT", "vault")
 DEV_MODE = os.environ.get("DEV_MODE", "1") == "1"
-ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
-MODEL = os.environ.get("FL_MODEL", "claude-sonnet-4-6")
+# .strip() guards against a trailing newline/space pasted into the host's
+# env var UI (e.g. Railway) — a present-but-invalid key is the most common
+# cause of "key is set but extraction says it isn't".
+ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "").strip()
+MODEL = os.environ.get("FL_MODEL", "claude-sonnet-4-6").strip()
+print(f"[boot] AI extraction {'ENABLED' if ANTHROPIC_API_KEY else 'DISABLED (ANTHROPIC_API_KEY not set)'}; model={MODEL}")
 
 os.makedirs(VAULT_DIR, exist_ok=True)
 app = FastAPI(title="Family Ledger")
@@ -535,7 +539,12 @@ Output: [
  {"entity":"asset","category":"insurance","title":"Vehicle insurance","amount":null,"confidence":0.8,"nominee":"unknown","mutation":"unknown"}]"""
 
 def claude_extract(text: str, image_b64: Optional[str] = None, media_type: str = "image/jpeg"):
+    """Returns the extracted list on success, or None on failure.
+    On failure, the reason is stored in claude_extract.last_error so callers
+    can tell 'no key' apart from 'API call failed'."""
+    claude_extract.last_error = None
     if not ANTHROPIC_API_KEY:
+        claude_extract.last_error = "no_key"
         return None
     content = []
     if image_b64:
@@ -554,9 +563,17 @@ def claude_extract(text: str, image_b64: Optional[str] = None, media_type: str =
         out = "".join(b.get("text", "") for b in r.json()["content"] if b.get("type") == "text")
         out = re.sub(r"```json|```", "", out).strip()
         return json.loads(out)
-    except Exception as e:
-        print("[extract] Claude call failed:", e)
+    except httpx.HTTPStatusError as e:
+        detail = e.response.text[:300] if e.response is not None else str(e)
+        claude_extract.last_error = f"HTTP {e.response.status_code if e.response is not None else '?'}: {detail}"
+        print("[extract] Claude API returned an error:", claude_extract.last_error)
         return None
+    except Exception as e:
+        claude_extract.last_error = f"{type(e).__name__}: {e}"
+        print("[extract] Claude call failed:", claude_extract.last_error)
+        return None
+
+claude_extract.last_error = None
 
 LAKH = r"(\d+(?:\.\d+)?)\s*(lakh|lac|लाख|crore|करोड़|cr)"
 
@@ -624,9 +641,13 @@ def ingest_text(body: IngestText, user=Depends(get_user)):
             created.append({"id": did, **it})
         emit(c, user["family_id"], user["name"], "ingest.text",
              {"chars": len(text), "drafts": len(created), "engine": engine})
-    return {"drafts": created, "engine": engine,
-            "note": None if engine == "claude" else
-            "AI key not configured — basic keyword extraction used. Review drafts carefully."}
+    note = None
+    if engine != "claude":
+        note = ("AI key not configured — basic keyword extraction used. Review drafts carefully."
+                if claude_extract.last_error == "no_key" else
+                "AI extraction failed (key is set but the call errored) — basic keyword "
+                "extraction used. Check server logs. Review drafts carefully.")
+    return {"drafts": created, "engine": engine, "note": note}
 
 @app.post("/api/ingest/document")
 async def ingest_document(file: UploadFile = File(...), user_token: str = Form(...)):
@@ -673,6 +694,39 @@ async def ingest_document(file: UploadFile = File(...), user_token: str = Form(.
              {"file": file.filename, "drafts": len(created)})
     return {"document_id": doc_id, "drafts": created,
             "note": None if items else "Stored in vault. AI extraction unavailable — add details manually."}
+
+@app.get("/api/ai/health")
+def ai_health():
+    """Unauthenticated diagnostics for deployment (Railway etc.).
+    Reports whether the key is visible to the process (masked) and, if so,
+    pings the Anthropic API so you can tell 'key missing' from 'key invalid'."""
+    key = ANTHROPIC_API_KEY
+    out = {
+        "key_present": bool(key),
+        "key_length": len(key),
+        "key_preview": (key[:7] + "…" + key[-4:]) if len(key) > 12 else None,
+        "model": MODEL,
+    }
+    if not key:
+        out["status"] = "no_key"
+        out["hint"] = "ANTHROPIC_API_KEY is not visible to the app. On Railway: set it on the correct service, then redeploy."
+        return out
+    try:
+        r = httpx.post("https://api.anthropic.com/v1/messages",
+                       headers={"x-api-key": key, "anthropic-version": "2023-06-01",
+                                "content-type": "application/json"},
+                       json={"model": MODEL, "max_tokens": 4,
+                             "messages": [{"role": "user", "content": "ping"}]},
+                       timeout=30)
+        out["status"] = "ok" if r.status_code == 200 else "api_error"
+        out["api_status_code"] = r.status_code
+        if r.status_code != 200:
+            out["api_response"] = r.text[:300]
+            out["hint"] = "Key reached Anthropic but was rejected. Check for a wrong/expired key, trailing whitespace, or an unknown model name."
+    except Exception as e:
+        out["status"] = "unreachable"
+        out["error"] = f"{type(e).__name__}: {e}"
+    return out
 
 @app.get("/api/drafts")
 def list_drafts(user=Depends(get_user)):
