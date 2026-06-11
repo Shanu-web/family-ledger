@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F6F7FB">
+<title>Family Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F6F7FB; --card:#FFFFFF; --ink:#10182B; --muted:#69708A; --line:#ECEEF4;
+  --brand:#4F46E5; --brand-2:#7C6FF0; --brand-soft:#EEF0FE;
+  --ok:#0A8F62; --ok-soft:#E6F7F0; --warn:#B45309; --warn-soft:#FFF3E0;
+  --bad:#DC2626; --bad-soft:#FDECEC;
+  --r:16px; --r-sm:12px;
+  --shadow:0 1px 2px rgba(16,24,43,.05),0 8px 24px rgba(16,24,43,.06);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:'Inter',-apple-system,'Segoe UI',sans-serif;
+  font-size:14.5px;line-height:1.45;padding-bottom:env(safe-area-inset-bottom)}
+h1,h2,h3{margin:0;font-weight:700;letter-spacing:-.01em}
+a{color:var(--brand);text-decoration:none}
+.muted{color:var(--muted)}
+.wrap{max-width:680px;margin:0 auto;padding:0 16px}
+.card{background:var(--card);border-radius:var(--r);padding:18px;margin-bottom:12px;box-shadow:var(--shadow)}
+.hero{background:linear-gradient(135deg,var(--brand) 0%,var(--brand-2) 100%);color:#fff;border-radius:20px;
+  padding:22px;margin-bottom:14px;box-shadow:0 10px 30px rgba(79,70,229,.25)}
+.hero .lbl{font-size:12px;font-weight:600;opacity:.85;letter-spacing:.04em;text-transform:uppercase}
+.hero .big{font-size:32px;font-weight:800;letter-spacing:-.02em;margin-top:2px;font-variant-numeric:tabular-nums}
+.hero .sub{font-size:13px;opacity:.85;margin-top:2px}
+
+button{font-family:inherit;cursor:pointer;border:none}
+.btn{background:var(--brand);color:#fff;font-weight:600;font-size:14px;border-radius:var(--r-sm);
+  padding:12px 18px;transition:transform .06s,box-shadow .2s;box-shadow:0 4px 14px rgba(79,70,229,.28)}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.5;box-shadow:none}
+.btn.full{width:100%}
+.btn.sm{padding:8px 14px;font-size:13px;box-shadow:none}
+.btn.ghost{background:var(--brand-soft);color:var(--brand);box-shadow:none}
+.btn.plain{background:transparent;color:var(--muted);box-shadow:none}
+.btn.danger{background:var(--bad-soft);color:var(--bad);box-shadow:none}
+.btn.success{background:var(--ok-soft);color:var(--ok);box-shadow:none}
+
+input,select,textarea{width:100%;font-family:inherit;font-size:15px;color:var(--ink);background:#FAFBFE;
+  border:1.5px solid var(--line);border-radius:var(--r-sm);padding:12px 14px;outline:none;transition:border .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--brand);background:#fff}
+label{display:block;margin-bottom:12px}
+label>span{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px}
+.row{display:grid;gap:10px}
+.row.c2{grid-template-columns:1fr 1fr}
+@media(max-width:540px){.row.c2{grid-template-columns:1fr}}
+
+details.more{margin:2px 0 12px}
+details.more>summary{list-style:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--brand);
+  padding:8px 0;user-select:none}
+details.more>summary::-webkit-details-marker{display:none}
+details.more>summary:before{content:'+ '}
+details.more[open]>summary:before{content:'– '}
+
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600;border-radius:99px;padding:3px 10px}
+.chip.bad{color:var(--bad);background:var(--bad-soft)}
+.chip.ok{color:var(--ok);background:var(--ok-soft)}
+.chip.warn{color:var(--warn);background:var(--warn-soft)}
+.chip.brand{color:var(--brand);background:var(--brand-soft)}
+.chip.mut{color:var(--muted);background:var(--bg)}
+
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.stat{background:var(--card);border-radius:var(--r);padding:14px 16px;box-shadow:var(--shadow);cursor:pointer}
+.stat b{font-size:22px;font-weight:800;display:block;font-variant-numeric:tabular-nums}
+.stat span{font-size:12px;font-weight:500;color:var(--muted)}
+
+.list-item{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.avatar{width:42px;height:42px;border-radius:50%;background:var(--brand-soft);color:var(--brand);font-weight:700;
+  display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.cat-head{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:18px 4px 8px}
+
+/* header */
+.hdr{position:sticky;top:0;z-index:20;background:rgba(246,247,251,.88);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--line)}
+.hdr-in{max-width:680px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:12px}
+.logo{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--brand),var(--brand-2));
+  color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.hdr-t{flex:1;min-width:0}
+.hdr-t b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hdr-t span{font-size:11.5px;color:var(--muted)}
+.ring{position:relative;width:42px;height:42px;flex-shrink:0;cursor:pointer}
+.ring svg{transform:rotate(-90deg)}
+.ring b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800}
+
+/* desktop pills */
+.pills{display:none;max-width:680px;margin:0 auto;padding:0 16px 10px;gap:6px;flex-wrap:wrap}
+.pill{font-size:13px;font-weight:600;color:var(--muted);background:transparent;border-radius:99px;padding:8px 14px;position:relative}
+.pill.on{color:#fff;background:var(--ink)}
+.pill .bdg{position:absolute;top:0;right:2px;background:var(--bad);color:#fff;font-size:9.5px;font-weight:700;
+  border-radius:99px;padding:1px 5px;min-width:15px}
+@media(min-width:768px){.pills{display:flex}.bnav{display:none!important}body{padding-bottom:0}#view{padding-bottom:40px!important}}
+
+/* bottom nav (mobile) */
+.bnav{position:fixed;bottom:0;left:0;right:0;z-index:30;background:rgba(255,255,255,.94);backdrop-filter:blur(14px);
+  border-top:1px solid var(--line);display:flex;justify-content:space-around;align-items:flex-end;
+  padding:6px 8px calc(8px + env(safe-area-inset-bottom))}
+.bnav button{background:none;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10.5px;
+  font-weight:600;color:var(--muted);padding:4px 10px;border-radius:12px;position:relative;min-width:58px}
+.bnav button.on{color:var(--brand)}
+.bnav .ico{font-size:20px;line-height:1}
+.bnav .bdg{position:absolute;top:-2px;right:8px;background:var(--bad);color:#fff;font-size:9.5px;font-weight:700;
+  border-radius:99px;padding:1px 5px;min-width:15px;text-align:center}
+.fab{width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,var(--brand),var(--brand-2));
+  color:#fff;font-size:22px;display:flex;align-items:center;justify-content:center;margin-top:-22px;
+  box-shadow:0 6px 20px rgba(79,70,229,.4)}
+
+/* sheet */
+.sheet-bg{position:fixed;inset:0;background:rgba(16,24,43,.4);z-index:40;display:none}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:41;background:#fff;border-radius:22px 22px 0 0;
+  padding:10px 16px calc(20px + env(safe-area-inset-bottom));display:none;max-width:680px;margin:0 auto}
+.sheet.open,.sheet-bg.open{display:block}
+.sheet .grab{width:40px;height:4px;border-radius:99px;background:var(--line);margin:6px auto 14px}
+.sheet button{display:flex;align-items:center;gap:12px;width:100%;background:none;font-size:15px;font-weight:600;
+  color:var(--ink);padding:14px 8px;border-radius:12px;text-align:left}
+.sheet button:active{background:var(--bg)}
+
+/* mic */
+.mic{width:84px;height:84px;border-radius:50%;font-size:32px;display:flex;align-items:center;justify-content:center;
+  margin:0 auto;background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;
+  box-shadow:0 8px 26px rgba(79,70,229,.35);transition:transform .1s}
+.mic:active{transform:scale(.95)}
+.mic.rec{background:linear-gradient(135deg,var(--bad),#F87171);animation:pulse 1.2s infinite;box-shadow:0 8px 26px rgba(220,38,38,.35)}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+
+.draft{border-left:4px solid var(--brand);}
+.tl{position:relative;margin:0 0 6px 14px;padding-left:22px;border-left:2px solid #DDD9F8}
+.tl .card{position:relative}
+.tl .card:before{content:'';position:absolute;left:-28px;top:24px;width:10px;height:10px;border-radius:50%;
+  background:var(--brand);border:2.5px solid #fff;box-shadow:0 0 0 2px #DDD9F8}
+.story-txt{font-size:14px;line-height:1.65;color:#3A4156;margin-top:8px;white-space:pre-line}
+.yrs{font-size:12px;font-weight:600;color:var(--brand)}
+.empty{text-align:center;padding:36px 20px;color:var(--muted)}
+.empty .e-ico{font-size:40px;margin-bottom:8px}
+.empty b{display:block;color:var(--ink);font-size:16px;margin-bottom:4px}
+
+.toast{position:fixed;bottom:84px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;
+  font-size:13px;font-weight:500;padding:11px 20px;border-radius:99px;display:none;z-index:60;max-width:88vw;
+  box-shadow:0 8px 24px rgba(16,24,43,.3)}
+@media(min-width:768px){.toast{bottom:30px}}
+.hidden{display:none!important}
+.prog{height:6px;border-radius:99px;background:var(--line);overflow:hidden;margin:8px 0 4px}
+.prog>div{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--brand),var(--brand-2));transition:width .4s}
+@media print{.no-print,.bnav,.hdr{display:none!important}body{background:#fff}#view{padding-bottom:0!important}.card{box-shadow:none;border:1px solid #ddd}}
+</style>
+</head>
+<body>
+<div id="toast" class="toast"></div>
+
+<!-- ── AUTH ── -->
+<div id="auth" class="wrap" style="max-width:420px;padding-top:9vh">
+  <div style="text-align:center;margin-bottom:22px">
+    <div class="logo" style="width:56px;height:56px;border-radius:16px;font-size:26px;margin:0 auto 12px">₹</div>
+    <h1 style="font-size:23px" id="auth-title">Family Ledger</h1>
+    <p class="muted" id="auth-sub" style="margin:6px 0 0;font-size:13.5px">One register for everything your family owns.</p>
+  </div>
+  <div class="card" style="padding:22px">
+    <div id="step-phone">
+      <label><span>Mobile number</span><input id="phone" inputmode="numeric" placeholder="10-digit number" autocomplete="tel"></label>
+      <button class="btn full" onclick="sendOtp()">Send OTP</button>
+    </div>
+    <div id="step-otp" class="hidden">
+      <label><span>Enter OTP</span><input id="otp" inputmode="numeric" placeholder="••••••" style="letter-spacing:.4em;text-align:center;font-size:20px;font-weight:700"></label>
+      <div class="muted" id="dev-otp" style="font-size:12px;margin-bottom:12px;text-align:center"></div>
+      <button class="btn full" onclick="verifyOtp()">Verify</button>
+    </div>
+    <div id="step-register" class="hidden">
+      <p class="muted" style="margin-top:0;font-size:13.5px">This number is new. Create your family's workspace — you'll be the owner.</p>
+      <label><span>Your full name</span><input id="reg-name" placeholder="e.g. Shanu Choudhary"></label>
+      <label><span>Family name (optional)</span><input id="reg-fam" placeholder="e.g. Choudhary family, Patna"></label>
+      <button class="btn full" onclick="completeAuth('register')">Create family workspace</button>
+    </div>
+    <div id="step-invite" class="hidden">
+      <p id="invite-text" class="muted" style="margin-top:0"></p>
+      <label id="invite-name-wrap"><span>Your full name</span><input id="invite-name"></label>
+      <button class="btn full" onclick="completeAuth('join_invite')">Join family</button>
+    </div>
+    <div id="step-claim" class="hidden">
+      <p class="muted" style="margin-top:0">A family member already added a profile with this number. Is this you?</p>
+      <div id="claim-list"></div>
+      <button class="btn ghost full" style="margin-top:8px" onclick="showRegister()">None of these — create new</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── APP ── -->
+<div id="app" class="hidden">
+  <div class="hdr no-print">
+    <div class="hdr-in">
+      <div class="logo">₹</div>
+      <div class="hdr-t"><b id="fam-name">Family Ledger</b><span id="whoami"></span></div>
+      <div class="ring" id="score-ring" title="Audit score" onclick="TAB='report';render()"></div>
+    </div>
+    <div class="pills no-print" id="pills"></div>
+  </div>
+  <div class="wrap" id="view" style="padding-top:16px;padding-bottom:110px"></div>
+</div>
+
+<!-- bottom nav -->
+<div class="bnav no-print hidden" id="bnav"></div>
+<!-- more sheet -->
+<div class="sheet-bg" id="sheet-bg" onclick="closeSheet()"></div>
+<div class="sheet" id="sheet">
+  <div class="grab"></div>
+  <button onclick="closeSheet();TAB='story';render()"><span style="font-size:20px">🌳</span> Family story</button>
+  <button onclick="closeSheet();TAB='discover';render()"><span style="font-size:20px">🔎</span> Discover unclaimed assets</button>
+  <button onclick="closeSheet();TAB='report';render()"><span style="font-size:20px">📋</span> Audit report</button>
+  <button onclick="logout()" style="color:var(--bad)"><span style="font-size:20px">↩︎</span> Sign out</button>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+let TOKEN=localStorage.getItem('fl_token')||'', ME=null, TAB='overview';
+let STATE={members:[],assets:[],checks:{},drafts:[],activity:[],invites:[],report:null};
+let vtoken='', authCtx={};
+
+const CATS=[["property","Property / Land"],["bank","Bank / Deposits"],["insurance","Insurance"],
+["epf","EPF / PPF / NPS"],["demat","Shares / MF"],["gold","Gold / Locker"],["vehicle","Vehicles"],["loan","Loans"]];
+const CAT_ICO={property:"🏠",bank:"🏦",insurance:"🛡",epf:"💼",demat:"📈",gold:"🪙",vehicle:"🚗",loan:"💳"};
+const FIELDS={
+ property:[["ptype","Type (flat / house / plot / land)"],["location","Location"],["khata_khesra","Khata / Khesra / Survey no."],["area","Area (sq ft / katha / acre)"],["registry_year","Registry year"],["papers_with","Original papers with (self / bank…)"]],
+ bank:[["bank","Bank"],["branch","Branch"],["acc_type","Type (Savings / FD / RD)"],["account_last4","Account — last 4 only"],["maturity","FD maturity (if any)"]],
+ insurance:[["insurer","Insurer (LIC / SBI Life…)"],["policy_type","Type (term / endowment / health / vehicle)"],["policy_last4","Policy no. — last 4 only"],["sum_assured","Sum assured (₹)"],["premium","Premium (₹)"],["premium_freq","Premium frequency"],["maturity","Maturity year"]],
+ epf:[["scheme","Scheme (EPF / PPF / NPS / Sukanya)"],["employer","Employer / bank"],["uan_last4","UAN / account — last 4 only"]],
+ demat:[["broker_amc","Broker / AMC"],["folio_last4","Folio / DP — last 4 only"],["sip_amount","SIP (₹ / month)"],["sip_since","SIP since (month / year)"],["expected_return","Expected return (% / yr)"]],
+ gold:[["form","Form (jewellery / coins / SGB)"],["weight_gms","Approx weight (grams)"],["storage","Kept where (home / locker — bank, branch)"]],
+ vehicle:[["make_model","Make & model"],["reg_no","Registration no."],["insurance_expiry","Insurance valid till"]],
+ loan:[["lender","Lender (bank / NBFC / person)"],["loan_type","Type (home / personal / gold / vehicle)"],["sanctioned","Sanctioned amount (₹)"],["emi","EMI (₹ / month)"],["tenure_years","Tenure (years)"],["started","Started (month / year)"],["account_last4","Loan a/c — last 4 only"]]};
+const FLABEL=Object.fromEntries(Object.values(FIELDS).flat().map(([k,l])=>[k,l.split(' (')[0].split(' — ')[0]]));
+const amtLabel=cat=>cat==='loan'?'Outstanding (₹)':cat==='demat'?'Current value (₹) — not the SIP':'Amount (₹, optional)';
+function sipProjection(a){
+  const x=a.extra||{};
+  const sip=Number(String(x.sip_amount||'').replace(/[^\d.]/g,''));if(!sip)return '';
+  const rate=Number(String(x.expected_return||'').replace(/[^\d.]/g,''))||12;
+  const rm=rate/1200, base=Number(a.amount)||0;
+  const fv=n=>Math.round(base*Math.pow(1+rm,n)+sip*((Math.pow(1+rm,n)-1)/rm)*(1+rm));
+  return `Projection @${rate}%/yr: ${inrShort(fv(60))} in 5y · ${inrShort(fv(120))} in 10y`;
+}
+function extraInputs(prefix,cat,vals){
+  const f=FIELDS[cat]||[];if(!f.length)return '';
+  return `<div class="row c2">${f.map(([k,l])=>
+    `<label><span>${l}</span><input id="${prefix}-x-${k}" value="${esc(String((vals||{})[k]??''))}"></label>`).join('')}</div>`;
+}
+function collectExtra(prefix,cat,base){
+  const o={...(base||{})};
+  (FIELDS[cat]||[]).forEach(([k])=>{const el=$(`${prefix}-x-${k}`);if(el)el.value.trim()?o[k]=el.value.trim():delete o[k]});
+  return o;
+}
+function extraLine(a){
+  const x=a.extra||{};
+  return (FIELDS[a.category]||[]).filter(([k])=>x[k]).slice(0,4)
+    .map(([k])=>`${FLABEL[k]}: ${esc(String(x[k]))}`).join(' · ');
+}
+const RELS=["Self","Spouse","Father","Mother","Son","Daughter","Brother","Sister","Grandfather","Grandmother","Other"];
+const CHECKS=[
+{id:"udgam",t:"RBI UDGAM — unclaimed bank deposits",u:"https://udgam.rbi.org.in",h:"Search every member's name, including deceased members. Old FDs and dormant accounts surface here."},
+{id:"ec",t:"Encumbrance Certificate — registration portal",u:"https://igrsup.gov.in",h:"Your state's IGRS portal lists every registered transaction on a property."},
+{id:"bhulekh",t:"Bhulekh — land records & mutation",u:"https://biharbhumi.bihar.gov.in",h:"Search khata/khesra. Confirm mutation was completed after registration."},
+{id:"lic",t:"LIC — unclaimed / lapsed policies",u:"https://licindia.in/home/unclaimed-policy-dues",h:"Check by name + date of birth. Forgotten parental policies appear here."},
+{id:"epfo",t:"EPFO — PF passbook",u:"https://passbook.epfindia.gov.in",h:"Old employers' PF accounts still unmerged or unwithdrawn?"},
+{id:"iepf",t:"IEPF — shares moved to government",u:"https://www.iepf.gov.in",h:"Dividends unclaimed 7 years → shares move here. Search by name."},
+{id:"mf",t:"MF Central — mutual fund folios",u:"https://www.mfcentral.com",h:"All folios against a PAN, including unclaimed redemptions."},
+{id:"vahan",t:"VAHAN — vehicle ownership",u:"https://vahan.parivahan.gov.in",h:"Sold a vehicle? Confirm the transfer actually happened."},
+{id:"digilocker",t:"DigiLocker — issued documents",u:"https://www.digilocker.gov.in",h:"Pull Aadhaar, PAN, RC, certificates into one place per member."}];
+
+function toast(m){const t=$('toast');t.textContent=m;t.style.display='block';setTimeout(()=>t.style.display='none',2600)}
+async function api(path,opts={}){
+  opts.headers=Object.assign({'Content-Type':'application/json'},opts.headers||{});
+  if(TOKEN)opts.headers['Authorization']='Bearer '+TOKEN;
+  const r=await fetch('/api'+path,opts);
+  if(r.status===401&&TOKEN){localStorage.removeItem('fl_token');location.reload();return}
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(j.detail||'Request failed');
+  return j;
+}
+const esc=s=>(s||'').replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const pname=id=>(STATE.members.find(m=>m.id===id)||{}).name||'—';
+const inr=n=>'₹'+Number(n||0).toLocaleString('en-IN');
+function inrShort(n){n=Number(n||0);const a=Math.abs(n),s=n<0?'−':'';
+  if(a>=1e7)return s+'₹'+(a/1e7).toFixed(a%1e7?2:0)+' Cr';
+  if(a>=1e5)return s+'₹'+(a/1e5).toFixed(a%1e5?1:0)+' L';
+  return s+'₹'+a.toLocaleString('en-IN')}
+const initials=n=>(n||'?').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+
+/* ── auth flow ── */
+function show(step){['step-phone','step-otp','step-register','step-invite','step-claim'].forEach(s=>$(s).classList.add('hidden'));$(step).classList.remove('hidden')}
+async function sendOtp(){
+  try{const r=await api('/auth/request-otp',{method:'POST',body:JSON.stringify({phone:$('phone').value})});
+    show('step-otp');$('auth-title').textContent='Verify your number';$('auth-sub').textContent='We sent a 6-digit code to your phone.';
+    if(r.dev_otp)$('dev-otp').textContent='Dev mode — OTP: '+r.dev_otp;
+  }catch(e){toast(e.message)}
+}
+async function verifyOtp(){
+  try{const r=await api('/auth/verify',{method:'POST',body:JSON.stringify({phone:$('phone').value,otp:$('otp').value})});
+    if(r.next==='session'){TOKEN=r.token;localStorage.setItem('fl_token',TOKEN);return boot()}
+    vtoken=r.vtoken;authCtx=r;
+    if(r.next==='register')showRegister();
+    else if(r.next==='join_invite'){show('step-invite');$('auth-title').textContent="You're invited";
+      $('invite-text').textContent=`You've been invited to join "${r.family_name}" as ${r.role}.`;}
+    else if(r.next==='claim'){show('step-claim');$('auth-title').textContent='Is this you?';
+      $('claim-list').innerHTML=r.candidates.map(c=>
+        `<button class="btn ghost full" style="text-align:left;margin-bottom:8px" onclick="claim('${c.id}')">${esc(c.name)} <span class="muted" style="font-size:12px;font-weight:500">· ${esc(c.relation)} · ${esc(c.family_name)}</span></button>`).join('');}
+  }catch(e){toast(e.message)}
+}
+function showRegister(){show('step-register');$('auth-title').textContent='Create your workspace'}
+async function completeAuth(action){
+  try{const body={vtoken,action};
+    if(action==='register'){body.name=$('reg-name').value;body.family_name=$('reg-fam').value}
+    if(action==='join_invite'){body.name=$('invite-name').value}
+    const r=await api('/auth/complete',{method:'POST',body:JSON.stringify(body)});
+    TOKEN=r.token;localStorage.setItem('fl_token',TOKEN);boot();
+  }catch(e){toast(e.message)}
+}
+async function claim(pid){
+  try{const r=await api('/auth/complete',{method:'POST',body:JSON.stringify({vtoken,action:'claim',person_id:pid})});
+    TOKEN=r.token;localStorage.setItem('fl_token',TOKEN);boot();
+  }catch(e){toast(e.message)}
+}
+function logout(){localStorage.removeItem('fl_token');location.reload()}
+
+/* ── boot & data ── */
+async function boot(){
+  try{ME=await api('/me')}catch(e){$('auth').classList.remove('hidden');$('app').classList.add('hidden');$('bnav').classList.add('hidden');return}
+  $('auth').classList.add('hidden');$('app').classList.remove('hidden');$('bnav').classList.remove('hidden');
+  $('fam-name').textContent=ME.family_name||'Family Ledger';
+  $('whoami').textContent=`${ME.name} · ${ME.role}`;
+  await refresh();render();
+}
+async function refresh(){
+  const[f,a,c,d,r]=await Promise.all([api('/family'),api('/assets'),api('/checks'),api('/drafts'),api('/report')]);
+  STATE={members:f.members,activity:f.activity,invites:f.invites,assets:a.assets,checks:c.checks,drafts:d.drafts,report:r};
+  drawScore(r.score);
+}
+function drawScore(s){
+  const col=s>=70?'var(--ok)':s>=35?'var(--warn)':'var(--bad)';
+  const C=2*Math.PI*17, off=C*(1-(s||0)/100);
+  $('score-ring').innerHTML=`<svg width="42" height="42"><circle cx="21" cy="21" r="17" fill="none" stroke="var(--line)" stroke-width="4"/>
+    <circle cx="21" cy="21" r="17" fill="none" stroke="${col}" stroke-width="4" stroke-linecap="round"
+      stroke-dasharray="${C}" stroke-dashoffset="${off}"/></svg><b style="color:${col}">${s||0}</b>`;
+}
+function flags(a){return a.flags||[]}
+function totalFlags(){return STATE.assets.reduce((n,a)=>n+flags(a).length,0)}
+
+/* ── nav & render ── */
+const TABS=[["overview","Home"],["capture","Capture"],["register","Register"],["family","Family"],["story","Story"],["discover","Discover"],["report","Report"]];
+function badgeFor(id){
+  if(id==='register'&&totalFlags())return totalFlags();
+  if(id==='capture'&&STATE.drafts.length)return STATE.drafts.length;
+  return 0;
+}
+function render(){
+  // desktop pills
+  $('pills').innerHTML=TABS.map(([id,l])=>{
+    const b=badgeFor(id);
+    return `<button class="pill ${TAB===id?'on':''}" onclick="TAB='${id}';render()">${l}${b?`<span class="bdg">${b}</span>`:''}</button>`}).join('')
+    +`<button class="pill" onclick="logout()" style="margin-left:auto">Sign out</button>`;
+  // mobile bottom nav
+  const moreOn=TAB==='discover'||TAB==='report';
+  const nb=[["overview","🏠","Home"],["register","📒","Register"]];
+  const nb2=[["family","👪","Family"]];
+  $('bnav').innerHTML=
+    nb.map(([id,ico,l])=>{const b=badgeFor(id);
+      return `<button class="${TAB===id?'on':''}" onclick="TAB='${id}';render()"><span class="ico">${ico}</span>${l}${b?`<span class="bdg">${b}</span>`:''}</button>`}).join('')
+    +`<button onclick="TAB='capture';render()" style="min-width:64px"><span class="fab">🎙</span>${STATE.drafts.length?`<span class="bdg">${STATE.drafts.length}</span>`:''}</button>`
+    +nb2.map(([id,ico,l])=>`<button class="${TAB===id?'on':''}" onclick="TAB='${id}';render()"><span class="ico">${ico}</span>${l}</button>`).join('')
+    +`<button class="${moreOn?'on':''}" onclick="openSheet()"><span class="ico">☰</span>More</button>`;
+  const v={overview,capture,family,register,story,discover,report}[TAB];$('view').innerHTML=v();
+  if(TAB==='capture')wireMic();
+  window.scrollTo({top:0});
+}
+function openSheet(){$('sheet').classList.add('open');$('sheet-bg').classList.add('open')}
+function closeSheet(){$('sheet').classList.remove('open');$('sheet-bg').classList.remove('open')}
+
+/* ── overview ── */
+function overview(){
+  const r=STATE.report,doneN=Object.values(STATE.checks).filter(c=>c.done).length;
+  let h='';
+  const totA=STATE.assets.filter(a=>a.kind==='asset').reduce((n,a)=>n+(a.amount||0),0);
+  const totL=STATE.assets.filter(a=>a.kind==='liability').reduce((n,a)=>n+(a.amount||0),0);
+  h+=`<div class="hero"><div class="lbl">Family net worth (recorded)</div>
+    <div class="big">${inrShort(r.net_worth)}</div>
+    <div class="sub">${inrShort(totA)} assets · ${inrShort(totL)} loans</div></div>`;
+  h+=`<div class="stats">
+    <div class="stat" onclick="TAB='family';render()"><b>${STATE.members.length}</b><span>Family members</span></div>
+    <div class="stat" onclick="TAB='register';render()"><b>${STATE.assets.length}</b><span>Records</span></div>
+    <div class="stat" onclick="TAB='register';render()"><b style="color:${totalFlags()?'var(--bad)':'var(--ok)'}">${totalFlags()}</b><span>Red flags</span></div>
+    <div class="stat" onclick="TAB='discover';render()"><b>${doneN}<span style="font-size:14px;color:var(--muted)">/9</span></b><span>Discovery checks</span></div></div>`;
+  if(STATE.drafts.length)h+=`<div class="card" style="border-left:4px solid var(--brand)">
+    <div class="list-item"><div><b>${STATE.drafts.length} draft${STATE.drafts.length>1?'s':''} waiting for review</b>
+    <div class="muted" style="font-size:13px;margin-top:2px">Nothing enters the register without your confirmation.</div></div>
+    <button class="btn sm" onclick="TAB='capture';render()">Review</button></div></div>`;
+  const flagged=STATE.assets.filter(a=>flags(a).length);
+  if(flagged.length)h+=`<div class="cat-head">Needs attention</div>`+flagged.slice(0,5).map(a=>
+    `<div class="card" style="padding:14px 16px"><div class="list-item">
+      <div><b style="font-size:14px">${CAT_ICO[a.category]||''} ${esc(a.title)}</b>
+      <div style="margin-top:4px">${flags(a).map(f=>`<span class="chip bad">⚑ ${f}</span>`).join(' ')}</div></div>
+      <button class="btn sm ghost" onclick='aEdit=${JSON.stringify(a).replace(/'/g,"&#39;")};TAB="register";render()'>Fix</button>
+    </div></div>`).join('');
+  if(!STATE.assets.length)h+=`<div class="card empty"><div class="e-ico">🎙</div><b>Start with your voice</b>
+    Speak naturally — "Patna mein ghar hai papa ke naam, LIC policy hai mummy ki" — and review what's extracted.
+    <div style="margin-top:14px"><button class="btn" onclick="TAB='capture';render()">Capture your first record</button></div></div>`;
+  if(STATE.members.length<=1)h+=`<div class="card" style="background:var(--brand-soft);box-shadow:none">
+    <b>Bring your family in</b><div class="muted" style="font-size:13px;margin:4px 0 10px">Invite members from the Family tab — they sign in with their own number and land here.</div>
+    <button class="btn sm" onclick="TAB='family';render()">Go to Family</button></div>`;
+  return h;
+}
+
+/* ── capture ── */
+let recog=null,recOn=false;
+function capture(){
+  const sup='webkitSpeechRecognition'in window||'SpeechRecognition'in window;
+  return `<h2 style="font-size:19px;margin-bottom:4px">Capture</h2>
+  <p class="muted" style="margin-top:0;font-size:13.5px">Speak about the family's assets, or photograph a document. Everything becomes a draft you approve first.</p>
+  <div class="card" style="text-align:center;padding:28px 18px">
+    <button id="mic" class="mic" ${sup?'':'disabled'}>🎙</button>
+    <div class="muted" style="font-size:13px;margin-top:12px;font-weight:500" id="mic-status">${sup?'Tap & speak — Hindi or English':'Voice needs Chrome — type below'}</div>
+  </div>
+  <div class="card">
+    <label><span>Or type what was said</span>
+    <textarea id="transcript" rows="3" placeholder="e.g. Patna mein ghar hai papa ke naam, home loan 32 lakh chal raha hai…"></textarea></label>
+    <button class="btn full" id="extract-btn" onclick="sendTranscript()">Extract records</button>
+  </div>
+  <details class="more"><summary>Upload a document photo instead</summary>
+  <div class="card">
+    <label><span>Deed / policy / passbook / RC photo</span>
+    <input type="file" id="docfile" accept="image/*,.pdf"></label>
+    <button class="btn ghost full" onclick="uploadDoc()">Upload to vault</button>
+  </div></details>
+  <div id="drafts-area">${draftsHtml()}</div>`;
+}
+function draftsHtml(){
+  if(!STATE.drafts.length)return `<div class="empty" style="padding:24px"><div class="e-ico">✓</div>No drafts waiting.</div>`;
+  return `<div class="cat-head">Drafts — confirm to add to register</div>`+STATE.drafts.map(d=>{
+    const conf=d.confidence>=.7?'ok':'warn';
+    const isPerson=d.entity==='person';
+    return `<div class="card draft" id="d-${d.id}">
+      <div class="list-item" style="margin-bottom:10px">
+        <b>${isPerson?'👤':CAT_ICO[d.category]||'📄'} ${esc(isPerson?(d.name||'New member'):(d.title||'Untitled'))}</b>
+        <span class="chip ${conf}">${Math.round((d.confidence||0)*100)}% sure</span></div>
+      ${isPerson?`
+        <div class="row c2">
+        <label><span>Name</span><input id="f-${d.id}-name" value="${esc(d.name||'')}"></label>
+        <label><span>Relation</span><select id="f-${d.id}-relation">${RELS.map(r=>`<option ${d.relation===r?'selected':''}>${r}</option>`).join('')}</select></label></div>`
+      :`<div class="row c2">
+        <label><span>Title</span><input id="f-${d.id}-title" value="${esc(d.title||'')}"></label>
+        <label><span>Category</span><select id="f-${d.id}-category">${CATS.map(([c,l])=>`<option value="${c}" ${d.category===c?'selected':''}>${l}</option>`).join('')}</select></label>
+        <label><span>Owner</span><select id="f-${d.id}-owner">${STATE.members.map(m=>`<option value="${m.id}">${esc(m.name)}</option>`).join('')}</select></label>
+        <label><span>${amtLabel(d.category)}</span><input id="f-${d.id}-amount" type="number" value="${d.amount||''}"></label></div>
+        ${extraInputs('f-'+d.id,d.category,d.extra)}
+        <details class="more"><summary>What was heard</summary>
+        <label><span>Details</span><input id="f-${d.id}-details" value="${esc(d.details||'')}"></label></details>`}
+      <div style="display:flex;gap:8px">
+        <button class="btn sm" style="flex:1" onclick="confirmDraft('${d.id}',${isPerson})">Confirm → Register</button>
+        <button class="btn sm danger" onclick="rejectDraft('${d.id}')">Reject</button></div></div>`}).join('');
+}
+function wireMic(){
+  const Sr=window.SpeechRecognition||window.webkitSpeechRecognition;if(!Sr)return;
+  const btn=$('mic');if(!btn)return;
+  btn.onclick=()=>{
+    if(recOn){recog.stop();return}
+    recog=new Sr();recog.lang='hi-IN';recog.interimResults=true;recog.continuous=true;
+    let finalTxt='';
+    recog.onresult=e=>{let interim='';
+      for(let i=e.resultIndex;i<e.results.length;i++){
+        if(e.results[i].isFinal)finalTxt+=e.results[i][0].transcript+' ';else interim+=e.results[i][0].transcript}
+      $('transcript').value=(finalTxt+interim).trim()};
+    recog.onstart=()=>{recOn=true;btn.classList.add('rec');$('mic-status').textContent='Listening… tap to stop'};
+    recog.onend=()=>{recOn=false;btn.classList.remove('rec');$('mic-status').textContent='Tap & speak — Hindi or English';
+      if($('transcript').value.trim())sendTranscript()};
+    recog.onerror=ev=>{
+      if(ev.error==='not-allowed')toast(location.hostname==='localhost'||location.hostname==='127.0.0.1'
+        ?'Mic blocked — click the mic icon in the address bar and allow'
+        :'Mic needs a secure origin — open http://localhost:8000 instead of '+location.host);
+      else toast('Mic error: '+ev.error)};
+    recog.start();
+  };
+}
+let sending=false;
+async function sendTranscript(){
+  if(sending)return;                                  // guard: mic auto-send + click can both fire
+  const t=$('transcript').value.trim();if(!t)return toast('Nothing to extract');
+  sending=true;
+  const b=$('extract-btn');if(b){b.disabled=true;b.textContent='Extracting…'}
+  try{const r=await api('/ingest/text',{method:'POST',body:JSON.stringify({transcript:t})});
+    if(r.note)toast(r.note);else toast(`${r.drafts.length} draft(s) extracted — review below`);
+    $('transcript').value='';await refresh();render();
+  }catch(e){toast(e.message)}
+  finally{sending=false;const b2=$('extract-btn');if(b2){b2.disabled=false;b2.textContent='Extract records'}}
+}
+async function uploadDoc(){
+  const f=$('docfile').files[0];if(!f)return toast('Choose a file first');
+  const fd=new FormData();fd.append('file',f);fd.append('user_token',TOKEN);
+  try{const r=await fetch('/api/ingest/document',{method:'POST',body:fd});
+    const j=await r.json();if(!r.ok)throw new Error(j.detail||'Upload failed');
+    toast(j.duplicate?'Already in vault':j.note||`Stored. ${(j.drafts||[]).length} draft(s) extracted`);
+    await refresh();render();
+  }catch(e){toast(e.message)}
+}
+async function confirmDraft(id,isPerson){
+  const g=k=>($(`f-${id}-${k}`)||{}).value;
+  const payload=isPerson?{entity:'person',name:g('name'),relation:g('relation'),status:'alive'}
+    :{entity:'asset',title:g('title'),category:g('category'),owner_person_id:g('owner'),
+      details:g('details'),amount:g('amount')?Number(g('amount')):null,
+      nominee:'unknown',mutation:'unknown'};
+  const d=STATE.drafts.find(x=>x.id===id)||{};
+  if(isPerson){if(d.status)payload.status=d.status;
+    if(d.birth_year)payload.birth_year=String(d.birth_year);
+    if(d.death_year)payload.death_year=String(d.death_year);
+    if(d.story)payload.story=d.story;}
+  if(!isPerson)payload.extra=collectExtra('f-'+id,d.category,d.extra);
+  if(d.entity==='liability')payload.entity='liability';
+  if(d.document_id)payload.document_id=d.document_id;
+  if(d.nominee)payload.nominee=d.nominee; if(d.mutation)payload.mutation=d.mutation;
+  if(d.doc_location)payload.doc_location=d.doc_location;
+  try{await api(`/drafts/${id}/confirm`,{method:'POST',
+    headers:{'Idempotency-Key':id},body:JSON.stringify({payload})});
+    toast('Added to the register ✓');await refresh();render();
+  }catch(e){toast(e.message)}
+}
+async function rejectDraft(id){
+  try{await api(`/drafts/${id}/reject`,{method:'POST',body:'{}'});await refresh();render()}catch(e){toast(e.message)}
+}
+
+/* ── family ── */
+let mEdit=null;
+function family(){
+  let h=`<div class="list-item" style="margin-bottom:12px;align-items:center">
+    <h2 style="font-size:19px">Family</h2>
+    <button class="btn sm" onclick="mEdit={relation:'Father',status:'alive'};render()">+ Add member</button></div>`;
+  if(mEdit)h+=memberForm();
+  h+=STATE.members.map(m=>{
+    const recs=STATE.assets.filter(a=>a.owner_person_id===m.id).length;
+    return `<div class="card" style="padding:14px 16px"><div class="list-item" style="align-items:center">
+      <div style="display:flex;gap:12px;align-items:center;min-width:0">
+        <div class="avatar">${initials(m.name)}</div>
+        <div style="min-width:0"><b>${esc(m.name)}</b>
+          <div class="muted" style="font-size:12.5px">${esc(m.relation)}${m.status==='deceased'?' · deceased':''}${m.pan_last4?' · PAN ••'+esc(m.pan_last4):''} · ${recs} record${recs===1?'':'s'}</div>
+          ${m.notes?`<div class="muted" style="font-size:12.5px">${esc(m.notes)}</div>`:''}</div></div>
+      <div style="display:flex;gap:6px;flex-shrink:0">
+        <button class="btn sm ghost" onclick='mEdit=${JSON.stringify(m).replace(/'/g,"&#39;")};render()'>Edit</button>
+        <button class="btn sm danger" onclick="delMember('${m.id}','${esc(m.name)}')">✕</button></div>
+    </div></div>`}).join('');
+  if(ME.role==='owner'){
+    h+=`<div class="cat-head">Invite family</div><div class="card">
+      <div class="row c2"><label><span>Phone</span><input id="inv-phone" inputmode="numeric" placeholder="10-digit number"></label>
+      <label><span>Role</span><select id="inv-role"><option value="member">Member — can add & edit</option><option value="viewer">Viewer — read only</option></select></label></div>
+      <details class="more"><summary>Link to an existing member</summary>
+      <label><span>Member profile</span><select id="inv-person"><option value="">— new person —</option>${STATE.members.map(m=>`<option value="${m.id}">${esc(m.name)}</option>`).join('')}</select></label></details>
+      <button class="btn full" onclick="invite()">Send invite</button>
+      ${STATE.invites.length?`<div class="muted" style="font-size:12.5px;margin-top:10px">Pending: ${STATE.invites.map(i=>'••••'+i.phone.slice(-4)+' ('+i.role+')').join(', ')} — they just sign in with that number.</div>`:''}
+    </div>`;}
+  if(STATE.activity.length)h+=`<details class="more"><summary>Recent activity (${STATE.activity.length})</summary>
+    <div class="card" style="padding:6px 16px">
+    ${STATE.activity.slice(0,15).map(e=>{const p=JSON.parse(e.payload||'{}');
+      return `<div style="padding:10px 0;border-bottom:1px solid var(--line);font-size:13.5px">
+        <b>${esc(e.actor)}</b> <span class="muted">${e.type.replace(/\./g,' ')}</span> ${esc(p.title||p.name||p.check||'')}</div>`}).join('')}</div></details>`;
+  return h;
+}
+function memberForm(){
+  const m=mEdit;
+  return `<div class="card" style="border:1.5px solid var(--brand)">
+    <div class="row c2">
+    <label><span>Full name (as on documents)</span><input id="m-name" value="${esc(m.name||'')}"></label>
+    <label><span>Relation</span><select id="m-relation">${RELS.map(r=>`<option ${m.relation===r?'selected':''}>${r}</option>`).join('')}</select></label>
+    <label><span>Phone — lets them claim this profile</span><input id="m-phone" inputmode="numeric" value="${esc(m.phone||'')}"></label></div>
+    <details class="more" ${m.pan_last4||m.notes||m.status==='deceased'||m.story?'open':''}><summary>More details & life story</summary>
+    <div class="row c2">
+    <label><span>Status</span><select id="m-status"><option value="alive" ${m.status!=='deceased'?'selected':''}>Alive</option><option value="deceased" ${m.status==='deceased'?'selected':''}>Deceased</option></select></label>
+    <label><span>PAN — last 4 only</span><input id="m-pan" maxlength="4" value="${esc(m.pan_last4||'')}"></label>
+    <label><span>Birth year</span><input id="m-birth" inputmode="numeric" placeholder="e.g. 1948" value="${esc(m.birth_year||'')}"></label>
+    <label><span>Death year (if deceased)</span><input id="m-death" inputmode="numeric" value="${esc(m.death_year||'')}"></label></div>
+    <label><span>Life story / yaadein — kaun the, kahan rehte the, kya karte the</span>
+    <textarea id="m-story" rows="4" placeholder="e.g. Rampur mein rehte the, school master the. Bahut anushasan-priya, subah 4 baje uthte the…">${esc(m.story||'')}</textarea></label>
+    <label><span>Notes</span><input id="m-notes" value="${esc(m.notes||'')}"></label></details>
+    <div style="display:flex;gap:8px"><button class="btn" style="flex:1" onclick="saveMember()">Save</button>
+    <button class="btn plain" onclick="mEdit=null;render()">Cancel</button></div></div>`;
+}
+async function saveMember(){
+  const body={name:$('m-name').value,relation:$('m-relation').value,status:$('m-status').value,
+    phone:$('m-phone').value,pan_last4:$('m-pan').value,notes:$('m-notes').value,
+    birth_year:$('m-birth').value,death_year:$('m-death').value,story:$('m-story').value};
+  if(!body.name.trim())return toast('Name is required');
+  try{
+    if(mEdit.id)await api('/members/'+mEdit.id,{method:'PATCH',body:JSON.stringify(body)});
+    else await api('/members',{method:'POST',headers:{'Idempotency-Key':crypto.randomUUID()},body:JSON.stringify(body)});
+    mEdit=null;await refresh();render();
+  }catch(e){toast(e.message)}
+}
+async function delMember(id,name){
+  if(!confirm(`Remove ${name}? Their records will also be removed (recoverable from the event log).`))return;
+  try{await api('/members/'+id,{method:'DELETE'});await refresh();render()}catch(e){toast(e.message)}
+}
+async function invite(){
+  try{const r=await api('/invites',{method:'POST',body:JSON.stringify({phone:$('inv-phone').value,
+    role:$('inv-role').value,person_id:($('inv-person')||{}).value||null})});
+    toast('Invite created — '+r.note);await refresh();render();
+  }catch(e){toast(e.message)}
+}
+
+/* ── register ── */
+let aEdit=null;
+function register(){
+  let h=`<div class="list-item" style="margin-bottom:12px;align-items:center">
+    <h2 style="font-size:19px">Register</h2>
+    <button class="btn sm" onclick="addAssetStart()">+ Add record</button></div>`;
+  if(aEdit)h+=assetForm();
+  for(const[cid,cl]of[...CATS]){
+    const list=STATE.assets.filter(a=>a.category===cid);
+    if(!list.length)continue;
+    h+=`<div class="cat-head">${CAT_ICO[cid]} ${cl}</div>`+list.map(a=>{
+      const fl=flags(a);
+      const stCls=a.status==='verified'?'ok':a.status==='issue'?'bad':'warn';
+      return `<div class="card" style="padding:14px 16px">
+      <div class="list-item">
+        <div style="min-width:0;flex:1"><b>${esc(a.title)}</b>${a.kind==='liability'?' <span class="chip mut">loan</span>':''}
+          <div class="muted" style="font-size:12.5px;margin-top:2px">${esc(pname(a.owner_person_id))}${a.amount?' · '+inrShort(a.amount):''}${a.doc_location?' · 📁 '+esc(a.doc_location):''}</div>
+          ${extraLine(a)?`<div class="muted" style="font-size:12px;margin-top:2px">${extraLine(a)}</div>`:''}
+          ${sipProjection(a)?`<div style="font-size:12px;color:var(--ok);margin-top:3px;font-weight:600">📈 ${sipProjection(a)}${!a.amount?' — add current value for accuracy':''}</div>`:''}
+          ${a.details?`<details class="more" style="margin:4px 0 0"><summary>Details</summary><div class="muted" style="font-size:13px">${esc(a.details)}</div></details>`:''}
+          ${fl.length?`<div style="margin-top:6px">${fl.map(f=>`<span class="chip bad">⚑ ${f}</span>`).join(' ')}</div>`:''}</div>
+        <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;flex-shrink:0">
+          <span class="chip ${stCls}">${a.status}</span>
+          <div style="display:flex;gap:6px">
+            <button class="btn sm ghost" onclick='aEdit=${JSON.stringify(a).replace(/'/g,"&#39;")};render()'>Edit</button>
+            <button class="btn sm danger" onclick="delAsset('${a.id}','${esc(a.title)}')">✕</button></div></div>
+      </div></div>`}).join('');
+  }
+  if(!STATE.assets.length&&!aEdit)h+=`<div class="card empty"><div class="e-ico">📒</div><b>Register is empty</b>
+    Use Capture to speak records in, or add one manually.
+    <div style="margin-top:14px"><button class="btn" onclick="TAB='capture';render()">🎙 Capture</button></div></div>`;
+  return h;
+}
+function addAssetStart(){
+  if(!STATE.members.length)return toast('Add a family member first');
+  aEdit={kind:'asset',category:'property',owner_person_id:STATE.members[0].id,nominee:'unknown',mutation:'unknown',status:'pending',extra:{}};render();
+}
+function assetCatChange(cat){
+  // keep what's typed, swap the category-specific fields
+  aEdit.title=$('a-title').value;aEdit.owner_person_id=$('a-owner').value;
+  aEdit.amount=$('a-amount').value?Number($('a-amount').value):null;
+  aEdit.extra=collectExtra('a',aEdit.category,aEdit.extra);
+  if($('a-kind'))aEdit.kind=$('a-kind').value;
+  if($('a-doc'))aEdit.doc_location=$('a-doc').value;
+  if($('a-details'))aEdit.details=$('a-details').value;
+  aEdit.category=cat;
+  if(cat==='loan')aEdit.kind='liability';
+  render();
+}
+function assetForm(){
+  const a=aEdit;
+  return `<div class="card" style="border:1.5px solid var(--brand)"><div class="row c2">
+    <label><span>Title</span><input id="a-title" value="${esc(a.title||'')}" placeholder="e.g. House in Patna / SBI FD"></label>
+    <label><span>Category</span><select id="a-category" onchange="assetCatChange(this.value)">${CATS.map(([c,l])=>`<option value="${c}" ${a.category===c?'selected':''}>${l}</option>`).join('')}</select></label>
+    <label><span>Owner</span><select id="a-owner">${STATE.members.map(m=>`<option value="${m.id}" ${a.owner_person_id===m.id?'selected':''}>${esc(m.name)}</option>`).join('')}</select></label>
+    <label><span>${amtLabel(a.category)}</span><input id="a-amount" type="number" value="${a.amount||''}"></label></div>
+    ${extraInputs('a',a.category,a.extra)}
+    <details class="more" ${a.id?'open':''}><summary>More details</summary>
+    <div class="row c2">
+    <label><span>Type</span><select id="a-kind"><option value="asset" ${a.kind!=='liability'?'selected':''}>Asset</option><option value="liability" ${a.kind==='liability'?'selected':''}>Liability / Loan</option></select></label>
+    <label><span>Documents kept where?</span><input id="a-doc" value="${esc(a.doc_location||'')}" placeholder="e.g. Almirah file, locker"></label>
+    <label><span>Nominee added?</span><select id="a-nominee"><option value="yes" ${a.nominee==='yes'?'selected':''}>Yes</option><option value="no" ${a.nominee==='no'?'selected':''}>No</option><option value="unknown" ${a.nominee==='unknown'?'selected':''}>Don't know</option></select></label>
+    <label><span>Mutation (property)</span><select id="a-mutation"><option value="done" ${a.mutation==='done'?'selected':''}>Done</option><option value="pending" ${a.mutation==='pending'?'selected':''}>Pending</option><option value="unknown" ${a.mutation==='unknown'?'selected':''}>Don't know</option></select></label>
+    <label><span>Verification</span><select id="a-status"><option value="pending" ${a.status==='pending'?'selected':''}>Pending</option><option value="verified" ${a.status==='verified'?'selected':''}>Verified</option><option value="issue" ${a.status==='issue'?'selected':''}>Issue found</option></select></label></div>
+    <label><span>Details (khata/khesra, policy no. — avoid full sensitive numbers)</span><textarea id="a-details" rows="2">${esc(a.details||'')}</textarea></label></details>
+    <div style="display:flex;gap:8px"><button class="btn" style="flex:1" onclick="saveAsset()">Save</button>
+    <button class="btn plain" onclick="aEdit=null;render()">Cancel</button></div></div>`;
+}
+async function saveAsset(){
+  const body={kind:$('a-kind').value,category:$('a-category').value,title:$('a-title').value,
+    owner_person_id:$('a-owner').value,details:$('a-details').value,doc_location:$('a-doc').value,
+    nominee:$('a-nominee').value,mutation:$('a-mutation').value,status:$('a-status').value,
+    amount:$('a-amount').value?Number($('a-amount').value):null,
+    extra:collectExtra('a',$('a-category').value,aEdit.extra)};
+  if(!body.title.trim())return toast('Title is required');
+  try{
+    if(aEdit.id)await api('/assets/'+aEdit.id,{method:'PATCH',body:JSON.stringify(body)});
+    else await api('/assets',{method:'POST',headers:{'Idempotency-Key':crypto.randomUUID()},body:JSON.stringify(body)});
+    aEdit=null;await refresh();render();
+  }catch(e){toast(e.message)}
+}
+async function delAsset(id,t){
+  if(!confirm(`Delete "${t}"? (Recoverable from the event log.)`))return;
+  try{await api('/assets/'+id,{method:'DELETE'});await refresh();render()}catch(e){toast(e.message)}
+}
+
+/* ── family story ── */
+function yrsOf(m){
+  if(m.birth_year||m.death_year)return `${m.birth_year||'?'} – ${m.status==='deceased'?(m.death_year||'…'):'aaj tak'}`;
+  return m.status==='deceased'?'deceased':'';
+}
+function storyCard(m){
+  const recs=STATE.assets.filter(a=>a.owner_person_id===m.id);
+  const canEdit=ME.role!=='viewer';
+  return `<div class="card">
+    <div class="list-item" style="align-items:center">
+      <div style="display:flex;gap:12px;align-items:center;min-width:0">
+        <div class="avatar" style="${m.status==='deceased'?'background:#F0EFEA;color:#8A8676':''}">${initials(m.name)}</div>
+        <div style="min-width:0"><b>${esc(m.name)}</b>
+          <div class="muted" style="font-size:12.5px">${esc(m.relation)}${yrsOf(m)?` · <span class="yrs">${yrsOf(m)}</span>`:''}</div></div></div>
+      ${canEdit?`<button class="btn sm ghost" onclick='mEdit=${JSON.stringify(m).replace(/'/g,"&#39;")};TAB="family";render()'>${m.story?'Edit':'+ Kahani likho'}</button>`:''}
+    </div>
+    ${m.story?`<div class="story-txt">${esc(m.story)}</div>`
+      :`<div class="muted" style="font-size:13px;font-style:italic;margin-top:8px">Inki kahani abhi likhi nahi gayi — yaadein hamesha ke liye save karo.</div>`}
+    ${recs.length?`<div class="muted" style="font-size:12px;margin-top:8px">📒 ${recs.length} record${recs.length>1?'s':''} in the register${recs.some(r=>flags(r).length)?' · ⚑ needs attention':''}</div>`:''}
+  </div>`;
+}
+function story(){
+  const gens=[
+    {l:"Dada-Dadi · Nana-Nani ki peedhi",e:"🌳",rels:["Grandfather","Grandmother"]},
+    {l:"Mata-Pita ki peedhi",e:"🪔",rels:["Father","Mother"]},
+    {l:"Aap ki peedhi",e:"🏡",rels:["Self","Spouse","Brother","Sister"]},
+    {l:"Agli peedhi",e:"🌱",rels:["Son","Daughter"]}];
+  let h=`<h2 style="font-size:19px;margin-bottom:2px">Family story</h2>
+  <p class="muted" style="margin-top:0;font-size:13.5px">Har peedhi ki kahani — taaki aane wali peedhiyan jaan sakein ki unke purkhe kaun the, kaise the.</p>`;
+  const used=new Set();let any=false;
+  for(const g of gens){
+    const ppl=STATE.members.filter(m=>g.rels.includes(m.relation));
+    if(!ppl.length)continue;
+    ppl.forEach(p=>used.add(p.id));any=true;
+    h+=`<div class="cat-head">${g.e} ${g.l}</div><div class="tl">${ppl.map(storyCard).join('')}</div>`;
+  }
+  const rest=STATE.members.filter(m=>!used.has(m.id));
+  if(rest.length){any=true;h+=`<div class="cat-head">👪 Rishtedaar</div><div class="tl">${rest.map(storyCard).join('')}</div>`}
+  if(!any)h+=`<div class="card empty"><div class="e-ico">🌳</div><b>Pehle family members jodo</b>
+    Family tab se members add karo — phir yahan har ek ki kahani likhi ja sakti hai.
+    <div style="margin-top:14px"><button class="btn" onclick="TAB='family';render()">Go to Family</button></div></div>`;
+  else h+=`<div class="card" style="background:var(--brand-soft);box-shadow:none">
+    <b style="font-size:14px">💡 Bolkar bhi kahani save hoti hai</b>
+    <div class="muted" style="font-size:13px;margin-top:4px">Capture mein bolo — "mere dada ji Rampur mein rehte the, school master the, 1932 mein janme" — naya member uski kahani ke saath draft ban jayega.</div></div>`;
+  return h;
+}
+
+/* ── discover ── */
+function discover(){
+  const doneN=Object.values(STATE.checks).filter(c=>c.done).length;
+  return `<h2 style="font-size:19px;margin-bottom:2px">Discover</h2>
+  <p class="muted" style="margin-top:0;font-size:13.5px">Official portals where unclaimed family assets surface.</p>
+  <div class="card" style="padding:14px 18px"><b style="font-size:13.5px">${doneN} of 9 checks done</b>
+    <div class="prog"><div style="width:${Math.round(doneN/9*100)}%"></div></div></div>`+
+  CHECKS.map(c=>{const st=STATE.checks[c.id]||{};
+    return `<div class="card" style="padding:14px 16px;${st.done?'opacity:.75':''}">
+    <div class="list-item">
+      <div style="flex:1;min-width:0"><b style="font-size:14px">${st.done?'✅ ':''}${c.t}</b>
+        <div class="muted" style="font-size:13px;margin-top:3px">${c.h}</div>
+        <a href="${c.u}" target="_blank" style="font-size:12.5px;font-weight:600">Open portal ↗</a>
+        <input style="margin-top:8px;font-size:13px;padding:9px 12px" placeholder="Findings…" value="${esc(st.note||'')}"
+          onchange="setCheck('${c.id}',null,this.value)"></div>
+      <button class="btn sm ${st.done?'plain':'success'}" onclick="setCheck('${c.id}',${st.done?'false':'true'},null)">${st.done?'Undo':'Done'}</button>
+    </div></div>`}).join('');
+}
+async function setCheck(id,done,note){
+  const body={id};if(done!==null)body.done=done==='true'||done===true;if(note!==null)body.note=note;
+  try{await api('/checks',{method:'POST',body:JSON.stringify(body)});await refresh();if(done!==null)render()}catch(e){toast(e.message)}
+}
+
+/* ── report ── */
+function report(){
+  const r=STATE.report;
+  return `<div class="no-print list-item" style="margin-bottom:12px;align-items:center">
+    <h2 style="font-size:19px">Audit report</h2><button class="btn sm ghost" onclick="window.print()">Print / PDF</button></div>
+  <div class="card" style="padding:24px">
+    <div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--brand)">FAMILY ASSET AUDIT · CONFIDENTIAL</div>
+    <h2 style="font-size:21px;margin:6px 0 2px">Audit score: ${r.score}/100</h2>
+    <div class="muted" style="font-size:13px;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:16px">
+      ${STATE.members.length} members · ${STATE.assets.length} records · Net worth ${inr(r.net_worth)}</div>
+    ${STATE.members.map(m=>{const list=STATE.assets.filter(a=>a.owner_person_id===m.id);
+      return `<div style="margin-bottom:18px"><b style="display:block;border-bottom:1px solid var(--line);padding-bottom:4px">${esc(m.name)} <span class="muted" style="font-size:12px;font-weight:500">· ${esc(m.relation)}${m.status==='deceased'?' · deceased':''}</span></b>
+      ${list.length?list.map(a=>`<div style="padding:8px 0;border-bottom:1px dashed var(--line);font-size:13.5px"><b>${esc(a.title)}</b> <span class="muted" style="font-size:12px">${a.category} · ${a.kind} · ${a.status}</span>
+        ${a.amount?`<span style="font-weight:600"> · ${inr(a.amount)}</span>`:''}
+        ${extraLine(a)?`<div class="muted" style="font-size:12px">${extraLine(a)}</div>`:''}
+        ${flags(a).length?`<div style="color:var(--bad);font-size:12.5px;margin-top:2px">⚑ ${flags(a).join(' · ')}</div>`:''}</div>`).join('')
+      :'<div class="muted" style="font-size:13px;font-style:italic;padding:6px 0">No records.</div>'}</div>`}).join('')}
+    <div class="muted" style="font-size:12px;border-top:1px solid var(--line);padding-top:10px">
+      Share only within the family. Full account numbers and PAN are not stored by design.</div></div>`;
+}
+
+if(TOKEN)boot();
+</script>
+</body>
+</html>
