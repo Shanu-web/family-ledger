@@ -434,6 +434,33 @@ function capture(){
   </div></details>
   <div id="drafts-area">${draftsHtml()}</div>`;
 }
+const RELMAP=[["Son",["beta","bete","son"]],["Daughter",["beti","daughter"]],
+ ["Spouse",["patni","wife","pati","husband","spouse"]],["Father",["papa","pita","father","dad"]],
+ ["Mother",["mummy","maa","amma","mother","mom"]],["Brother",["bhai","brother"]],["Sister",["behen","bahan","didi","sister"]],
+ ["Grandfather",["dada","nana","grandfather"]],["Grandmother",["dadi","nani","grandmother"]],["Self",["mera","mere naam","self","khud"]]];
+function guessOwner(d){
+  const hint=(d.owner_hint||'').toLowerCase().trim();
+  if(hint){
+    const byName=STATE.members.find(m=>{
+      const fn=(m.name||'').toLowerCase().split(' ')[0];
+      return fn&&(hint.includes(fn)||fn.includes(hint))});
+    if(byName)return byName.id;
+    for(const[rel,kws]of RELMAP)if(kws.some(k=>hint.includes(k))){
+      const byRel=STATE.members.find(m=>m.relation===rel);
+      if(byRel)return byRel.id;
+    }
+  }
+  return ME.person_id;  // default: speaker
+}
+function ownerNote(d){
+  const hint=(d.owner_hint||'').trim();
+  if(!hint)return '';
+  const gid=guessOwner(d);
+  const m=STATE.members.find(x=>x.id===gid);
+  const matched=m&&hint.toLowerCase().split(' ').some(w=>w.length>2&&m.name.toLowerCase().includes(w));
+  if(gid!==ME.person_id||matched)return '';
+  return `<div class="chip warn" style="margin-bottom:8px">⚠ Bola gaya owner "${esc(hint)}" family mein nahi mila — pehle member add karo ya dropdown se chuno</div>`;
+}
 function draftsHtml(){
   if(!STATE.drafts.length)return `<div class="empty" style="padding:24px"><div class="e-ico">✓</div>No drafts waiting.</div>`;
   return `<div class="cat-head">Drafts — confirm to add to register</div>`+STATE.drafts.map(d=>{
@@ -450,8 +477,9 @@ function draftsHtml(){
       :`<div class="row c2">
         <label><span>Title</span><input id="f-${d.id}-title" value="${esc(d.title||'')}"></label>
         <label><span>Category</span><select id="f-${d.id}-category">${CATS.map(([c,l])=>`<option value="${c}" ${d.category===c?'selected':''}>${l}</option>`).join('')}</select></label>
-        <label><span>Owner</span><select id="f-${d.id}-owner">${STATE.members.map(m=>`<option value="${m.id}">${esc(m.name)}</option>`).join('')}</select></label>
+        <label><span>Owner${d.owner_hint?` <i style="font-weight:400;text-transform:none">— suna: "${esc(d.owner_hint)}"</i>`:''}</span><select id="f-${d.id}-owner">${(g=>STATE.members.map(m=>`<option value="${m.id}" ${m.id===g?'selected':''}>${esc(m.name)}</option>`).join(''))(guessOwner(d))}</select></label>
         <label><span>${amtLabel(d.category)}</span><input id="f-${d.id}-amount" type="number" value="${d.amount||''}"></label></div>
+        ${ownerNote(d)}
         ${extraInputs('f-'+d.id,d.category,d.extra)}
         <details class="more"><summary>What was heard</summary>
         <label><span>Details</span><input id="f-${d.id}-details" value="${esc(d.details||'')}"></label></details>`}

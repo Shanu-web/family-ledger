@@ -28,8 +28,11 @@ if os.path.exists(_ENV_FILE):
                 _k, _, _v = _line.partition("=")
                 os.environ.setdefault(_k.strip(), _v.strip().strip('"').strip("'"))
 
-DB_PATH = os.environ.get("FL_DB", "family.db")
-VAULT_DIR = os.environ.get("FL_VAULT", "vault")
+# If a persistent volume is mounted at /data (Railway), use it automatically —
+# otherwise data lives next to the app (local dev) and is wiped on each redeploy.
+_DATA_DIR = "/data" if (os.path.isdir("/data") and os.access("/data", os.W_OK)) else "."
+DB_PATH = os.environ.get("FL_DB", os.path.join(_DATA_DIR, "family.db"))
+VAULT_DIR = os.environ.get("FL_VAULT", os.path.join(_DATA_DIR, "vault"))
 DEV_MODE = os.environ.get("DEV_MODE", "1") == "1"
 # .strip() guards against a trailing newline/space pasted into the host's
 # env var UI (e.g. Railway) — a present-but-invalid key is the most common
@@ -86,9 +89,11 @@ CREATE TABLE IF NOT EXISTS events(
 
 @contextmanager
 def db():
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=10)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys=ON")
+    conn.execute("PRAGMA journal_mode=WAL")     # safe concurrent reads/writes
+    conn.execute("PRAGMA busy_timeout=5000")
     try:
         yield conn
         conn.commit()
@@ -151,6 +156,11 @@ def get_user(request: Request):
 def require_writer(user):
     if user["role"] == "viewer":
         raise HTTPException(403, "Viewers cannot make changes")
+
+def person_in_family(conn, pid, family_id) -> bool:
+    return bool(pid) and conn.execute(
+        "SELECT 1 FROM persons WHERE id=? AND family_id=? AND deleted_at IS NULL",
+        (pid, family_id)).fetchone() is not None
 
 def make_session(conn, user_id):
     token = secrets.token_hex(24)
@@ -381,6 +391,8 @@ class InviteIn(BaseModel):
 def create_invite(inv: InviteIn, user=Depends(get_user)):
     if user["role"] != "owner":
         raise HTTPException(403, "Only the owner can invite")
+    if inv.role not in ("member", "viewer"):
+        raise HTTPException(400, "Role must be member or viewer")
     code = secrets.token_hex(4)
     with db() as c:
         c.execute(
@@ -435,8 +447,14 @@ def list_assets(user=Depends(get_user)):
 @app.post("/api/assets")
 def add_asset(a: AssetIn, request: Request, user=Depends(get_user)):
     require_writer(user)
+    if a.category not in CATEGORIES:
+        raise HTTPException(400, "Unknown category")
+    if a.kind not in ("asset", "liability"):
+        raise HTTPException(400, "kind must be asset or liability")
     aid = nid()
     with db() as c:
+        if not person_in_family(c, a.owner_person_id, user["family_id"]):
+            raise HTTPException(400, "Owner must be a member of your family")
         if seen_key(c, request.headers.get("idempotency-key")):
             return {"id": None, "duplicate": True}
         c.execute(
@@ -454,7 +472,11 @@ def add_asset(a: AssetIn, request: Request, user=Depends(get_user)):
 @app.patch("/api/assets/{aid}")
 def edit_asset(aid: str, a: AssetIn, user=Depends(get_user)):
     require_writer(user)
+    if a.category not in CATEGORIES:
+        raise HTTPException(400, "Unknown category")
     with db() as c:
+        if not person_in_family(c, a.owner_person_id, user["family_id"]):
+            raise HTTPException(400, "Owner must be a member of your family")
         c.execute(
             "UPDATE assets SET owner_person_id=?, kind=?, category=?, title=?, details=?, doc_location=?,"
             " nominee=?, mutation=?, status=?, amount=?, linked_asset_id=?, extra=? WHERE id=? AND family_id=?",
@@ -625,6 +647,8 @@ def ingest_text(body: IngestText, user=Depends(get_user)):
     text = body.transcript.strip()
     if not text:
         raise HTTPException(400, "Empty transcript")
+    if len(text) > 20000:
+        raise HTTPException(400, "Transcript too long")
     items = claude_extract(text)
     engine = "claude"
     if items is None:
@@ -751,7 +775,7 @@ def confirm_draft(did: str, body: ConfirmIn, request: Request, user=Depends(get_
         if not d:
             raise HTTPException(404, "Draft not found")
         if seen_key(c, request.headers.get("idempotency-key")):
-            c.execute("UPDATE drafts SET status='confirmed' WHERE id=?", (did,))
+            c.execute("UPDATE drafts SET status='confirmed' WHERE id=? AND family_id=?", (did, user["family_id"]))
             return {"ok": True, "duplicate": True}
         if p.get("entity") == "person":
             pid = nid()
@@ -764,6 +788,8 @@ def confirm_draft(did: str, body: ConfirmIn, request: Request, user=Depends(get_
                  {"name": p.get("name"), "via": "draft"}, request.headers.get("idempotency-key"))
         else:
             owner = p.get("owner_person_id") or user["person_id"]
+            if not person_in_family(c, owner, user["family_id"]):
+                raise HTTPException(400, "Owner must be a member of your family")
             aid = nid()
             c.execute(
                 "INSERT INTO assets(id, family_id, owner_person_id, kind, category, title, details, doc_location,"
@@ -779,7 +805,7 @@ def confirm_draft(did: str, body: ConfirmIn, request: Request, user=Depends(get_
                           (aid, p["document_id"], user["family_id"]))
             emit(c, user["family_id"], user["name"], "asset.added",
                  {"title": p.get("title"), "via": "draft"}, request.headers.get("idempotency-key"))
-        c.execute("UPDATE drafts SET status='confirmed' WHERE id=?", (did,))
+        c.execute("UPDATE drafts SET status='confirmed' WHERE id=? AND family_id=?", (did, user["family_id"]))
     return {"ok": True}
 
 @app.post("/api/drafts/{did}/reject")
