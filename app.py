@@ -7,12 +7,19 @@ Run:  uvicorn app:app --reload --host 0.0.0.0 --port 8000
 Dev OTP: printed to console (and returned in response when DEV_MODE=1).
 Optional: set ANTHROPIC_API_KEY to enable AI extraction (text + documents).
 """
-import os, json, sqlite3, secrets, hashlib, time, re
+import os, json, sqlite3, secrets, hashlib, time, re, base64
 from datetime import datetime, timedelta
 from contextlib import contextmanager
 from typing import Optional
 
 import httpx
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+from webauthn import (generate_registration_options, verify_registration_response,
+                      generate_authentication_options, verify_authentication_response, options_to_json)
+from webauthn.helpers import bytes_to_base64url, base64url_to_bytes
+from webauthn.helpers.structs import (PublicKeyCredentialDescriptor,
+                                      AuthenticatorSelectionCriteria, ResidentKeyRequirement,
+                                      UserVerificationRequirement)
 from fastapi import FastAPI, Request, HTTPException, Depends, UploadFile, File, Form
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
@@ -85,6 +92,34 @@ CREATE TABLE IF NOT EXISTS documents(
 CREATE TABLE IF NOT EXISTS events(
   id INTEGER PRIMARY KEY AUTOINCREMENT, family_id TEXT, actor TEXT,
   type TEXT, payload TEXT, client_key TEXT UNIQUE, created_at TEXT);
+-- Vault encryption (Option B: per-family passphrase, envelope-wrapped DEK).
+-- We store ONLY wrapped keys + ciphertext at rest; the passphrase and the
+-- plaintext data-encryption-key (DEK) are never persisted. The DEK is wrapped
+-- twice — once by the passphrase, once by a one-time recovery code — so a lost
+-- passphrase can be recovered, but losing BOTH means the data is unrecoverable.
+CREATE TABLE IF NOT EXISTS vault_keys(
+  family_id TEXT PRIMARY KEY,
+  salt_pass BLOB, nonce_pass BLOB, dek_pass BLOB,
+  salt_rec BLOB, nonce_rec BLOB, dek_rec BLOB,
+  created_at TEXT, rotated_at TEXT);
+CREATE TABLE IF NOT EXISTS succession_cases(
+  id TEXT PRIMARY KEY, family_id TEXT, person_id TEXT, status TEXT DEFAULT 'open',
+  note TEXT, opened_by TEXT, opened_at TEXT, closed_at TEXT, deleted_at TEXT);
+CREATE TABLE IF NOT EXISTS succession_tasks(
+  id TEXT PRIMARY KEY, case_id TEXT, family_id TEXT, asset_id TEXT,
+  category TEXT, title TEXT, kind TEXT, claimant_person_id TEXT,
+  status TEXT DEFAULT 'not_started', docs TEXT, note TEXT,
+  updated_by TEXT, updated_at TEXT);
+-- Passkeys (WebAuthn): device-based login, no SMS. Each credential stores the
+-- authenticator's PUBLIC key only; the private key never leaves the user's device.
+CREATE TABLE IF NOT EXISTS credentials(
+  id TEXT PRIMARY KEY, user_id TEXT, family_id TEXT,
+  public_key BLOB, sign_count INTEGER DEFAULT 0,
+  device_label TEXT, created_at TEXT, last_used_at TEXT);
+-- Short-lived server state binding a WebAuthn challenge to a login attempt.
+CREATE TABLE IF NOT EXISTS webauthn_flows(
+  handle TEXT PRIMARY KEY, phone TEXT, kind TEXT, challenge TEXT,
+  action TEXT, user_id TEXT, rp_id TEXT, origin TEXT, expires_at TEXT);
 """
 
 @contextmanager
@@ -105,7 +140,8 @@ with db() as c:
     for _mig in ("ALTER TABLE assets ADD COLUMN extra TEXT",
                  "ALTER TABLE persons ADD COLUMN birth_year TEXT",
                  "ALTER TABLE persons ADD COLUMN death_year TEXT",
-                 "ALTER TABLE persons ADD COLUMN story TEXT"):
+                 "ALTER TABLE persons ADD COLUMN story TEXT",
+                 "ALTER TABLE documents ADD COLUMN encrypted INTEGER DEFAULT 0"):
         try:  # migrate pre-existing DBs
             c.execute(_mig)
         except sqlite3.OperationalError:
@@ -135,10 +171,63 @@ def emit(conn, family_id, actor, etype, payload, client_key=None):
     )
     return True
 
+# ───────────────────────── vault crypto (Option B) ─────────────────────────
+# Envelope encryption: a random 256-bit data key (DEK) encrypts every vault
+# file with AES-256-GCM. The DEK itself is wrapped (encrypted) by two key-
+# encryption-keys (KEKs): one derived from the family passphrase, one from a
+# one-time recovery code. At rest we keep only wrapped keys + ciphertext, so the
+# server cannot read documents on its own. An unlocked DEK lives only in process
+# memory, keyed by session token, and expires — never touching disk.
+
+VAULT_UNLOCK_TTL = 30 * 60          # an unlocked vault re-locks after 30 min idle
+_VAULT_UNLOCKED: dict = {}          # session_token -> {"dek": bytes, "expires": float}
+
+def _kdf(passphrase: str, salt: bytes) -> bytes:
+    """Slow, memory-hard key derivation (scrypt) — resists brute force."""
+    return hashlib.scrypt(passphrase.encode("utf-8"), salt=salt,
+                          n=2**14, r=8, p=1, dklen=32, maxmem=64 * 1024 * 1024)
+
+def _wrap(dek: bytes, kek: bytes):
+    nonce = secrets.token_bytes(12)
+    return nonce, AESGCM(kek).encrypt(nonce, dek, None)
+
+def _unwrap(nonce: bytes, ct: bytes, kek: bytes) -> bytes:
+    return AESGCM(kek).decrypt(nonce, ct, None)   # raises on wrong key / tampering
+
+def _enc_blob(dek: bytes, data: bytes) -> bytes:
+    nonce = secrets.token_bytes(12)
+    return nonce + AESGCM(dek).encrypt(nonce, data, None)
+
+def _dec_blob(dek: bytes, blob: bytes) -> bytes:
+    return AESGCM(dek).decrypt(blob[:12], blob[12:], None)
+
+def _fmt_recovery(raw: str) -> str:
+    """20 hex chars -> FAMILY-XXXXX-XXXXX-XXXXX-XXXXX (shown once)."""
+    s = raw.upper()
+    return "FAMILY-" + "-".join(s[i:i + 5] for i in range(0, 20, 5))
+
+def _norm_recovery(code: str) -> str:
+    # strip the human-readable "FAMILY" label first (its letters f/a are valid hex)
+    code = re.sub(r"(?i)family", "", code or "")
+    return re.sub(r"[^a-f0-9]", "", code.lower())
+
+def vault_unlock_mem(token: str, dek: bytes):
+    _VAULT_UNLOCKED[token] = {"dek": dek, "expires": time.time() + VAULT_UNLOCK_TTL}
+
+def vault_dek(token: str) -> Optional[bytes]:
+    """Return the in-memory DEK for this session, or None if locked/expired."""
+    ent = _VAULT_UNLOCKED.get(token)
+    if not ent:
+        return None
+    if ent["expires"] < time.time():
+        _VAULT_UNLOCKED.pop(token, None)
+        return None
+    ent["expires"] = time.time() + VAULT_UNLOCK_TTL   # sliding expiry on use
+    return ent["dek"]
+
 # ───────────────────────── auth helpers ─────────────────────────
 
-def get_user(request: Request):
-    token = request.headers.get("authorization", "").replace("Bearer ", "")
+def user_from_token(token: str):
     if not token:
         raise HTTPException(401, "Not signed in")
     with db() as c:
@@ -150,8 +239,11 @@ def get_user(request: Request):
             raise HTTPException(401, "User not found")
         p = c.execute("SELECT name FROM persons WHERE id=?", (u["person_id"],)).fetchone()
         return {"id": u["id"], "phone": u["phone"], "person_id": u["person_id"],
-                "family_id": u["family_id"], "role": u["role"],
+                "family_id": u["family_id"], "role": u["role"], "token": token,
                 "name": p["name"] if p else u["phone"]}
+
+def get_user(request: Request):
+    return user_from_token(request.headers.get("authorization", "").replace("Bearer ", ""))
 
 def require_writer(user):
     if user["role"] == "viewer":
@@ -303,11 +395,419 @@ def complete_auth(body: CompleteIn):
 
         raise HTTPException(400, "Unknown action")
 
+# ───────────────────────── auth: passkeys / WebAuthn (no SMS) ─────────────────────────
+# Device-based login. Trust for a NEW person comes from the family owner's invite
+# (or a claimable profile), not from an SMS to the phone. The owner who creates a
+# family self-enrolls the first device. Returning users sign in with the device
+# biometric. Phone number still anchors identity (invites/claims key off it).
+
+RP_NAME = "Family Ledger"
+WEBAUTHN_TTL = 5 * 60
+
+def rp_info(request: Request):
+    """RP ID + origin must match what the browser sees. Overridable for deploys."""
+    host = request.headers.get("host", "localhost:8000")
+    rp_id = os.environ.get("FL_RP_ID", "").strip() or host.split(":")[0]
+    proto = request.headers.get("x-forwarded-proto") or request.url.scheme or "http"
+    origin = os.environ.get("FL_ORIGIN", "").strip() or f"{proto}://{host}"
+    return rp_id, origin
+
+def claim_candidates(c, phone):
+    return c.execute(
+        "SELECT p.id, p.name, p.relation, f.name AS family_name FROM persons p "
+        "JOIN families f ON f.id=p.family_id "
+        "WHERE p.phone=? AND p.deleted_at IS NULL "
+        "AND p.id NOT IN (SELECT person_id FROM users WHERE person_id IS NOT NULL)",
+        (phone,)).fetchall()
+
+def _store_flow(c, handle, phone, kind, challenge, action, user_id, rp_id, origin):
+    c.execute("REPLACE INTO webauthn_flows(handle, phone, kind, challenge, action, user_id, rp_id, origin, expires_at)"
+              " VALUES(?,?,?,?,?,?,?,?,?)",
+              (handle, phone, kind, bytes_to_base64url(challenge), action, user_id, rp_id, origin,
+               (datetime.utcnow() + timedelta(seconds=WEBAUTHN_TTL)).isoformat()))
+
+def _reg_options(c, request, phone, action, user_id, exclude_ids=()):
+    rp_id, origin = rp_info(request)
+    opts = generate_registration_options(
+        rp_id=rp_id, rp_name=RP_NAME, user_id=user_id.encode(), user_name=phone,
+        user_display_name=phone,
+        authenticator_selection=AuthenticatorSelectionCriteria(
+            resident_key=ResidentKeyRequirement.PREFERRED,
+            user_verification=UserVerificationRequirement.PREFERRED),
+        exclude_credentials=[PublicKeyCredentialDescriptor(id=base64url_to_bytes(i)) for i in exclude_ids])
+    handle = nid()
+    _store_flow(c, handle, phone, "register", opts.challenge, action, user_id, rp_id, origin)
+    return handle, json.loads(options_to_json(opts))
+
+@app.post("/api/auth/passkey/begin")
+def passkey_begin(body: PhoneIn, request: Request):
+    phone = norm_phone(body.phone)
+    if len(phone) != 10:
+        raise HTTPException(400, "Enter a valid 10-digit phone number")
+    rp_id, origin = rp_info(request)
+    with db() as c:
+        user = c.execute("SELECT * FROM users WHERE phone=?", (phone,)).fetchone()
+        creds = c.execute("SELECT id FROM credentials WHERE user_id=?",
+                          (user["id"],)).fetchall() if user else []
+        invite = c.execute(
+            "SELECT * FROM invites WHERE phone=? AND used_at IS NULL AND expires_at>?",
+            (phone, now())).fetchone()
+
+        # Returning user with a registered device → authenticate (biometric).
+        if user and creds:
+            opts = generate_authentication_options(
+                rp_id=rp_id,
+                allow_credentials=[PublicKeyCredentialDescriptor(id=base64url_to_bytes(r["id"])) for r in creds],
+                user_verification=UserVerificationRequirement.PREFERRED)
+            handle = nid()
+            _store_flow(c, handle, phone, "authenticate", opts.challenge, "login", user["id"], rp_id, origin)
+            return {"mode": "authenticate", "handle": handle,
+                    "options": json.loads(options_to_json(opts)),
+                    "can_add_device": bool(invite)}
+
+        # No usable device → enrol one (registration), if trust allows.
+        if user and invite:                      # owner re-vouched → add a device to existing user
+            handle, options = _reg_options(c, request, phone, "add_device", user["id"])
+            return {"mode": "register", "next": "add_device", "handle": handle, "options": options}
+        if user and not invite:                  # existing account, no device, no vouch
+            return {"mode": "blocked", "reason": "no_device",
+                    "message": "This number has an account but no device set up here. "
+                               "Ask the family owner to re-invite your number to add this device."}
+        if invite:                               # owner invited a new person
+            fam = c.execute("SELECT name FROM families WHERE id=?", (invite["family_id"],)).fetchone()
+            handle, options = _reg_options(c, request, phone, "join_invite", nid())
+            return {"mode": "register", "next": "join_invite", "handle": handle, "options": options,
+                    "family_name": fam["name"] if fam else "your family", "role": invite["role"],
+                    "need_name": invite["person_id"] is None}
+        cands = claim_candidates(c, phone)       # an existing profile to claim
+        if cands:
+            handle, options = _reg_options(c, request, phone, "claim", nid())
+            return {"mode": "register", "next": "claim", "handle": handle, "options": options,
+                    "candidates": [dict(r) for r in cands]}
+        # brand-new number with no invite → start your own family (you become owner)
+        handle, options = _reg_options(c, request, phone, "register", nid())
+        return {"mode": "register", "next": "register", "handle": handle, "options": options}
+
+@app.post("/api/auth/passkey/add-begin")
+def passkey_add_begin(body: PhoneIn, request: Request):
+    """Enrol a NEW device for an existing account — requires a fresh owner invite."""
+    phone = norm_phone(body.phone)
+    with db() as c:
+        user = c.execute("SELECT * FROM users WHERE phone=?", (phone,)).fetchone()
+        invite = c.execute(
+            "SELECT * FROM invites WHERE phone=? AND used_at IS NULL AND expires_at>?",
+            (phone, now())).fetchone()
+        if not (user and invite):
+            raise HTTPException(400, "Ask the family owner to re-invite your number, then try again")
+        exclude = [r["id"] for r in c.execute("SELECT id FROM credentials WHERE user_id=?", (user["id"],))]
+        handle, options = _reg_options(c, request, phone, "add_device", user["id"], exclude)
+    return {"mode": "register", "next": "add_device", "handle": handle, "options": options}
+
+class PasskeyComplete(BaseModel):
+    handle: str
+    credential: dict
+    action: Optional[str] = None          # UI may pick a sub-action (e.g. claim vs new family)
+    name: Optional[str] = None
+    family_name: Optional[str] = None
+    person_id: Optional[str] = None
+    device_label: Optional[str] = None
+
+@app.post("/api/auth/passkey/complete")
+def passkey_complete(body: PasskeyComplete):
+    with db() as c:
+        flow = c.execute("SELECT * FROM webauthn_flows WHERE handle=?", (body.handle,)).fetchone()
+        if not flow or flow["expires_at"] < now():
+            raise HTTPException(400, "Login attempt expired — start again")
+        c.execute("DELETE FROM webauthn_flows WHERE handle=?", (body.handle,))
+        challenge = base64url_to_bytes(flow["challenge"])
+        rp_id, origin = flow["rp_id"], flow["origin"]
+
+        # ── authenticate ──
+        if flow["kind"] == "authenticate":
+            cred_id = body.credential.get("id") or body.credential.get("rawId")
+            row = c.execute("SELECT * FROM credentials WHERE id=?", (cred_id,)).fetchone()
+            if not row:
+                raise HTTPException(400, "Unknown device")
+            try:
+                res = verify_authentication_response(
+                    credential=json.dumps(body.credential), expected_challenge=challenge,
+                    expected_rp_id=rp_id, expected_origin=origin,
+                    credential_public_key=row["public_key"], credential_current_sign_count=row["sign_count"])
+            except Exception:
+                raise HTTPException(400, "Passkey verification failed")
+            c.execute("UPDATE credentials SET sign_count=?, last_used_at=? WHERE id=?",
+                      (res.new_sign_count, now(), cred_id))
+            return {"token": make_session(c, row["user_id"])}
+
+        # ── register (enrol a device + perform the account action) ──
+        try:
+            reg = verify_registration_response(
+                credential=json.dumps(body.credential), expected_challenge=challenge,
+                expected_rp_id=rp_id, expected_origin=origin)
+        except Exception:
+            raise HTTPException(400, "Could not register this device")
+        cred_id = bytes_to_base64url(reg.credential_id)
+        phone = flow["phone"]
+        action = body.action or flow["action"]
+        label = (body.device_label or "This device")[:40]
+
+        def save_cred(uid, fid):
+            c.execute("INSERT OR REPLACE INTO credentials(id, user_id, family_id, public_key, sign_count,"
+                      " device_label, created_at, last_used_at) VALUES(?,?,?,?,?,?,?,?)",
+                      (cred_id, uid, fid, reg.credential_public_key, reg.sign_count, label, now(), now()))
+
+        if action == "register":
+            if c.execute("SELECT 1 FROM users WHERE phone=?", (phone,)).fetchone():
+                raise HTTPException(400, "This number already has an account")
+            if not body.name:
+                raise HTTPException(400, "Name is required")
+            fam_id, person_id, user_id = nid(), nid(), flow["user_id"]
+            c.execute("INSERT INTO families(id, name, created_at) VALUES(?,?,?)",
+                      (fam_id, body.family_name or f"{body.name.split()[0]} family", now()))
+            c.execute("INSERT INTO persons(id, family_id, name, relation, phone, added_by) VALUES(?,?,?,?,?,?)",
+                      (person_id, fam_id, body.name.strip(), "Self", phone, body.name.strip()))
+            c.execute("INSERT INTO users(id, phone, person_id, family_id, role, created_at) VALUES(?,?,?,?,?,?)",
+                      (user_id, phone, person_id, fam_id, "owner", now()))
+            save_cred(user_id, fam_id)
+            emit(c, fam_id, body.name.strip(), "family.created", {"family": body.family_name or ""})
+            return {"token": make_session(c, user_id)}
+
+        if action == "join_invite":
+            inv = c.execute("SELECT * FROM invites WHERE phone=? AND used_at IS NULL AND expires_at>?",
+                            (phone, now())).fetchone()
+            if not inv:
+                raise HTTPException(400, "Invite not found or expired")
+            if inv["person_id"]:
+                person_id = inv["person_id"]
+                pname = c.execute("SELECT name FROM persons WHERE id=?", (person_id,)).fetchone()["name"]
+            else:
+                if not body.name:
+                    raise HTTPException(400, "Name is required")
+                person_id, pname = nid(), body.name.strip()
+                c.execute("INSERT INTO persons(id, family_id, name, relation, phone, added_by) VALUES(?,?,?,?,?,?)",
+                          (person_id, inv["family_id"], pname, "Other", phone, pname))
+            user_id = flow["user_id"]
+            c.execute("INSERT INTO users(id, phone, person_id, family_id, role, created_at) VALUES(?,?,?,?,?,?)",
+                      (user_id, phone, person_id, inv["family_id"], inv["role"], now()))
+            c.execute("UPDATE invites SET used_at=? WHERE code=?", (now(), inv["code"]))
+            save_cred(user_id, inv["family_id"])
+            emit(c, inv["family_id"], pname, "member.joined", {"role": inv["role"]})
+            return {"token": make_session(c, user_id)}
+
+        if action == "claim":
+            p = c.execute("SELECT * FROM persons WHERE id=? AND phone=? AND deleted_at IS NULL",
+                          (body.person_id, phone)).fetchone()
+            if not p:
+                raise HTTPException(400, "Profile not found")
+            user_id = flow["user_id"]
+            c.execute("INSERT INTO users(id, phone, person_id, family_id, role, created_at) VALUES(?,?,?,?,?,?)",
+                      (user_id, phone, p["id"], p["family_id"], "member", now()))
+            save_cred(user_id, p["family_id"])
+            emit(c, p["family_id"], p["name"], "profile.claimed",
+                 {"person": p["name"], "note": "existing profile linked via passkey"})
+            return {"token": make_session(c, user_id)}
+
+        if action == "add_device":
+            inv = c.execute("SELECT * FROM invites WHERE phone=? AND used_at IS NULL AND expires_at>?",
+                            (phone, now())).fetchone()
+            user = c.execute("SELECT * FROM users WHERE phone=?", (phone,)).fetchone()
+            if not (user and inv):
+                raise HTTPException(400, "Adding a device needs a fresh owner invite")
+            c.execute("UPDATE invites SET used_at=? WHERE code=?", (now(), inv["code"]))
+            save_cred(user["id"], user["family_id"])
+            emit(c, user["family_id"], user["phone"], "device.added", {})
+            return {"token": make_session(c, user["id"])}
+
+        raise HTTPException(400, "Unknown action")
+
+# ───────────────────────── registered devices ─────────────────────────
+
+@app.get("/api/credentials")
+def list_credentials(user=Depends(get_user)):
+    with db() as c:
+        rows = [dict(r) for r in c.execute(
+            "SELECT id, device_label, created_at, last_used_at FROM credentials WHERE user_id=? ORDER BY rowid",
+            (user["id"],))]
+    return {"devices": rows}
+
+class DeviceLabelIn(BaseModel):
+    device_label: str
+
+@app.patch("/api/credentials/{cred_id}")
+def rename_credential(cred_id: str, body: DeviceLabelIn, user=Depends(get_user)):
+    with db() as c:
+        c.execute("UPDATE credentials SET device_label=? WHERE id=? AND user_id=?",
+                  (body.device_label[:40], cred_id, user["id"]))
+    return {"ok": True}
+
+@app.delete("/api/credentials/{cred_id}")
+def remove_credential(cred_id: str, user=Depends(get_user)):
+    with db() as c:
+        n = c.execute("SELECT COUNT(*) n FROM credentials WHERE user_id=?", (user["id"],)).fetchone()["n"]
+        if n <= 1:
+            raise HTTPException(400, "You can't remove your only device — add another first")
+        c.execute("DELETE FROM credentials WHERE id=? AND user_id=?", (cred_id, user["id"]))
+        emit(c, user["family_id"], user["name"], "device.removed", {})
+    return {"ok": True}
+
+@app.get("/api/config")
+def config():
+    return {"dev_mode": DEV_MODE}
+
 @app.get("/api/me")
 def me(user=Depends(get_user)):
     with db() as c:
         fam = c.execute("SELECT name FROM families WHERE id=?", (user["family_id"],)).fetchone()
     return {**user, "family_name": fam["name"] if fam else ""}
+
+# ───────────────────────── document vault (encryption at rest) ─────────────────────────
+
+class VaultSetupIn(BaseModel):
+    passphrase: str
+
+class VaultUnlockIn(BaseModel):
+    passphrase: str
+
+class VaultRecoverIn(BaseModel):
+    recovery_code: str
+    new_passphrase: str
+
+class VaultChangeIn(BaseModel):
+    old_passphrase: str
+    new_passphrase: str
+
+def _vault_row(c, family_id):
+    return c.execute("SELECT * FROM vault_keys WHERE family_id=?", (family_id,)).fetchone()
+
+@app.get("/api/vault/status")
+def vault_status(user=Depends(get_user)):
+    with db() as c:
+        row = _vault_row(c, user["family_id"])
+        ndocs = c.execute("SELECT COUNT(*) n FROM documents WHERE family_id=?",
+                          (user["family_id"],)).fetchone()["n"]
+    return {"configured": bool(row), "unlocked": vault_dek(user["token"]) is not None,
+            "documents": ndocs}
+
+@app.post("/api/vault/setup")
+def vault_setup(body: VaultSetupIn, user=Depends(get_user)):
+    if user["role"] != "owner":
+        raise HTTPException(403, "Only the family owner can set up the vault")
+    if len(body.passphrase or "") < 6:
+        raise HTTPException(400, "Passphrase must be at least 6 characters")
+    with db() as c:
+        if _vault_row(c, user["family_id"]):
+            raise HTTPException(400, "Vault is already set up")
+        dek = secrets.token_bytes(32)
+        recovery_raw = secrets.token_hex(10)                 # 20 hex chars, shown once
+        salt_p, salt_r = secrets.token_bytes(16), secrets.token_bytes(16)
+        np, cp = _wrap(dek, _kdf(body.passphrase, salt_p))
+        nr, cr = _wrap(dek, _kdf(_norm_recovery(recovery_raw), salt_r))
+        c.execute("INSERT INTO vault_keys(family_id, salt_pass, nonce_pass, dek_pass,"
+                  " salt_rec, nonce_rec, dek_rec, created_at) VALUES(?,?,?,?,?,?,?,?)",
+                  (user["family_id"], salt_p, np, cp, salt_r, nr, cr, now()))
+        emit(c, user["family_id"], user["name"], "vault.created", {})
+    vault_unlock_mem(user["token"], dek)
+    return {"ok": True, "recovery_code": _fmt_recovery(recovery_raw),
+            "note": "Save this recovery code somewhere safe. It is shown only once and is "
+                    "the ONLY way back in if the passphrase is forgotten."}
+
+@app.post("/api/vault/unlock")
+def vault_unlock(body: VaultUnlockIn, user=Depends(get_user)):
+    with db() as c:
+        row = _vault_row(c, user["family_id"])
+        if not row:
+            raise HTTPException(400, "Vault is not set up yet")
+    try:
+        dek = _unwrap(row["nonce_pass"], row["dek_pass"], _kdf(body.passphrase, row["salt_pass"]))
+    except Exception:
+        raise HTTPException(400, "Incorrect passphrase")
+    vault_unlock_mem(user["token"], dek)
+    return {"ok": True}
+
+@app.post("/api/vault/lock")
+def vault_lock(user=Depends(get_user)):
+    _VAULT_UNLOCKED.pop(user["token"], None)
+    return {"ok": True}
+
+@app.post("/api/vault/recover")
+def vault_recover(body: VaultRecoverIn, user=Depends(get_user)):
+    if user["role"] != "owner":
+        raise HTTPException(403, "Only the family owner can reset the passphrase")
+    if len(body.new_passphrase or "") < 6:
+        raise HTTPException(400, "New passphrase must be at least 6 characters")
+    with db() as c:
+        row = _vault_row(c, user["family_id"])
+        if not row:
+            raise HTTPException(400, "Vault is not set up yet")
+        try:
+            dek = _unwrap(row["nonce_rec"], row["dek_rec"],
+                          _kdf(_norm_recovery(body.recovery_code), row["salt_rec"]))
+        except Exception:
+            raise HTTPException(400, "Incorrect recovery code")
+        salt_p, (np, cp) = secrets.token_bytes(16), (None, None)
+        np, cp = _wrap(dek, _kdf(body.new_passphrase, salt_p))
+        c.execute("UPDATE vault_keys SET salt_pass=?, nonce_pass=?, dek_pass=?, rotated_at=? WHERE family_id=?",
+                  (salt_p, np, cp, now(), user["family_id"]))
+        emit(c, user["family_id"], user["name"], "vault.recovered", {})
+    vault_unlock_mem(user["token"], dek)
+    return {"ok": True, "note": "Passphrase reset using your recovery code. The vault is unlocked."}
+
+@app.post("/api/vault/change-passphrase")
+def vault_change(body: VaultChangeIn, user=Depends(get_user)):
+    if user["role"] != "owner":
+        raise HTTPException(403, "Only the family owner can change the passphrase")
+    if len(body.new_passphrase or "") < 6:
+        raise HTTPException(400, "New passphrase must be at least 6 characters")
+    with db() as c:
+        row = _vault_row(c, user["family_id"])
+        if not row:
+            raise HTTPException(400, "Vault is not set up yet")
+        try:
+            dek = _unwrap(row["nonce_pass"], row["dek_pass"], _kdf(body.old_passphrase, row["salt_pass"]))
+        except Exception:
+            raise HTTPException(400, "Current passphrase is incorrect")
+        salt_p = secrets.token_bytes(16)
+        np, cp = _wrap(dek, _kdf(body.new_passphrase, salt_p))
+        c.execute("UPDATE vault_keys SET salt_pass=?, nonce_pass=?, dek_pass=?, rotated_at=? WHERE family_id=?",
+                  (salt_p, np, cp, now(), user["family_id"]))
+        emit(c, user["family_id"], user["name"], "vault.passphrase_changed", {})
+    vault_unlock_mem(user["token"], dek)
+    return {"ok": True}
+
+@app.get("/api/documents")
+def list_documents(user=Depends(get_user)):
+    with db() as c:
+        rows = [dict(r) for r in c.execute(
+            "SELECT id, filename, doc_type, linked_asset_id, uploaded_by, created_at, encrypted"
+            " FROM documents WHERE family_id=? ORDER BY rowid DESC", (user["family_id"],))]
+    return {"documents": rows, "unlocked": vault_dek(user["token"]) is not None}
+
+@app.get("/api/documents/{doc_id}/file")
+def get_document(doc_id: str, t: str):
+    user = user_from_token(t)
+    dek = vault_dek(user["token"])
+    if dek is None:
+        raise HTTPException(409, "Vault is locked — unlock it to view documents")
+    with db() as c:
+        d = c.execute("SELECT * FROM documents WHERE id=? AND family_id=?",
+                      (doc_id, user["family_id"])).fetchone()
+    if not d:
+        raise HTTPException(404, "Document not found")
+    ext = os.path.splitext(d["filename"] or "doc.jpg")[1] or ".jpg"
+    path = os.path.join(VAULT_DIR, d["sha256"] + (".enc" if d["encrypted"] else ext))
+    if not os.path.exists(path):
+        raise HTTPException(404, "File missing from vault")
+    raw = open(path, "rb").read()
+    if d["encrypted"]:
+        try:
+            raw = _dec_blob(dek, raw)
+        except Exception:
+            raise HTTPException(500, "Could not decrypt — wrong key state")
+    media = {".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png",
+             ".pdf": "application/pdf", ".webp": "image/webp"}.get(ext.lower(), "application/octet-stream")
+    from fastapi.responses import Response
+    return Response(content=raw, media_type=media,
+                    headers={"Content-Disposition": f'inline; filename="{d["filename"] or "document"}"'})
 
 # ───────────────────────── family & members ─────────────────────────
 
@@ -676,33 +1176,37 @@ def ingest_text(body: IngestText, user=Depends(get_user)):
 @app.post("/api/ingest/document")
 async def ingest_document(file: UploadFile = File(...), user_token: str = Form(...)):
     # multipart can't easily carry the auth header from fetch FormData in some setups; accept token in form
-    class R:  # minimal shim
-        headers = {"authorization": f"Bearer {user_token}"}
-    user = get_user(R())
+    user = user_from_token(user_token)
     require_writer(user)
+    # Vault must be set up and unlocked — documents are only ever stored encrypted.
+    with db() as c:
+        if not _vault_row(c, user["family_id"]):
+            raise HTTPException(400, "Set up your document vault (passphrase) before uploading documents")
+    dek = vault_dek(user["token"])
+    if dek is None:
+        raise HTTPException(409, "Vault is locked — unlock it to upload documents")
     data = await file.read()
     if len(data) > 8_000_000:
         raise HTTPException(400, "File too large (max 8 MB)")
-    sha = hashlib.sha256(data).hexdigest()
+    sha = hashlib.sha256(data).hexdigest()   # hash of plaintext → content dedupe
     with db() as c:
         dup = c.execute("SELECT id FROM documents WHERE sha256=? AND family_id=?",
                         (sha, user["family_id"])).fetchone()
         if dup:
             return {"duplicate": True, "note": "This document is already in the vault."}
-    ext = os.path.splitext(file.filename or "doc.jpg")[1] or ".jpg"
-    path = os.path.join(VAULT_DIR, sha + ext)
-    with open(path, "wb") as f:
-        f.write(data)
-    doc_id = nid()
     media = file.content_type or "image/jpeg"
     items = None
     if media.startswith("image/"):
-        import base64
-        items = claude_extract("", base64.b64encode(data).decode(), media)
+        items = claude_extract("", base64.b64encode(data).decode(), media)   # extract from plaintext, in memory
+    # encrypt before it ever touches disk
+    path = os.path.join(VAULT_DIR, sha + ".enc")
+    with open(path, "wb") as f:
+        f.write(_enc_blob(dek, data))
+    doc_id = nid()
     created = []
     with db() as c:
-        c.execute("INSERT INTO documents(id, family_id, filename, sha256, doc_type, uploaded_by, created_at)"
-                  " VALUES(?,?,?,?,?,?,?)",
+        c.execute("INSERT INTO documents(id, family_id, filename, sha256, doc_type, uploaded_by, created_at, encrypted)"
+                  " VALUES(?,?,?,?,?,?,?,1)",
                   (doc_id, user["family_id"], file.filename, sha,
                    (items[0].get("category") if items else "unclassified") or "unclassified",
                    user["name"], now()))
@@ -814,6 +1318,218 @@ def reject_draft(did: str, user=Depends(get_user)):
     with db() as c:
         c.execute("UPDATE drafts SET status='rejected' WHERE id=? AND family_id=?", (did, user["family_id"]))
         emit(c, user["family_id"], user["name"], "draft.rejected", {"id": did})
+    return {"ok": True}
+
+# ───────────────────────── succession / transmission (W5) ─────────────────────────
+# When a family member dies, every asset they held must be claimed or transferred
+# (transmission). India needs different paperwork per institution; this turns the
+# register into a per-asset action plan with status tracking. General procedural
+# guidance only — not legal advice.
+
+SUCCESSION_STATUSES = ["not_started", "gathering", "filed", "transferred", "blocked", "na"]
+
+SUCCESSION_GUIDANCE = {
+    "bank": {
+        "label": "Bank accounts & deposits",
+        "documents": ["Death certificate (original + several attested copies)",
+                      "Claimant/nominee PAN, Aadhaar & KYC", "Account number / passbook",
+                      "Bank's death-claim form", "If no nominee & balance is large: succession "
+                      "certificate / legal heir certificate, indemnity bond, sureties"],
+        "steps": ["Notify the branch and freeze further debits.",
+                  "Submit the death-claim form with the death certificate.",
+                  "If a nominee is registered, the balance is released to the nominee.",
+                  "If no nominee, follow the succession-certificate / legal-heir route."],
+        "where": "The account holder's home branch."},
+    "insurance": {
+        "label": "Life / other insurance",
+        "documents": ["Death certificate", "Original policy document", "Claimant ID & bank details",
+                      "Insurer's claim/intimation form",
+                      "For early or unnatural death: FIR, post-mortem & hospital records"],
+        "steps": ["Intimate the insurer as early as possible (delays can complicate claims).",
+                  "Submit the claim form with all documents.",
+                  "The nominee receives the sum assured; if no nominee, heirs must establish title."],
+        "where": "Insurer branch or online claims portal (LIC / SBI Life / HDFC Life etc.)."},
+    "epf": {
+        "label": "EPF / PPF / NPS / pension",
+        "documents": ["Death certificate", "Form 20 (EPF, by nominee/legal heir)",
+                      "Form 10D (pension) & Form 5IF (EDLI insurance)", "Nominee KYC & bank details",
+                      "For PPF/NPS: scheme-specific death-claim form"],
+        "steps": ["For EPF, file through the last employer or online on the EPFO portal.",
+                  "Claim provident fund (Form 20), pension (10D) and EDLI (5IF) together.",
+                  "PPF/NPS are claimed at the holding bank / NPS CRA."],
+        "where": "EPFO (via employer or unified portal) / holding bank / NPS CRA."},
+    "property": {
+        "label": "Property & land",
+        "documents": ["Death certificate", "Will (if any) or legal-heir / succession certificate",
+                      "Title deed & prior chain of documents", "Mutation (dakhil-kharij) application",
+                      "Latest tax / utility receipts"],
+        "steps": ["Establish heirship (will, or legal-heir/succession certificate).",
+                  "File for mutation at the local revenue/municipal office to update title records.",
+                  "For registered transfer, execute the relevant deed at the sub-registrar.",
+                  "Clear any pending property tax or society dues."],
+        "where": "Tehsil / municipal office (mutation); sub-registrar (registered transfer)."},
+    "demat": {
+        "label": "Shares & mutual funds",
+        "documents": ["Death certificate", "Transmission Request Form (TRF)",
+                      "Claimant KYC & client-master / folio details",
+                      "If no nominee & above threshold: succession certificate / probate / LoA"],
+        "steps": ["Submit a transmission request to the Depository Participant (broker) for shares.",
+                  "For mutual funds, submit the AMC/RTA transmission form per folio.",
+                  "Nominee holdings transmit on documents; otherwise heirs must establish title."],
+        "where": "Depository Participant (broker) / AMC or RTA (CAMS, KFintech)."},
+    "gold": {
+        "label": "Gold & locker contents",
+        "documents": ["Death certificate", "Locker-holder nominee KYC & locker agreement",
+                      "For Sovereign Gold Bonds: transmission request via RBI/depository"],
+        "steps": ["For a bank locker, the nominee/heir accesses contents with the bank's witness procedure.",
+                  "Physical gold passes per the will / family settlement.",
+                  "SGBs are transmitted through the issuing bank / depository."],
+        "where": "Bank locker branch / SGB issuer."},
+    "vehicle": {
+        "label": "Vehicles",
+        "documents": ["Death certificate", "Registration Certificate (RC)",
+                      "Form 31 (transfer on death of owner)", "Insurance papers", "Legal-heir proof"],
+        "steps": ["Apply at the RTO using Form 31 to transfer ownership to the heir.",
+                  "Update the insurance policy to the new owner."],
+        "where": "Regional Transport Office (RTO)."},
+    "loan": {
+        "label": "Loans & liabilities",
+        "documents": ["Death certificate", "Loan account statement",
+                      "Any loan-protection / home-loan insurance policy"],
+        "steps": ["Check whether the loan carried protection insurance — many home loans do; "
+                  "if so, the cover can clear the outstanding balance.",
+                  "Otherwise the debt is settled from the estate or the secured asset.",
+                  "Liabilities are NOT inherited as personal debt beyond the estate's value."],
+        "where": "The lender's branch / loan servicing desk."},
+}
+GENERIC_SUCCESSION_NOTE = ("Obtain 10+ attested copies of the death certificate up front — every "
+                           "institution keeps one. A nominee is a trustee who receives the asset; "
+                           "final ownership still follows the will or succession law.")
+
+def _case_progress(c, case_id):
+    rows = c.execute("SELECT status FROM succession_tasks WHERE case_id=?", (case_id,)).fetchall()
+    total = len(rows)
+    done = len([r for r in rows if r["status"] in ("transferred", "na")])
+    return {"tasks": total, "done": done,
+            "pct": round(done / total * 100) if total else 0}
+
+class SuccessionOpenIn(BaseModel):
+    person_id: str
+    note: Optional[str] = None
+
+@app.post("/api/succession/open")
+def succession_open(body: SuccessionOpenIn, request: Request, user=Depends(get_user)):
+    require_writer(user)
+    with db() as c:
+        p = c.execute("SELECT * FROM persons WHERE id=? AND family_id=? AND deleted_at IS NULL",
+                      (body.person_id, user["family_id"])).fetchone()
+        if not p:
+            raise HTTPException(404, "Person not found")
+        existing = c.execute(
+            "SELECT * FROM succession_cases WHERE family_id=? AND person_id=? AND status='open' AND deleted_at IS NULL",
+            (user["family_id"], body.person_id)).fetchone()
+        if existing:
+            return {"id": existing["id"], "existing": True}
+        if p["status"] != "deceased":
+            c.execute("UPDATE persons SET status='deceased' WHERE id=?", (body.person_id,))
+            emit(c, user["family_id"], user["name"], "member.updated",
+                 {"name": p["name"], "status": "deceased"})
+        case_id = nid()
+        c.execute("INSERT INTO succession_cases(id, family_id, person_id, status, note, opened_by, opened_at)"
+                  " VALUES(?,?,?,?,?,?,?)",
+                  (case_id, user["family_id"], body.person_id, "open", body.note, user["name"], now()))
+        assets = c.execute(
+            "SELECT * FROM assets WHERE family_id=? AND owner_person_id=? AND deleted_at IS NULL",
+            (user["family_id"], body.person_id)).fetchall()
+        for a in assets:
+            c.execute("INSERT INTO succession_tasks(id, case_id, family_id, asset_id, category, title, kind,"
+                      " status, updated_at) VALUES(?,?,?,?,?,?,?,?,?)",
+                      (nid(), case_id, user["family_id"], a["id"], a["category"], a["title"],
+                       a["kind"], "not_started", now()))
+        emit(c, user["family_id"], user["name"], "succession.opened",
+             {"person": p["name"], "tasks": len(assets)})
+    return {"id": case_id, "tasks": len(assets)}
+
+@app.get("/api/succession")
+def succession_list(user=Depends(get_user)):
+    with db() as c:
+        cases = c.execute(
+            "SELECT sc.*, p.name AS person_name, p.relation AS person_relation"
+            " FROM succession_cases sc JOIN persons p ON p.id=sc.person_id"
+            " WHERE sc.family_id=? AND sc.deleted_at IS NULL ORDER BY sc.rowid DESC",
+            (user["family_id"],)).fetchall()
+        out = []
+        for sc in cases:
+            out.append({**dict(sc), "progress": _case_progress(c, sc["id"])})
+    return {"cases": out}
+
+@app.get("/api/succession/{case_id}")
+def succession_detail(case_id: str, user=Depends(get_user)):
+    with db() as c:
+        sc = c.execute("SELECT * FROM succession_cases WHERE id=? AND family_id=? AND deleted_at IS NULL",
+                       (case_id, user["family_id"])).fetchone()
+        if not sc:
+            raise HTTPException(404, "Case not found")
+        person = c.execute("SELECT * FROM persons WHERE id=?", (sc["person_id"],)).fetchone()
+        tasks = []
+        for t in c.execute("SELECT * FROM succession_tasks WHERE case_id=? ORDER BY rowid", (case_id,)):
+            a = c.execute("SELECT amount, nominee, mutation, doc_location, details FROM assets WHERE id=?",
+                          (t["asset_id"],)).fetchone()
+            tasks.append({**dict(t), "docs": json.loads(t["docs"]) if t["docs"] else [],
+                          "guidance": SUCCESSION_GUIDANCE.get(t["category"], {}),
+                          "asset": dict(a) if a else {}})
+        progress = _case_progress(c, case_id)
+    return {"case": dict(sc), "person": dict(person) if person else {}, "tasks": tasks,
+            "progress": progress, "generic_note": GENERIC_SUCCESSION_NOTE,
+            "statuses": SUCCESSION_STATUSES}
+
+class SuccessionTaskIn(BaseModel):
+    status: Optional[str] = None
+    claimant_person_id: Optional[str] = None
+    docs: Optional[list] = None
+    note: Optional[str] = None
+
+@app.patch("/api/succession/tasks/{task_id}")
+def succession_task_update(task_id: str, body: SuccessionTaskIn, user=Depends(get_user)):
+    require_writer(user)
+    with db() as c:
+        t = c.execute("SELECT * FROM succession_tasks WHERE id=? AND family_id=?",
+                      (task_id, user["family_id"])).fetchone()
+        if not t:
+            raise HTTPException(404, "Task not found")
+        if body.status is not None and body.status not in SUCCESSION_STATUSES:
+            raise HTTPException(400, "Unknown status")
+        status = body.status if body.status is not None else t["status"]
+        claimant = body.claimant_person_id if body.claimant_person_id is not None else t["claimant_person_id"]
+        if claimant and not person_in_family(c, claimant, user["family_id"]):
+            raise HTTPException(400, "Claimant must be a member of your family")
+        docs = json.dumps(body.docs) if body.docs is not None else t["docs"]
+        note = body.note if body.note is not None else t["note"]
+        c.execute("UPDATE succession_tasks SET status=?, claimant_person_id=?, docs=?, note=?,"
+                  " updated_by=?, updated_at=? WHERE id=? AND family_id=?",
+                  (status, claimant, docs, note, user["name"], now(), task_id, user["family_id"]))
+        if body.status is not None:
+            emit(c, user["family_id"], user["name"], "succession.task_updated",
+                 {"title": t["title"], "status": status})
+    return {"ok": True}
+
+class SuccessionCloseIn(BaseModel):
+    reopen: bool = False
+
+@app.post("/api/succession/{case_id}/close")
+def succession_close(case_id: str, body: SuccessionCloseIn, user=Depends(get_user)):
+    require_writer(user)
+    with db() as c:
+        sc = c.execute("SELECT * FROM succession_cases WHERE id=? AND family_id=? AND deleted_at IS NULL",
+                       (case_id, user["family_id"])).fetchone()
+        if not sc:
+            raise HTTPException(404, "Case not found")
+        if body.reopen:
+            c.execute("UPDATE succession_cases SET status='open', closed_at=NULL WHERE id=?", (case_id,))
+            emit(c, user["family_id"], user["name"], "succession.reopened", {})
+        else:
+            c.execute("UPDATE succession_cases SET status='closed', closed_at=? WHERE id=?", (now(), case_id))
+            emit(c, user["family_id"], user["name"], "succession.closed", {})
     return {"ok": True}
 
 # ───────────────────────── report ─────────────────────────
