@@ -24,7 +24,7 @@ With the key set, spoken/typed Hinglish and uploaded document photos are extract
 
 **Voice input:** two modes, chosen automatically.
 
-- **Server-side STT (recommended) — Sarvam Saarika.** Set `SARVAM_API_KEY` and the mic records audio and transcribes it server-side — far more accurate for Hindi/Hinglish, and works in any browser (it uses `MediaRecorder`, not the flaky Web Speech API). The transcript lands in the box for you to review before extracting. Records in ≤28-second clips (the sync API's limit); speak longer descriptions as a few short captures.
+- **Server-side STT (recommended) — Sarvam Saarika.** Set `SARVAM_API_KEY` and the mic records **16 kHz mono WAV** (via the Web Audio API — Sarvam's REST endpoint rejects the WebM/Opus that `MediaRecorder` produces) and transcribes it server-side. Far more accurate for Hindi/Hinglish, works in any browser, and auto-detects the spoken language by default. The transcript lands in the box for you to review before extracting. Records in ≤28-second clips (the sync API's limit); speak longer descriptions as a few short captures. STT failures show a friendly message; the exact provider error is logged server-side (`[stt] …`), never shown to the user.
 
   ```bash
   export SARVAM_API_KEY=...           # from dashboard.sarvam.ai

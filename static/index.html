@@ -632,42 +632,79 @@ function wireMic(){
     recog.start();
   };
 }
-/* Server-side STT (Sarvam): record audio, upload, transcript lands in the box for review. */
+/* Server-side STT (Sarvam): record as 16kHz mono WAV (Sarvam rejects webm/opus),
+   upload, transcript lands in the box for review. */
+function _downsample(buf,inRate,outRate){
+  if(outRate>=inRate)return buf;
+  const ratio=inRate/outRate, out=new Float32Array(Math.round(buf.length/ratio));
+  let o=0,i=0;
+  while(o<out.length){
+    const next=Math.round((o+1)*ratio); let sum=0,n=0;
+    for(let k=i;k<next&&k<buf.length;k++){sum+=buf[k];n++;}
+    out[o++]=n?sum/n:0; i=next;
+  }
+  return out;
+}
+function _encodeWav(samples,rate){
+  const buf=new ArrayBuffer(44+samples.length*2), v=new DataView(buf);
+  const ws=(off,s)=>{for(let i=0;i<s.length;i++)v.setUint8(off+i,s.charCodeAt(i));};
+  ws(0,'RIFF');v.setUint32(4,36+samples.length*2,true);ws(8,'WAVE');ws(12,'fmt ');
+  v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);
+  v.setUint32(24,rate,true);v.setUint32(28,rate*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);
+  ws(36,'data');v.setUint32(40,samples.length*2,true);
+  let off=44;
+  for(let i=0;i<samples.length;i++){const s=Math.max(-1,Math.min(1,samples[i]));v.setInt16(off,s<0?s*0x8000:s*0x7FFF,true);off+=2;}
+  return new Blob([v],{type:'audio/wav'});
+}
 function wireMicSarvam(btn){
   btn.onclick=async()=>{
-    if(REC&&REC.mr&&REC.mr.state==='recording'){stopRec();return;}
+    if(REC&&REC.recording){stopRec();return;}
     let stream;
     try{stream=await navigator.mediaDevices.getUserMedia({audio:true});}
     catch(e){return toast(location.protocol==='https:'||location.hostname==='localhost'
       ?'Microphone permission needed — allow it and try again'
       :'Mic needs a secure origin (https or localhost)');}
-    const mr=new MediaRecorder(stream),chunks=[];
-    mr.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data);};
-    mr.onstop=async()=>{
-      stream.getTracks().forEach(t=>t.stop());btn.classList.remove('rec');
-      if(REC&&REC.timer)clearTimeout(REC.timer);
-      const type=mr.mimeType||'audio/webm';
-      const blob=new Blob(chunks,{type});
-      if(!blob.size){$('mic-status').textContent='Tap to record';return;}
-      $('mic-status').textContent='Transcribing…';
-      const ext=type.includes('mp4')||type.includes('m4a')?'m4a':type.includes('ogg')?'ogg':'webm';
-      const lang=($('stt-lang')||{}).value||sttLang();
-      const fd=new FormData();fd.append('file',blob,'audio.'+ext);fd.append('user_token',TOKEN);fd.append('language_code',lang);
-      try{
-        const r=await fetch('/api/stt',{method:'POST',body:fd});
-        const j=await r.json();if(!r.ok)throw new Error(j.detail||'Transcription failed');
-        const cur=$('transcript').value.trim();
-        $('transcript').value=(cur?cur+' ':'')+(j.transcript||'');
-        const det=(lang==='unknown'&&j.language_code)?' ('+langName(j.language_code)+')':'';
-        $('mic-status').textContent=j.transcript?'Transcribed'+det+' — review, then tap Extract':'Nothing heard — try again';
-        if(!j.transcript)toast('Didn’t catch that — speak a little closer');
-      }catch(e){toast(e.message);$('mic-status').textContent='Tap to record';}
-    };
-    REC={mr,stream,timer:setTimeout(()=>{toast('Reached ~28s — transcribing this part');stopRec();},28000)};
-    mr.start();btn.classList.add('rec');$('mic-status').textContent='Recording… tap to stop';
+    const AC=window.AudioContext||window.webkitAudioContext;
+    const ctx=new AC();
+    try{if(ctx.state==='suspended')await ctx.resume();}catch(e){}
+    const source=ctx.createMediaStreamSource(stream);
+    const proc=ctx.createScriptProcessor(4096,1,1), chunks=[];
+    proc.onaudioprocess=e=>{chunks.push(new Float32Array(e.inputBuffer.getChannelData(0)));};
+    source.connect(proc);proc.connect(ctx.destination);   // output is silent (we only read input)
+    REC={recording:true,stream,ctx,proc,source,chunks,
+      timer:setTimeout(()=>{toast('Reached ~28s — transcribing this part');stopRec();},28000)};
+    btn.classList.add('rec');$('mic-status').textContent='Recording… tap to stop';
   };
 }
-function stopRec(){try{if(REC&&REC.mr&&REC.mr.state!=='inactive')REC.mr.stop();}catch(e){}}
+async function stopRec(){
+  const R=REC; if(!R||!R.recording)return; REC.recording=false;
+  if(R.timer)clearTimeout(R.timer);
+  const btn=$('mic'); if(btn)btn.classList.remove('rec');
+  try{R.proc.disconnect();R.source.disconnect();}catch(e){}
+  R.stream.getTracks().forEach(t=>t.stop());
+  let len=0; R.chunks.forEach(c=>len+=c.length);
+  const flat=new Float32Array(len); let o=0; R.chunks.forEach(c=>{flat.set(c,o);o+=c.length;});
+  const rate=R.ctx.sampleRate||44100;
+  try{R.ctx.close();}catch(e){}
+  if(len<rate*0.3){$('mic-status').textContent='Tap to record';return toast('Too short — hold and speak a moment');}
+  const blob=_encodeWav(_downsample(flat,rate,16000),16000);
+  $('mic-status').textContent='Transcribing…';
+  const lang=($('stt-lang')||{}).value||sttLang();
+  const fd=new FormData();fd.append('file',blob,'audio.wav');fd.append('user_token',TOKEN);fd.append('language_code',lang);
+  try{
+    const r=await fetch('/api/stt',{method:'POST',body:fd});
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok)throw new Error(j.detail||'failed');
+    const cur=$('transcript').value.trim();
+    $('transcript').value=(cur?cur+' ':'')+(j.transcript||'');
+    const det=(lang==='unknown'&&j.language_code)?' ('+langName(j.language_code)+')':'';
+    $('mic-status').textContent=j.transcript?'Transcribed'+det+' — review, then tap Extract':'Tap to record';
+    if(!j.transcript)toast('Didn’t catch that — speak a little closer');
+  }catch(e){
+    $('mic-status').textContent='Tap to record';
+    toast('Could not transcribe — please try again, or type below');   // never show raw API errors to the user
+  }
+}
 let sending=false;
 async function sendTranscript(){
   if(sending)return;                                  // guard: mic auto-send + click can both fire
