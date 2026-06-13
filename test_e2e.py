@@ -210,6 +210,61 @@ check("proximity: house gets 80 lakh", ds.get("property", {}).get("amount") == 8
 check("proximity: loan gets 27 lakh (not 80)", ds.get("loan", {}).get("amount") == 2700000, ds.get("loan"))
 check("proximity: insurance gets no amount", ds.get("insurance", {}).get("amount") is None, ds.get("insurance"))
 
+# ── W5 vault (encryption at rest) ────────────────────
+import io
+st = c.get("/api/vault/status", headers=H(OWNER)).json()
+check("vault starts unconfigured", st["configured"] is False, st)
+# uploads blocked before setup
+up = c.post("/api/ingest/document", data={"user_token": OWNER},
+            files={"file": ("d.txt", io.BytesIO(b"x"), "text/plain")})
+check("upload blocked before vault setup", up.status_code == 400, up.status_code)
+setup = c.post("/api/vault/setup", headers=H(OWNER), json={"passphrase": "familypass"})
+rec = setup.json().get("recovery_code", "")
+check("vault setup returns recovery code", setup.status_code == 200 and rec.startswith("FAMILY-"), setup.text)
+check("vault now configured + unlocked", c.get("/api/vault/status", headers=H(OWNER)).json()["unlocked"], "")
+# upload encrypts; download decrypts
+up = c.post("/api/ingest/document", data={"user_token": OWNER},
+            files={"file": ("deed.txt", io.BytesIO(b"SECRET DEED 123"), "text/plain")}).json()
+docs = c.get("/api/documents", headers=H(OWNER)).json()["documents"]
+check("document stored encrypted", docs and docs[0]["encrypted"] == 1, docs)
+did = docs[0]["id"]
+dl = c.get(f"/api/documents/{did}/file?t={OWNER}")
+check("download decrypts to original bytes", dl.content == b"SECRET DEED 123", dl.status_code)
+c.post("/api/vault/lock", headers=H(OWNER))
+check("locked vault blocks download", c.get(f"/api/documents/{did}/file?t={OWNER}").status_code == 409, "")
+check("wrong passphrase rejected",
+      c.post("/api/vault/unlock", headers=H(OWNER), json={"passphrase": "nope"}).status_code == 400, "")
+rc = c.post("/api/vault/recover", headers=H(OWNER), json={"recovery_code": rec, "new_passphrase": "newpass1"})
+check("recovery code resets passphrase + unlocks", rc.status_code == 200, rc.text)
+check("download works after recovery", c.get(f"/api/documents/{did}/file?t={OWNER}").status_code == 200, "")
+check("old passphrase no longer works",
+      (c.post("/api/vault/lock", headers=H(OWNER)),
+       c.post("/api/vault/unlock", headers=H(OWNER), json={"passphrase": "familypass"}).status_code)[1] == 400, "")
+
+# ── W5 succession (transmission) ─────────────────────
+pm = c.post("/api/members", headers={**H(OWNER), "idempotency-key": "succ-papa"},
+            json={"name": "Papa Ji", "relation": "Father"}).json()["id"]
+c.post("/api/assets", headers={**H(OWNER), "idempotency-key": "succ-a1"},
+       json={"category": "bank", "title": "SBI FD", "owner_person_id": pm, "amount": 500000})
+c.post("/api/assets", headers={**H(OWNER), "idempotency-key": "succ-a2"},
+       json={"category": "property", "title": "Patna House", "owner_person_id": pm, "amount": 8000000})
+op = c.post("/api/succession/open", headers=H(OWNER), json={"person_id": pm}).json()
+check("opening case creates one task per asset", op.get("tasks") == 2, op)
+cid = op["id"]
+det = c.get(f"/api/succession/{cid}", headers=H(OWNER)).json()
+check("opening marks person deceased", det["person"]["status"] == "deceased", det["person"].get("status"))
+check("tasks carry category guidance",
+      all(t["guidance"].get("documents") for t in det["tasks"]), [t["category"] for t in det["tasks"]])
+t0 = det["tasks"][0]["id"]
+c.patch(f"/api/succession/tasks/{t0}", headers=H(OWNER),
+        json={"status": "transferred", "claimant_person_id": pm})
+prog = c.get("/api/succession", headers=H(OWNER)).json()["cases"][0]["progress"]
+check("task status update reflects in progress", prog["done"] == 1 and prog["tasks"] == 2, prog)
+check("re-open is idempotent",
+      c.post("/api/succession/open", headers=H(OWNER), json={"person_id": pm}).json().get("existing") is True, "")
+check("case can be closed",
+      c.post(f"/api/succession/{cid}/close", headers=H(OWNER), json={}).json().get("ok") is True, "")
+
 # ── summary ──────────────────────────────────────────
 fails = [r for r in results if not r[1]]
 print(f"\n{len(results)-len(fails)}/{len(results)} passed")

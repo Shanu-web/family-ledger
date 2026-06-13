@@ -145,9 +145,10 @@ details.more[open]>summary:before{content:'– '}
   box-shadow:0 8px 24px rgba(16,24,43,.3)}
 @media(min-width:768px){.toast{bottom:30px}}
 .hidden{display:none!important}
+.print-only{display:none}
 .prog{height:6px;border-radius:99px;background:var(--line);overflow:hidden;margin:8px 0 4px}
 .prog>div{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--brand),var(--brand-2));transition:width .4s}
-@media print{.no-print,.bnav,.hdr{display:none!important}body{background:#fff}#view{padding-bottom:0!important}.card{box-shadow:none;border:1px solid #ddd}}
+@media print{.no-print,.bnav,.hdr{display:none!important}.print-only{display:block!important}body{background:#fff}#view{padding-bottom:0!important}.card{box-shadow:none;border:1px solid #ddd}}
 </style>
 </head>
 <body>
@@ -163,7 +164,10 @@ details.more[open]>summary:before{content:'– '}
   <div class="card" style="padding:22px">
     <div id="step-phone">
       <label><span>Mobile number</span><input id="phone" inputmode="numeric" placeholder="10-digit number" autocomplete="tel"></label>
-      <button class="btn full" onclick="sendOtp()">Send OTP</button>
+      <button class="btn full" onclick="startAuth()">Continue with this device 🔐</button>
+      <div class="muted" style="font-size:12px;text-align:center;margin-top:10px">Sign in with your phone's fingerprint / face — no SMS, no password.</div>
+      <div id="dev-fallback" class="hidden" style="text-align:center;margin-top:6px">
+        <button class="btn plain" style="font-size:12px" onclick="sendOtp()">Dev mode: use a test code instead</button></div>
     </div>
     <div id="step-otp" class="hidden">
       <label><span>Enter OTP</span><input id="otp" inputmode="numeric" placeholder="••••••" style="letter-spacing:.4em;text-align:center;font-size:20px;font-weight:700"></label>
@@ -174,12 +178,12 @@ details.more[open]>summary:before{content:'– '}
       <p class="muted" style="margin-top:0;font-size:13.5px">This number is new. Create your family's workspace — you'll be the owner.</p>
       <label><span>Your full name</span><input id="reg-name" placeholder="e.g. Shanu Choudhary"></label>
       <label><span>Family name (optional)</span><input id="reg-fam" placeholder="e.g. Choudhary family, Patna"></label>
-      <button class="btn full" onclick="completeAuth('register')">Create family workspace</button>
+      <button class="btn full" onclick="onRegister()">Create family workspace</button>
     </div>
     <div id="step-invite" class="hidden">
       <p id="invite-text" class="muted" style="margin-top:0"></p>
       <label id="invite-name-wrap"><span>Your full name</span><input id="invite-name"></label>
-      <button class="btn full" onclick="completeAuth('join_invite')">Join family</button>
+      <button class="btn full" onclick="onJoin()">Join family</button>
     </div>
     <div id="step-claim" class="hidden">
       <p class="muted" style="margin-top:0">A family member already added a profile with this number. Is this you?</p>
@@ -209,6 +213,8 @@ details.more[open]>summary:before{content:'– '}
 <div class="sheet" id="sheet">
   <div class="grab"></div>
   <button onclick="closeSheet();TAB='story';render()"><span style="font-size:20px">🌳</span> Family story</button>
+  <button onclick="closeSheet();TAB='succession';render()"><span style="font-size:20px">🕊️</span> Succession (transmission)</button>
+  <button onclick="closeSheet();TAB='vault';render()"><span style="font-size:20px">🔐</span> Document vault</button>
   <button onclick="closeSheet();TAB='discover';render()"><span style="font-size:20px">🔎</span> Discover unclaimed assets</button>
   <button onclick="closeSheet();TAB='report';render()"><span style="font-size:20px">📋</span> Audit report</button>
   <button onclick="logout()" style="color:var(--bad)"><span style="font-size:20px">↩︎</span> Sign out</button>
@@ -217,8 +223,10 @@ details.more[open]>summary:before{content:'– '}
 <script>
 const $=id=>document.getElementById(id);
 let TOKEN=localStorage.getItem('fl_token')||'', ME=null, TAB='overview';
-let STATE={members:[],assets:[],checks:{},drafts:[],activity:[],invites:[],report:null};
-let vtoken='', authCtx={};
+let STATE={members:[],assets:[],checks:{},drafts:[],activity:[],invites:[],report:null,
+  vault:{configured:false,unlocked:false,documents:0},documents:[],cases:[]};
+let vaultRecoveryShow='', sucCaseId='', sucDetail=null;
+let vtoken='', authCtx={}, DEVMODE=false;
 
 const CATS=[["property","Property / Land"],["bank","Bank / Deposits"],["insurance","Insurance"],
 ["epf","EPF / PPF / NPS"],["demat","Shares / MF"],["gold","Gold / Locker"],["vehicle","Vehicles"],["loan","Loans"]];
@@ -289,23 +297,104 @@ function inrShort(n){n=Number(n||0);const a=Math.abs(n),s=n<0?'−':'';
 const initials=n=>(n||'?').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
 
 /* ── auth flow ── */
+let authMode='passkey', pk={};   // pk: {handle, options, next}
 function show(step){['step-phone','step-otp','step-register','step-invite','step-claim'].forEach(s=>$(s).classList.add('hidden'));$(step).classList.remove('hidden')}
+function onAuthed(token){TOKEN=token;localStorage.setItem('fl_token',TOKEN);boot()}
+
+/* WebAuthn (passkey) helpers — convert between server base64url and browser ArrayBuffers */
+function b64uToBuf(s){s=s.replace(/-/g,'+').replace(/_/g,'/');const pad=s.length%4?'='.repeat(4-s.length%4):'';
+  const bin=atob(s+pad),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return u.buffer}
+function bufToB64u(b){const u=new Uint8Array(b);let s='';for(let i=0;i<u.length;i++)s+=String.fromCharCode(u[i]);
+  return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
+function prepCreate(o){o.challenge=b64uToBuf(o.challenge);o.user.id=b64uToBuf(o.user.id);
+  if(o.excludeCredentials)o.excludeCredentials=o.excludeCredentials.map(c=>({...c,id:b64uToBuf(c.id)}));return o}
+function prepGet(o){o.challenge=b64uToBuf(o.challenge);
+  if(o.allowCredentials)o.allowCredentials=o.allowCredentials.map(c=>({...c,id:b64uToBuf(c.id)}));return o}
+function serReg(c){return{id:c.id,rawId:bufToB64u(c.rawId),type:c.type,clientExtensionResults:{},
+  response:{clientDataJSON:bufToB64u(c.response.clientDataJSON),attestationObject:bufToB64u(c.response.attestationObject)}}}
+function serAuth(c){return{id:c.id,rawId:bufToB64u(c.rawId),type:c.type,clientExtensionResults:{},
+  response:{clientDataJSON:bufToB64u(c.response.clientDataJSON),authenticatorData:bufToB64u(c.response.authenticatorData),
+    signature:bufToB64u(c.response.signature),userHandle:c.response.userHandle?bufToB64u(c.response.userHandle):null}}}
+function deviceLabel(){const u=navigator.userAgent;
+  const os=/Android/i.test(u)?'Android':/iPhone|iPad|iOS/i.test(u)?'iPhone':/Mac/i.test(u)?'Mac':/Windows/i.test(u)?'Windows':'device';
+  const br=/Edg/i.test(u)?'Edge':/Chrome/i.test(u)?'Chrome':/Safari/i.test(u)?'Safari':/Firefox/i.test(u)?'browser':'browser';
+  return br+' on '+os}
+
+async function startAuth(){
+  const phone=$('phone').value;
+  if(!window.PublicKeyCredential){
+    if(DEVMODE)return sendOtp();
+    return toast('This device/browser does not support passkeys. Use a recent Chrome, Safari or Edge.');
+  }
+  authMode='passkey';
+  try{
+    const r=await api('/auth/passkey/begin',{method:'POST',body:JSON.stringify({phone})});
+    if(r.mode==='authenticate'){
+      const assertion=await navigator.credentials.get({publicKey:prepGet(r.options)});
+      const out=await api('/auth/passkey/complete',{method:'POST',
+        body:JSON.stringify({handle:r.handle,credential:serAuth(assertion)})});
+      return onAuthed(out.token);
+    }
+    if(r.mode==='blocked'){
+      show('step-phone');toast(r.message);
+      $('dev-fallback').insertAdjacentHTML('beforebegin',
+        `<div id="blocked-msg" class="muted" style="font-size:12.5px;text-align:center;margin-top:10px">${esc(r.message)}</div>`);
+      return;
+    }
+    // register ceremony — branch by what the server says this number is
+    pk={handle:r.handle,options:r.options,next:r.next};
+    if(r.next==='register'){showRegister();}
+    else if(r.next==='join_invite'){show('step-invite');$('auth-title').textContent="You're invited";
+      $('invite-text').textContent=`You've been invited to join "${r.family_name}" as ${r.role}. Set up this device to join.`;
+      $('invite-name-wrap').style.display=r.need_name?'block':'none';}
+    else if(r.next==='claim'){show('step-claim');$('auth-title').textContent='Is this you?';renderClaim(r.candidates);}
+    else if(r.next==='add_device'){finishRegister('add_device');}
+  }catch(e){toast(e.name==='NotAllowedError'?'Passkey cancelled':e.message)}
+}
+function renderClaim(cands){
+  $('claim-list').innerHTML=cands.map(c=>
+    `<button class="btn ghost full" style="text-align:left;margin-bottom:8px" onclick="onClaim('${c.id}')">${esc(c.name)} <span class="muted" style="font-size:12px;font-weight:500">· ${esc(c.relation)} · ${esc(c.family_name)}</span></button>`).join('');
+}
+async function finishRegister(action,person_id){
+  try{
+    const cred=await navigator.credentials.create({publicKey:prepCreate(pk.options)});
+    const body={handle:pk.handle,credential:serReg(cred),action,device_label:deviceLabel()};
+    if(action==='register'){body.name=$('reg-name').value;body.family_name=$('reg-fam').value;
+      if(!body.name.trim())return toast('Your name is required')}
+    if(action==='join_invite')body.name=$('invite-name').value;
+    if(action==='claim')body.person_id=person_id;
+    const out=await api('/auth/passkey/complete',{method:'POST',body:JSON.stringify(body)});
+    onAuthed(out.token);
+  }catch(e){toast(e.name==='NotAllowedError'?'Passkey setup cancelled':e.message)}
+}
+async function addDeviceWithInvite(){
+  try{const r=await api('/auth/passkey/add-begin',{method:'POST',body:JSON.stringify({phone:$('phone').value})});
+    pk={handle:r.handle,options:r.options,next:'add_device'};finishRegister('add_device');
+  }catch(e){toast(e.message)}
+}
+
+/* dispatchers — route to passkey or (dev) OTP completion */
+function onRegister(){authMode==='otp'?completeAuth('register'):finishRegister('register')}
+function onJoin(){authMode==='otp'?completeAuth('join_invite'):finishRegister('join_invite')}
+function onClaim(pid){authMode==='otp'?claim(pid):finishRegister('claim',pid)}
+
+/* dev-only OTP fallback (DEV_MODE) */
 async function sendOtp(){
+  authMode='otp';
   try{const r=await api('/auth/request-otp',{method:'POST',body:JSON.stringify({phone:$('phone').value})});
-    show('step-otp');$('auth-title').textContent='Verify your number';$('auth-sub').textContent='We sent a 6-digit code to your phone.';
+    show('step-otp');$('auth-title').textContent='Verify your number';$('auth-sub').textContent='Dev mode — enter the test code.';
     if(r.dev_otp)$('dev-otp').textContent='Dev mode — OTP: '+r.dev_otp;
   }catch(e){toast(e.message)}
 }
 async function verifyOtp(){
   try{const r=await api('/auth/verify',{method:'POST',body:JSON.stringify({phone:$('phone').value,otp:$('otp').value})});
-    if(r.next==='session'){TOKEN=r.token;localStorage.setItem('fl_token',TOKEN);return boot()}
+    if(r.next==='session')return onAuthed(r.token);
     vtoken=r.vtoken;authCtx=r;
     if(r.next==='register')showRegister();
     else if(r.next==='join_invite'){show('step-invite');$('auth-title').textContent="You're invited";
-      $('invite-text').textContent=`You've been invited to join "${r.family_name}" as ${r.role}.`;}
-    else if(r.next==='claim'){show('step-claim');$('auth-title').textContent='Is this you?';
-      $('claim-list').innerHTML=r.candidates.map(c=>
-        `<button class="btn ghost full" style="text-align:left;margin-bottom:8px" onclick="claim('${c.id}')">${esc(c.name)} <span class="muted" style="font-size:12px;font-weight:500">· ${esc(c.relation)} · ${esc(c.family_name)}</span></button>`).join('');}
+      $('invite-text').textContent=`You've been invited to join "${r.family_name}" as ${r.role}.`;
+      $('invite-name-wrap').style.display='block';}
+    else if(r.next==='claim'){show('step-claim');$('auth-title').textContent='Is this you?';renderClaim(r.candidates);}
   }catch(e){toast(e.message)}
 }
 function showRegister(){show('step-register');$('auth-title').textContent='Create your workspace'}
@@ -314,12 +403,12 @@ async function completeAuth(action){
     if(action==='register'){body.name=$('reg-name').value;body.family_name=$('reg-fam').value}
     if(action==='join_invite'){body.name=$('invite-name').value}
     const r=await api('/auth/complete',{method:'POST',body:JSON.stringify(body)});
-    TOKEN=r.token;localStorage.setItem('fl_token',TOKEN);boot();
+    onAuthed(r.token);
   }catch(e){toast(e.message)}
 }
 async function claim(pid){
   try{const r=await api('/auth/complete',{method:'POST',body:JSON.stringify({vtoken,action:'claim',person_id:pid})});
-    TOKEN=r.token;localStorage.setItem('fl_token',TOKEN);boot();
+    onAuthed(r.token);
   }catch(e){toast(e.message)}
 }
 function logout(){localStorage.removeItem('fl_token');location.reload()}
@@ -333,8 +422,10 @@ async function boot(){
   await refresh();render();
 }
 async function refresh(){
-  const[f,a,c,d,r]=await Promise.all([api('/family'),api('/assets'),api('/checks'),api('/drafts'),api('/report')]);
-  STATE={members:f.members,activity:f.activity,invites:f.invites,assets:a.assets,checks:c.checks,drafts:d.drafts,report:r};
+  const[f,a,c,d,r,v,doc,suc,dev]=await Promise.all([api('/family'),api('/assets'),api('/checks'),
+    api('/drafts'),api('/report'),api('/vault/status'),api('/documents'),api('/succession'),api('/credentials')]);
+  STATE={members:f.members,activity:f.activity,invites:f.invites,assets:a.assets,checks:c.checks,
+    drafts:d.drafts,report:r,vault:v,documents:doc.documents,cases:suc.cases,devices:dev.devices};
   drawScore(r.score);
 }
 function drawScore(s){
@@ -348,10 +439,12 @@ function flags(a){return a.flags||[]}
 function totalFlags(){return STATE.assets.reduce((n,a)=>n+flags(a).length,0)}
 
 /* ── nav & render ── */
-const TABS=[["overview","Home"],["capture","Capture"],["register","Register"],["family","Family"],["story","Story"],["discover","Discover"],["report","Report"]];
+const TABS=[["overview","Home"],["capture","Capture"],["register","Register"],["family","Family"],["story","Story"],["succession","Succession"],["vault","Vault"],["discover","Discover"],["report","Report"]];
+function openCases(){return STATE.cases.filter(c=>c.status==='open').length}
 function badgeFor(id){
   if(id==='register'&&totalFlags())return totalFlags();
   if(id==='capture'&&STATE.drafts.length)return STATE.drafts.length;
+  if(id==='succession'&&openCases())return openCases();
   return 0;
 }
 function render(){
@@ -370,7 +463,7 @@ function render(){
     +`<button onclick="TAB='capture';render()" style="min-width:64px"><span class="fab">🎙</span>${STATE.drafts.length?`<span class="bdg">${STATE.drafts.length}</span>`:''}</button>`
     +nb2.map(([id,ico,l])=>`<button class="${TAB===id?'on':''}" onclick="TAB='${id}';render()"><span class="ico">${ico}</span>${l}</button>`).join('')
     +`<button class="${moreOn?'on':''}" onclick="openSheet()"><span class="ico">☰</span>More</button>`;
-  const v={overview,capture,family,register,story,discover,report}[TAB];$('view').innerHTML=v();
+  const v={overview,capture,family,register,story,discover,report,succession,vault}[TAB];$('view').innerHTML=v();
   if(TAB==='capture')wireMic();
   window.scrollTo({top:0});
 }
@@ -428,11 +521,43 @@ function capture(){
   </div>
   <details class="more"><summary>Upload a document photo instead</summary>
   <div class="card">
+    ${STATE.vault.unlocked?`
     <label><span>Deed / policy / passbook / RC photo</span>
     <input type="file" id="docfile" accept="image/*,.pdf"></label>
-    <button class="btn ghost full" onclick="uploadDoc()">Upload to vault</button>
+    <button class="btn ghost full" onclick="uploadDoc()">Upload to encrypted vault 🔐</button>
+    <div class="muted" style="font-size:12px;margin-top:8px">Files are encrypted before they touch the disk. AI reads the photo to draft records; you confirm them.</div>`
+    :`<div class="list-item" style="align-items:center"><div><b style="font-size:14px">🔐 Vault is ${STATE.vault.configured?'locked':'not set up'}</b>
+      <div class="muted" style="font-size:13px;margin-top:2px">Documents are stored encrypted. ${STATE.vault.configured?'Unlock the vault to upload.':'Set a vault passphrase first.'}</div></div>
+      <button class="btn sm" onclick="TAB='vault';render()">${STATE.vault.configured?'Unlock':'Set up'}</button></div>`}
   </div></details>
   <div id="drafts-area">${draftsHtml()}</div>`;
+}
+const RELMAP=[["Son",["beta","bete","son"]],["Daughter",["beti","daughter"]],
+ ["Spouse",["patni","wife","pati","husband","spouse"]],["Father",["papa","pita","father","dad"]],
+ ["Mother",["mummy","maa","amma","mother","mom"]],["Brother",["bhai","brother"]],["Sister",["behen","bahan","didi","sister"]],
+ ["Grandfather",["dada","nana","grandfather"]],["Grandmother",["dadi","nani","grandmother"]],["Self",["mera","mere naam","self","khud"]]];
+function guessOwner(d){
+  const hint=(d.owner_hint||'').toLowerCase().trim();
+  if(hint){
+    const byName=STATE.members.find(m=>{
+      const fn=(m.name||'').toLowerCase().split(' ')[0];
+      return fn&&(hint.includes(fn)||fn.includes(hint))});
+    if(byName)return byName.id;
+    for(const[rel,kws]of RELMAP)if(kws.some(k=>hint.includes(k))){
+      const byRel=STATE.members.find(m=>m.relation===rel);
+      if(byRel)return byRel.id;
+    }
+  }
+  return ME.person_id;  // default: speaker
+}
+function ownerNote(d){
+  const hint=(d.owner_hint||'').trim();
+  if(!hint)return '';
+  const gid=guessOwner(d);
+  const m=STATE.members.find(x=>x.id===gid);
+  const matched=m&&hint.toLowerCase().split(' ').some(w=>w.length>2&&m.name.toLowerCase().includes(w));
+  if(gid!==ME.person_id||matched)return '';
+  return `<div class="chip warn" style="margin-bottom:8px">⚠ Bola gaya owner "${esc(hint)}" family mein nahi mila — pehle member add karo ya dropdown se chuno</div>`;
 }
 function draftsHtml(){
   if(!STATE.drafts.length)return `<div class="empty" style="padding:24px"><div class="e-ico">✓</div>No drafts waiting.</div>`;
@@ -450,8 +575,9 @@ function draftsHtml(){
       :`<div class="row c2">
         <label><span>Title</span><input id="f-${d.id}-title" value="${esc(d.title||'')}"></label>
         <label><span>Category</span><select id="f-${d.id}-category">${CATS.map(([c,l])=>`<option value="${c}" ${d.category===c?'selected':''}>${l}</option>`).join('')}</select></label>
-        <label><span>Owner</span><select id="f-${d.id}-owner">${STATE.members.map(m=>`<option value="${m.id}">${esc(m.name)}</option>`).join('')}</select></label>
+        <label><span>Owner${d.owner_hint?` <i style="font-weight:400;text-transform:none">— suna: "${esc(d.owner_hint)}"</i>`:''}</span><select id="f-${d.id}-owner">${(g=>STATE.members.map(m=>`<option value="${m.id}" ${m.id===g?'selected':''}>${esc(m.name)}</option>`).join(''))(guessOwner(d))}</select></label>
         <label><span>${amtLabel(d.category)}</span><input id="f-${d.id}-amount" type="number" value="${d.amount||''}"></label></div>
+        ${ownerNote(d)}
         ${extraInputs('f-'+d.id,d.category,d.extra)}
         <details class="more"><summary>What was heard</summary>
         <label><span>Details</span><input id="f-${d.id}-details" value="${esc(d.details||'')}"></label></details>`}
@@ -498,7 +624,7 @@ async function uploadDoc(){
   const fd=new FormData();fd.append('file',f);fd.append('user_token',TOKEN);
   try{const r=await fetch('/api/ingest/document',{method:'POST',body:fd});
     const j=await r.json();if(!r.ok)throw new Error(j.detail||'Upload failed');
-    toast(j.duplicate?'Already in vault':j.note||`Stored. ${(j.drafts||[]).length} draft(s) extracted`);
+    toast(j.duplicate?'Already in vault':j.note||`Stored & encrypted. ${(j.drafts||[]).length} draft(s) extracted`);
     await refresh();render();
   }catch(e){toast(e.message)}
 }
@@ -555,6 +681,13 @@ function family(){
       <button class="btn full" onclick="invite()">Send invite</button>
       ${STATE.invites.length?`<div class="muted" style="font-size:12.5px;margin-top:10px">Pending: ${STATE.invites.map(i=>'••••'+i.phone.slice(-4)+' ('+i.role+')').join(', ')} — they just sign in with that number.</div>`:''}
     </div>`;}
+  h+=`<div class="cat-head">🔐 Your sign-in devices</div>`+(STATE.devices||[]).map(dv=>
+    `<div class="card" style="padding:12px 16px"><div class="list-item" style="align-items:center">
+      <div style="min-width:0"><b style="font-size:14px">${esc(dv.device_label||'Device')}</b>
+        <div class="muted" style="font-size:12px">${dv.last_used_at?'Last used '+esc((dv.last_used_at||'').slice(0,10)):'Added '+esc((dv.created_at||'').slice(0,10))}</div></div>
+      ${(STATE.devices||[]).length>1?`<button class="btn sm danger" onclick="removeDevice('${dv.id}')">Remove</button>`:`<span class="chip ok">This device</span>`}
+    </div></div>`).join('')+
+    `<div class="muted" style="font-size:12px;margin:2px 4px 0">Passkeys sign you in with your fingerprint or face — no SMS. To add a new phone, ask the family owner to invite your number, then tap "Continue" on that phone.</div>`;
   if(STATE.activity.length)h+=`<details class="more"><summary>Recent activity (${STATE.activity.length})</summary>
     <div class="card" style="padding:6px 16px">
     ${STATE.activity.slice(0,15).map(e=>{const p=JSON.parse(e.payload||'{}');
@@ -591,6 +724,10 @@ async function saveMember(){
     else await api('/members',{method:'POST',headers:{'Idempotency-Key':crypto.randomUUID()},body:JSON.stringify(body)});
     mEdit=null;await refresh();render();
   }catch(e){toast(e.message)}
+}
+async function removeDevice(id){
+  if(!confirm('Remove this device? It will no longer be able to sign in.'))return;
+  try{await api('/credentials/'+id,{method:'DELETE'});await refresh();render();toast('Device removed')}catch(e){toast(e.message)}
 }
 async function delMember(id,name){
   if(!confirm(`Remove ${name}? Their records will also be removed (recoverable from the event log).`))return;
@@ -759,6 +896,190 @@ async function setCheck(id,done,note){
   try{await api('/checks',{method:'POST',body:JSON.stringify(body)});await refresh();if(done!==null)render()}catch(e){toast(e.message)}
 }
 
+/* ── vault (encrypted documents) ── */
+function vault(){
+  const v=STATE.vault;
+  let h=`<h2 style="font-size:19px;margin-bottom:2px">Document vault</h2>
+  <p class="muted" style="margin-top:0;font-size:13.5px">Deeds, policies and passbooks — encrypted on the server. We cannot read them without your family passphrase.</p>`;
+  if(vaultRecoveryShow){
+    h+=`<div class="card" style="border:2px solid var(--warn);background:var(--warn-soft)">
+      <b style="font-size:15px">🔑 Save your recovery code</b>
+      <p class="muted" style="font-size:13px;margin:6px 0">This is shown <b>once</b>. It's the only way back in if the passphrase is forgotten. Write it down or store it in a password manager.</p>
+      <div style="font-family:monospace;font-size:17px;font-weight:700;letter-spacing:.04em;background:#fff;border:1.5px solid var(--line);border-radius:12px;padding:14px;text-align:center;user-select:all">${esc(vaultRecoveryShow)}</div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn sm ghost" onclick="navigator.clipboard.writeText('${esc(vaultRecoveryShow)}').then(()=>toast('Copied'))">Copy</button>
+        <button class="btn sm" style="flex:1" onclick="vaultRecoveryShow='';render()">I've saved it safely</button></div></div>`;
+  }
+  if(!v.configured){
+    if(ME.role!=='owner')return h+`<div class="card empty"><div class="e-ico">🔐</div><b>Vault not set up</b>
+      Ask the family owner to set a vault passphrase before documents can be stored.</div>`;
+    return h+`<div class="card">
+      <b style="font-size:15px">Set a family vault passphrase</b>
+      <p class="muted" style="font-size:13px;margin:6px 0 12px">Everyone who needs to view documents will use this passphrase. Choose something the trusted family can remember — and you'll get a one-time recovery code.</p>
+      <label><span>Passphrase (min 6 characters)</span><input id="v-pass" type="password" placeholder="••••••••"></label>
+      <label><span>Confirm passphrase</span><input id="v-pass2" type="password" placeholder="••••••••"></label>
+      <button class="btn full" onclick="vaultSetup()">Create encrypted vault</button></div>`;
+  }
+  if(!v.unlocked){
+    return h+`<div class="card">
+      <b style="font-size:15px">🔒 Vault is locked</b>
+      <p class="muted" style="font-size:13px;margin:6px 0 12px">Enter the family passphrase to view or add documents. It re-locks automatically after 30 minutes.</p>
+      <label><span>Passphrase</span><input id="v-unlock" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')vaultUnlock()"></label>
+      <button class="btn full" onclick="vaultUnlock()">Unlock</button>
+      <details class="more" style="margin-top:10px"><summary>Forgot the passphrase?</summary>
+      ${ME.role==='owner'?`<p class="muted" style="font-size:13px">Use the one-time recovery code you saved at setup to choose a new passphrase.</p>
+        <label><span>Recovery code</span><input id="v-rec" placeholder="FAMILY-XXXXX-XXXXX-XXXXX-XXXXX"></label>
+        <label><span>New passphrase</span><input id="v-rec-pass" type="password" placeholder="••••••••"></label>
+        <button class="btn ghost full" onclick="vaultRecover()">Reset passphrase with recovery code</button>`
+        :`<p class="muted" style="font-size:13px">Only the family owner can reset the passphrase using the recovery code.</p>`}
+      </details></div>`;
+  }
+  // unlocked
+  h+=`<div class="card" style="padding:12px 16px"><div class="list-item" style="align-items:center">
+    <div><b style="font-size:14px">🔓 Vault unlocked</b><div class="muted" style="font-size:12.5px">${v.documents} document${v.documents===1?'':'s'} · auto-locks after 30 min</div></div>
+    <button class="btn sm plain" onclick="vaultLock()">Lock now</button></div></div>`;
+  if(!STATE.documents.length){
+    h+=`<div class="card empty"><div class="e-ico">📄</div><b>No documents yet</b>
+      Add deed / policy / passbook photos from Capture — they're encrypted automatically.
+      <div style="margin-top:14px"><button class="btn" onclick="TAB='capture';render()">🎙 Go to Capture</button></div></div>`;
+  }else{
+    h+=`<div class="cat-head">Stored documents</div>`+STATE.documents.map(d=>{
+      const url=`/api/documents/${d.id}/file?t=${encodeURIComponent(TOKEN)}`;
+      const linked=STATE.assets.find(a=>a.id===d.linked_asset_id);
+      return `<div class="card" style="padding:14px 16px"><div class="list-item">
+        <div style="min-width:0;flex:1"><b style="font-size:14px">${CAT_ICO[d.doc_type]||'📄'} ${esc(d.filename||'Document')}</b>
+          <div class="muted" style="font-size:12.5px;margin-top:2px">${esc(d.doc_type||'document')} · added by ${esc(d.uploaded_by||'—')}${linked?' · 🔗 '+esc(linked.title):''}</div></div>
+        <a class="btn sm ghost" href="${url}" target="_blank" rel="noopener">View</a>
+      </div></div>`}).join('');
+  }
+  if(ME.role==='owner')h+=`<details class="more"><summary>Change passphrase</summary><div class="card">
+    <label><span>Current passphrase</span><input id="v-old" type="password"></label>
+    <label><span>New passphrase</span><input id="v-new" type="password"></label>
+    <button class="btn ghost full" onclick="vaultChange()">Update passphrase</button></div></details>`;
+  return h;
+}
+async function vaultSetup(){
+  const p=$('v-pass').value,p2=$('v-pass2').value;
+  if(p.length<6)return toast('Passphrase must be at least 6 characters');
+  if(p!==p2)return toast('Passphrases do not match');
+  try{const r=await api('/vault/setup',{method:'POST',body:JSON.stringify({passphrase:p})});
+    vaultRecoveryShow=r.recovery_code;await refresh();render();
+  }catch(e){toast(e.message)}
+}
+async function vaultUnlock(){
+  try{await api('/vault/unlock',{method:'POST',body:JSON.stringify({passphrase:$('v-unlock').value})});
+    toast('Vault unlocked');await refresh();render();
+  }catch(e){toast(e.message)}
+}
+async function vaultLock(){try{await api('/vault/lock',{method:'POST',body:'{}'});await refresh();render()}catch(e){toast(e.message)}}
+async function vaultRecover(){
+  try{const r=await api('/vault/recover',{method:'POST',body:JSON.stringify({recovery_code:$('v-rec').value,new_passphrase:$('v-rec-pass').value})});
+    toast(r.note||'Passphrase reset');await refresh();render();
+  }catch(e){toast(e.message)}
+}
+async function vaultChange(){
+  try{await api('/vault/change-passphrase',{method:'POST',body:JSON.stringify({old_passphrase:$('v-old').value,new_passphrase:$('v-new').value})});
+    toast('Passphrase updated');await refresh();render();
+  }catch(e){toast(e.message)}
+}
+
+/* ── succession (W5 transmission) ── */
+const SUC_STATUS=[["not_started","Not started"],["gathering","Gathering documents"],["filed","Claim filed"],
+  ["transferred","Transferred / done"],["blocked","Blocked"],["na","Not applicable"]];
+const SUC_STCLS={transferred:'ok',na:'mut',blocked:'bad',filed:'brand',gathering:'warn',not_started:'mut'};
+function succession(){
+  if(sucCaseId&&sucDetail)return sucCaseView();
+  let h=`<h2 style="font-size:19px;margin-bottom:2px">Succession</h2>
+  <p class="muted" style="margin-top:0;font-size:13.5px">When a family member passes, this builds a per-asset transmission plan — what to claim, the documents each institution needs, and where to go.</p>`;
+  const candidates=STATE.members.filter(m=>!STATE.cases.some(c=>c.person_id===m.id&&c.status==='open'));
+  if(ME.role!=='viewer'&&candidates.length)h+=`<div class="card">
+    <b style="font-size:14px">Open a succession case</b>
+    <p class="muted" style="font-size:12.5px;margin:4px 0 10px">Choose the member. They'll be marked deceased and a plan is built from every asset in their name.</p>
+    <div class="row c2"><label><span>Family member</span><select id="suc-person">${candidates.map(m=>`<option value="${m.id}">${esc(m.name)} · ${esc(m.relation)}${m.status==='deceased'?' (deceased)':''}</option>`).join('')}</select></label>
+    <label><span>&nbsp;</span><button class="btn full" onclick="openCaseFor()">Build succession plan</button></label></div></div>`;
+  if(!STATE.cases.length)return h+`<div class="card empty"><div class="e-ico">🕊️</div><b>No succession cases</b>
+    This is here when you need it — nothing to do today.</div>`;
+  h+=`<div class="cat-head">Cases</div>`+STATE.cases.map(c=>{
+    const pr=c.progress||{tasks:0,done:0,pct:0};
+    return `<div class="card" style="padding:16px"><div class="list-item" style="align-items:flex-start">
+      <div style="min-width:0;flex:1"><b style="font-size:15px">${esc(c.person_name)}</b>
+        <span class="chip ${c.status==='open'?'brand':'ok'}">${c.status==='open'?'In progress':'Closed'}</span>
+        <div class="muted" style="font-size:12.5px;margin-top:4px">${pr.done} of ${pr.tasks} asset${pr.tasks===1?'':'s'} transferred</div>
+        <div class="prog" style="max-width:240px"><div style="width:${pr.pct}%"></div></div></div>
+      <button class="btn sm ghost" onclick="openCase('${c.id}')">Open plan</button></div></div>`}).join('');
+  return h;
+}
+function sucCaseView(){
+  const d=sucDetail,p=d.person,pr=d.progress;
+  const claimants=STATE.members;
+  let h=`<div class="no-print list-item" style="align-items:center;margin-bottom:10px">
+    <button class="btn sm plain" onclick="sucCaseId='';sucDetail=null;render()">← Cases</button>
+    <div style="display:flex;gap:8px"><button class="btn sm ghost" onclick="window.print()">Print plan</button>
+    ${ME.role!=='viewer'?`<button class="btn sm ${d.case.status==='open'?'success':'plain'}" onclick="closeCase(${d.case.status!=='open'})">${d.case.status==='open'?'Mark closed':'Reopen'}</button>`:''}</div></div>
+  <div class="card" style="padding:22px">
+    <div style="font-size:11px;font-weight:700;letter-spacing:.08em;color:var(--brand)">SUCCESSION / TRANSMISSION PLAN · CONFIDENTIAL</div>
+    <h2 style="font-size:21px;margin:6px 0 2px">${esc(p.name)} <span class="muted" style="font-size:13px;font-weight:500">· ${esc(p.relation||'')}${p.death_year?' · d. '+esc(p.death_year):''}</span></h2>
+    <div class="muted" style="font-size:13px;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:6px">${pr.done} of ${pr.tasks} assets transferred · ${pr.pct}% complete</div>
+    <div class="prog"><div style="width:${pr.pct}%"></div></div>
+    <div class="muted" style="font-size:12.5px;margin-top:10px;background:var(--brand-soft);padding:10px 12px;border-radius:10px">💡 ${esc(d.generic_note)}</div>
+  </div>`;
+  if(!d.tasks.length)h+=`<div class="card empty"><div class="e-ico">📒</div><b>No assets recorded for ${esc(p.name)}</b>
+    Add their assets in the Register, then reopen this plan.</div>`;
+  h+=d.tasks.map(t=>{
+    const g=t.guidance||{},checked=t.docs||[];
+    const stcls=SUC_STCLS[t.status]||'mut',stlbl=(SUC_STATUS.find(s=>s[0]===t.status)||['','—'])[1];
+    return `<div class="card">
+      <div class="list-item" style="align-items:flex-start;margin-bottom:8px">
+        <div style="min-width:0;flex:1"><b style="font-size:15px">${CAT_ICO[t.category]||'📄'} ${esc(t.title)}</b>
+          <div class="muted" style="font-size:12.5px;margin-top:2px">${esc(g.label||t.category)}${t.asset&&t.asset.amount?' · '+inrShort(t.asset.amount):''}${t.kind==='liability'?' · liability':''}</div></div>
+        <span class="chip ${stcls}">${stlbl}</span></div>
+      <div class="no-print row c2">
+        <label><span>Status</span><select onchange="updTask('${t.id}',{status:this.value})">${SUC_STATUS.map(([v,l])=>`<option value="${v}" ${t.status===v?'selected':''}>${l}</option>`).join('')}</select></label>
+        <label><span>Claimant / nominee</span><select onchange="updTask('${t.id}',{claimant_person_id:this.value||null})"><option value="">— not set —</option>${claimants.map(m=>`<option value="${m.id}" ${t.claimant_person_id===m.id?'selected':''}>${esc(m.name)}</option>`).join('')}</select></label></div>
+      ${t.claimant_person_id?`<div class="muted print-only" style="font-size:12.5px">Claimant: ${esc(pname(t.claimant_person_id))}</div>`:''}
+      ${g.documents?`<div style="margin-top:6px"><div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Documents needed</div>
+        ${g.documents.map((doc,i)=>{const on=checked.includes(doc);
+          return `<label style="display:flex;gap:8px;align-items:flex-start;margin-bottom:6px;font-size:13.5px;font-weight:400;color:var(--ink)">
+            <input type="checkbox" style="width:auto;margin-top:2px" ${on?'checked':''} onchange="toggleDoc('${t.id}',${i})">
+            <span style="${on?'text-decoration:line-through;color:var(--muted)':''}">${esc(doc)}</span></label>`}).join('')}</div>`:''}
+      ${g.steps?`<details class="more"><summary>How to do it · where to go</summary>
+        <ol style="margin:4px 0;padding-left:20px;font-size:13.5px;line-height:1.6">${g.steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol>
+        ${g.where?`<div class="muted" style="font-size:12.5px">📍 ${esc(g.where)}</div>`:''}</details>`:''}
+      <label class="no-print" style="margin-top:8px"><span>Notes (reference no., date filed…)</span>
+        <input value="${esc(t.note||'')}" onchange="updTask('${t.id}',{note:this.value})" placeholder="e.g. claim filed 12 Jun, ack #..."></label>
+      ${t.note?`<div class="muted print-only" style="font-size:12.5px">Note: ${esc(t.note)}</div>`:''}
+    </div>`}).join('');
+  h+=`<div class="muted no-print" style="font-size:11.5px;text-align:center;padding:8px">General procedural guidance for Indian institutions — not legal advice. Requirements vary by bank, state and amount; confirm with each institution.</div>`;
+  return h;
+}
+async function openCaseFor(){
+  const pid=$('suc-person').value;if(!pid)return;
+  const m=STATE.members.find(x=>x.id===pid);
+  if(!confirm(`Open a succession plan for ${m?m.name:'this member'}? They will be marked as deceased.`))return;
+  try{const r=await api('/succession/open',{method:'POST',body:JSON.stringify({person_id:pid})});
+    await refresh();await openCase(r.id);
+  }catch(e){toast(e.message)}
+}
+async function openCase(id){
+  try{sucDetail=await api('/succession/'+id);sucCaseId=id;render()}catch(e){toast(e.message)}
+}
+async function updTask(tid,patch){
+  try{await api('/succession/tasks/'+tid,{method:'PATCH',body:JSON.stringify(patch)});
+    sucDetail=await api('/succession/'+sucCaseId);await refresh();render();
+  }catch(e){toast(e.message)}
+}
+function toggleDoc(tid,i){
+  const t=sucDetail.tasks.find(x=>x.id===tid);if(!t)return;
+  const doc=t.guidance.documents[i],set=new Set(t.docs||[]);
+  set.has(doc)?set.delete(doc):set.add(doc);
+  updTask(tid,{docs:[...set]});
+}
+async function closeCase(reopen){
+  try{await api('/succession/'+sucCaseId+'/close',{method:'POST',body:JSON.stringify({reopen})});
+    sucDetail=await api('/succession/'+sucCaseId);await refresh();render();
+  }catch(e){toast(e.message)}
+}
+
 /* ── report ── */
 function report(){
   const r=STATE.report;
@@ -780,7 +1101,11 @@ function report(){
       Share only within the family. Full account numbers and PAN are not stored by design.</div></div>`;
 }
 
-if(TOKEN)boot();
+(async()=>{
+  try{DEVMODE=(await (await fetch('/api/config')).json()).dev_mode}catch(e){}
+  if(DEVMODE&&$('dev-fallback'))$('dev-fallback').classList.remove('hidden');
+  if(TOKEN)boot();
+})();
 </script>
 </body>
 </html>
