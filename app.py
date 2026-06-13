@@ -1209,11 +1209,14 @@ async def speech_to_text(file: UploadFile = File(...), user_token: str = Form(..
         r.raise_for_status()
         j = r.json()
     except httpx.HTTPStatusError as e:
-        detail = e.response.text[:200] if e.response is not None else str(e)
+        detail = e.response.text[:300] if e.response is not None else str(e)
         code = e.response.status_code if e.response is not None else "?"
+        # surface the real reason in the server log (Railway) — not just a bare 502
+        print(f"[stt] Sarvam error {code}: {detail} (audio {len(data)} bytes, type={file.content_type}, lang={lang})")
         # 30s limit on the sync API is the most common cause of a 4xx here
         raise HTTPException(502, f"Transcription failed (Sarvam {code}). {detail}")
     except Exception as e:
+        print(f"[stt] call failed: {type(e).__name__}: {e}")
         raise HTTPException(502, f"Transcription failed: {type(e).__name__}")
     return {"transcript": (j.get("transcript") or "").strip(),
             "language_code": j.get("language_code")}
