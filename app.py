@@ -46,7 +46,17 @@ DEV_MODE = os.environ.get("DEV_MODE", "1") == "1"
 # cause of "key is set but extraction says it isn't".
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "").strip()
 MODEL = os.environ.get("FL_MODEL", "claude-sonnet-4-6").strip()
+# Optional server-side speech-to-text (Sarvam) — far more accurate for Hindi/Hinglish
+# than the browser's built-in recognition. Without a key, the browser engine is used.
+SARVAM_API_KEY = os.environ.get("SARVAM_API_KEY", "").strip()
+SARVAM_MODEL = os.environ.get("FL_STT_MODEL", "saarika:v2.5").strip()
+# Default to auto-detect so a family can speak ANY supported language. A per-capture
+# override (from the UI) can pin a specific language when auto-detect struggles.
+SARVAM_LANG = os.environ.get("FL_STT_LANG", "unknown").strip()
+STT_LANGS = {"unknown", "hi-IN", "en-IN", "bn-IN", "kn-IN", "ml-IN", "mr-IN",
+             "od-IN", "pa-IN", "ta-IN", "te-IN", "gu-IN"}
 print(f"[boot] AI extraction {'ENABLED' if ANTHROPIC_API_KEY else 'DISABLED (ANTHROPIC_API_KEY not set)'}; model={MODEL}")
+print(f"[boot] Sarvam STT {'ENABLED' if SARVAM_API_KEY else 'DISABLED (browser speech only)'}; model={SARVAM_MODEL}, lang={SARVAM_LANG}")
 
 os.makedirs(VAULT_DIR, exist_ok=True)
 app = FastAPI(title="Family Ledger")
@@ -652,7 +662,7 @@ def remove_credential(cred_id: str, user=Depends(get_user)):
 
 @app.get("/api/config")
 def config():
-    return {"dev_mode": DEV_MODE}
+    return {"dev_mode": DEV_MODE, "stt": bool(SARVAM_API_KEY)}
 
 @app.get("/api/me")
 def me(user=Depends(get_user)):
@@ -1028,7 +1038,7 @@ def set_check(ck: CheckIn, user=Depends(get_user)):
 
 # ───────────────────────── ingestion: drafts (W2/W3) ─────────────────────────
 
-EXTRACT_PROMPT = """You extract structured records from a Hindi/Hinglish/English family conversation transcript for an Indian family asset register. Return ONLY a JSON array, no prose, no markdown fences. Each element:
+EXTRACT_PROMPT = """You extract structured records from a family conversation transcript for an Indian family asset register. The transcript may be in ANY Indian language (Hindi, Hinglish, English, Tamil, Telugu, Kannada, Malayalam, Marathi, Bengali, Gujarati, Punjabi, Odia, or code-mixed). Understand whatever language is used; keep names/titles in the words spoken. Return ONLY a JSON array, no prose, no markdown fences. Each element:
 {"entity":"person|asset|liability","confidence":0.0-1.0,
  "name":"(person only)","relation":"Self|Spouse|Father|Mother|Son|Daughter|Brother|Sister|Grandfather|Grandmother|Other","status":"alive|deceased",
  "birth_year":"(person, if said)","death_year":"(person, if said)","story":"(person) any life details told about them — kahan rehte the, kya karte the, kaisi shakhsiyat — preserve the storyteller's words",
@@ -1172,6 +1182,41 @@ def ingest_text(body: IngestText, user=Depends(get_user)):
                 "AI extraction failed (key is set but the call errored) — basic keyword "
                 "extraction used. Check server logs. Review drafts carefully.")
     return {"drafts": created, "engine": engine, "note": note}
+
+@app.post("/api/stt")
+async def speech_to_text(file: UploadFile = File(...), user_token: str = Form(...),
+                         language_code: str = Form(None)):
+    """Server-side STT via Sarvam (Saarika). Audio never persists — transcribed in memory.
+    The transcript is returned to the client for review; it does NOT auto-write anything.
+    language_code defaults to auto-detect, so the speaker can use any supported language."""
+    user = user_from_token(user_token)
+    require_writer(user)
+    if not SARVAM_API_KEY:
+        raise HTTPException(400, "Server-side transcription isn't configured (SARVAM_API_KEY not set)")
+    lang = language_code if language_code in STT_LANGS else SARVAM_LANG
+    data = await file.read()
+    if not data:
+        raise HTTPException(400, "Empty audio")
+    if len(data) > 12_000_000:
+        raise HTTPException(400, "Audio too large — keep clips under ~30 seconds")
+    try:
+        r = httpx.post(
+            "https://api.sarvam.ai/speech-to-text",
+            headers={"api-subscription-key": SARVAM_API_KEY},
+            data={"model": SARVAM_MODEL, "language_code": lang},
+            files={"file": (file.filename or "audio.webm", data, file.content_type or "audio/webm")},
+            timeout=60)
+        r.raise_for_status()
+        j = r.json()
+    except httpx.HTTPStatusError as e:
+        detail = e.response.text[:200] if e.response is not None else str(e)
+        code = e.response.status_code if e.response is not None else "?"
+        # 30s limit on the sync API is the most common cause of a 4xx here
+        raise HTTPException(502, f"Transcription failed (Sarvam {code}). {detail}")
+    except Exception as e:
+        raise HTTPException(502, f"Transcription failed: {type(e).__name__}")
+    return {"transcript": (j.get("transcript") or "").strip(),
+            "language_code": j.get("language_code")}
 
 @app.post("/api/ingest/document")
 async def ingest_document(file: UploadFile = File(...), user_token: str = Form(...)):

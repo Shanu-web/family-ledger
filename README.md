@@ -22,7 +22,17 @@ export ANTHROPIC_API_KEY=sk-ant-...
 ```
 With the key set, spoken/typed Hinglish and uploaded document photos are extracted by Claude into structured drafts. Without it, a basic keyword parser runs as fallback (clearly marked, low confidence).
 
-**Voice input:** uses the browser's built-in speech recognition (`hi-IN`) — works in Chrome/Edge. No key needed. Production would swap this for Sarvam/Bhashini server-side STT.
+**Voice input:** two modes, chosen automatically.
+
+- **Server-side STT (recommended) — Sarvam Saarika.** Set `SARVAM_API_KEY` and the mic records audio and transcribes it server-side — far more accurate for Hindi/Hinglish, and works in any browser (it uses `MediaRecorder`, not the flaky Web Speech API). The transcript lands in the box for you to review before extracting. Records in ≤28-second clips (the sync API's limit); speak longer descriptions as a few short captures.
+
+  ```bash
+  export SARVAM_API_KEY=...           # from dashboard.sarvam.ai
+  # optional: FL_STT_LANG=unknown     # auto-detect language (default hi-IN)
+  #           FL_STT_MODEL=saarika:v2.5
+  ```
+
+- **Browser speech (fallback).** With no Sarvam key, it uses the browser's built-in recognition (`hi-IN`, Chrome/Edge). Defensive merging guards against the engine's cumulative-duplication bug, but accuracy is the browser's. Audio sent to STT is transcribed in memory and never stored.
 
 ## Try this flow
 
@@ -48,7 +58,7 @@ With the key set, spoken/typed Hinglish and uploaded document photos are extract
 ## Deploy (Railway)
 
 1. Push this repo to GitHub → Railway → New Project → Deploy from GitHub repo. The `Procfile` is picked up automatically.
-2. Variables: set `ANTHROPIC_API_KEY` (AI extraction) and **`DEV_MODE=0`** so only passkeys are accepted (the OTP test-code fallback is disabled). Set `FL_RP_ID` to your domain (e.g. `myfamily.up.railway.app`) and `FL_ORIGIN` to `https://<that-domain>` for stable WebAuthn verification behind the proxy.
+2. Variables: set `ANTHROPIC_API_KEY` (AI extraction), `SARVAM_API_KEY` (accurate voice transcription — optional), and **`DEV_MODE=0`** so only passkeys are accepted (the OTP test-code fallback is disabled). Set `FL_RP_ID` to your domain (e.g. `myfamily.up.railway.app`) and `FL_ORIGIN` to `https://<that-domain>` for stable WebAuthn verification behind the proxy.
 3. SQLite is wiped on every redeploy unless you attach a Volume: mount it at `/data`, then set `FL_DB=/data/family.db` and `FL_VAULT=/data/vault`. The volume also preserves the encrypted document files.
 4. Voice input and passkeys both work on the deployed URL (https = secure context). No SMS provider or DLT registration is needed.
 
