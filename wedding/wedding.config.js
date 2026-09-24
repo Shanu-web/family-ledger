@@ -4,9 +4,9 @@
 //  hamper.html all read from it. Anything marked TODO still needs your input.
 // ─────────────────────────────────────────────────────────────────────────────
 
-// TODO: the venue. Fill these two in once and every page, card and QR updates.
-const VENUE_NAME = "Venue to be confirmed";
-const VENUE_CITY = "";                       // e.g. "Pune" or "Bhagalpur"; leave "" until known
+// The venue. Every page, card and QR reads these two.
+const VENUE_NAME = "Sree Raaga Resorts";
+const VENUE_CITY = "Bengaluru";
 
 window.WEDDING = {
   // ── Look ───────────────────────────────────────────────────────────────────
@@ -54,27 +54,27 @@ window.WEDDING = {
   // ── Venue ──────────────────────────────────────────────────────────────────
   venue: {
     name: VENUE_NAME,
-    address: "Address to be confirmed",                                   // TODO
-    mapsQuery: VENUE_NAME + (VENUE_CITY ? ", " + VENUE_CITY : ""),        // used for the embedded map + directions link
-    landmark: "To be confirmed",                                          // TODO
-    parking: "To be confirmed",                                           // TODO
+    address: "No. 1246, Budigere Bypass Road, Devanahalli, Bengaluru, Karnataka 562129",
+    mapsQuery: "Sree Raaga Resorts, Budigere Bypass Road, Devanahalli, Bengaluru",   // used for the embedded map + directions link
+    landmark: "Off Budigere Cross on the airport side of the city, 25 minutes from Kempegowda International Airport (BLR).",
+    parking: "Free parking on the property; valet at the main porch on the wedding evening.",
   },
 
   // ── Stay ───────────────────────────────────────────────────────────────────
   stay: {
-    hotel: "Guest hotel to be confirmed",                                 // TODO
-    address: "",
-    checkIn: "Thu 10 Dec, arrivals from the morning",
-    checkOut: "Sat 12 Dec, after the bidai",
-    note: "Rooms are booked under ‘Choudhary–Mohan wedding’. Your hamper is waiting in the room.",
-    shuttle: "Cars leave the hotel 45 minutes before every event.",
+    hotel: "Sree Raaga Resorts, on the property",
+    address: "Rooms, villas and row houses across the resort’s five acres. You walk to every event.",
+    checkIn: "Thu 10 Dec, from the morning",
+    checkOut: "Sat 12 Dec, after the bidai and breakfast",
+    note: "Rooms are booked under ‘Choudhary–Mohan wedding’. Your hamper is waiting in the room. December evenings in Bengaluru drop to about 15 °C; bring a shawl for the sangeet lawns and the bidai.",
+    shuttle: "Everything happens on the property, so there are no shuttles. Airport and station pick-ups are arranged on request.",
   },
 
-  // ── Travel (TODO: depends on the venue city) ───────────────────────────────
+  // ── Travel ─────────────────────────────────────────────────────────────────
   travel: [
-    { by: "Air",   text: "Nearest airport and pick-up arrangements to be confirmed once the venue is fixed. A car with a marigold tag will meet you at Arrivals." },
-    { by: "Rail",  text: "Nearest station and pick-up to be confirmed. Share your train number on WhatsApp and a car will be waiting." },
-    { by: "Road",  text: "Share your ETA on WhatsApp and a car will meet you at the hotel." },
+    { by: "Air",   text: "Kempegowda International Airport (BLR) is 25 minutes away, the closest a Bengaluru venue can be. Send your flight number on WhatsApp and a car with a marigold tag will be at Arrivals." },
+    { by: "Rail",  text: "KSR Bengaluru City (SBC) and Yesvantpur (YPR) are about 1¼ hours by road; Yelahanka (YNK) is closer, about 40 minutes. Share your train and coach and a car will be waiting." },
+    { by: "Road",  text: "Take NH-44 towards the airport, exit for Budigere Cross, then Budigere Bypass Road. Pin: search ‘Sree Raaga Resorts’ in Google Maps, or scan the code on your card." },
   ],
 
   // ── Contacts (guests will call these; keep them answered!) ────────────────

@@ -166,6 +166,7 @@
     ${extra || ""}
     ${folio()}`);
 
+  const oneVenue = W.events.every(e => e.where === W.events[0].where);
   const P = [];
 
   // 1 · Cover
@@ -228,9 +229,9 @@
     ${days().map(d => `
       <div class="dayblk">
         <h3><b>${fmtDate(d.day, "dnum")}</b><span>${fmtDate(d.day, "long")} · Day ${d.index}</span></h3>
-        <table>${d.events.map(e => `<tr><td class="t">${fmtTime(e.start)}</td><td class="n"><b>${e.title}</b><span>${e.where}</span></td></tr>`).join("")}</table>
+        <table>${d.events.map(e => `<tr><td class="t">${fmtTime(e.start)}</td><td class="n"><b>${e.title}</b><span>${oneVenue ? e.kicker : e.where}</span></td></tr>`).join("")}</table>
       </div>`).join("")}
-    <p class="meta" style="margin-top:3mm">${W.stay.shuttle}</p>
+    <p class="meta" style="margin-top:3mm">${oneVenue ? "Everything at " + W.venue.name + ", " + W.wedding.city + ". " : ""}${W.stay.shuttle}</p>
     ${folio()}`));
 
   // 7 · What to wear

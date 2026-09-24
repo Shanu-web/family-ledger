@@ -123,16 +123,18 @@
   `;
 
   const ds = days();
+  const oneVenue = W.events.every(e => e.where === W.events[0].where);
   document.getElementById("back").innerHTML = `
     ${corners()}
     <div>
       <p class="eyebrow">The three days</p>
       <h2 class="h3" style="font-style:italic">We would love you at all of them.</h2>
+      ${oneVenue ? `<p class="meta" style="margin:var(--s-2) 0 0">All at ${W.venue.name}, ${W.venue.address}</p>` : ""}
       <div class="days">
         ${ds.map(d => `
           <div class="day">
             <div class="dnum">${fmtDate(d.day, "dnum")}<small>${fmtDate(d.day, "day").slice(0,3)} · ${fmtDate(d.day, "month").slice(0,3)}</small></div>
-            <ul>${d.events.map(e => `<li><b>${e.title}</b><span>${fmtTime(e.start)} · ${e.where.split(",")[0]}</span></li>`).join("")}</ul>
+            <ul>${d.events.map(e => `<li><b>${e.title}</b><span>${fmtTime(e.start)}${oneVenue ? "" : " · " + e.where.split(",")[0]}</span></li>`).join("")}</ul>
           </div>`).join("")}
       </div>
     </div>

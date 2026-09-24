@@ -22,19 +22,21 @@ dress code, colour palette, note, menu) and the copy (welcome letter, story,
 gift note). Values marked `SAMPLE` are placeholders; change them and every
 page updates. No build step.
 
-What is already in: both families with parents, brothers and home addresses,
+What is already in: the venue, both families with parents, brothers and home addresses,
 the monogram S·S, the hashtag, and the three days (10 Dec tilak 1:30 pm and
 sangeet + engagement 6 pm; 11 Dec haldi 11 am and baraat 7 pm with jaimala and
 reception from 8 pm; 12 Dec bidai before sunrise).
 
 Still marked `TODO` in the config, in order of urgency:
 
-1. `VENUE_NAME` / `VENUE_CITY` at the top of the file, plus the venue address, landmark and parking. Every page, card and QR picks them up.
-2. `guestUrl` — the public address of `guest.html`. **This is what every QR encodes.**
-3. `rsvp.whatsapp` and the four contact numbers (Gaurav and Vikash are named; numbers are zeros).
-4. The hotel, and the travel lines once the city is known.
-5. `copy.story` — three short paragraphs in your own words.
-6. `theme` — which of the three palettes (below).
+1. `guestUrl` — the public address of `guest.html`. **This is what every QR encodes.**
+2. `rsvp.whatsapp` and the four contact numbers (Gaurav and Vikash are named; numbers are zeros).
+3. `copy.story` — three short paragraphs in your own words.
+4. `theme` — which of the three palettes (below).
+
+Venue is set: Sree Raaga Resorts, No. 1246, Budigere Bypass Road, Devanahalli,
+Bengaluru 562129 (25 minutes from BLR airport). Guests stay on the property,
+so the stay, travel and shuttle copy are written around that.
 
 ## 2. Publish the guest page (so the QR works)
 
