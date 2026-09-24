@@ -175,6 +175,8 @@
     const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
     a.download = `${W.couple.one.first}-${W.couple.two.first}-wedding.ics`; a.click();
   }
+  function hasRSVP() { return !!(W.rsvp && W.rsvp.whatsapp); }
+  function contacts() { return (W.contacts || []).filter(c => c.phone); }
   function rsvpLink() { return `https://wa.me/${W.rsvp.whatsapp}?text=${encodeURIComponent(W.rsvp.text)}`; }
   function mapsEmbed() { return `https://www.google.com/maps?q=${encodeURIComponent(W.venue.mapsQuery)}&output=embed`; }
   function directions() { return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(W.venue.mapsQuery)}`; }
@@ -199,5 +201,5 @@
   }
   const city = W.wedding.city || "";
   const cityDot = city ? " · " + city : "";
-  window.WX = { cardFront, guestUrl, mealsFor, ganesha, ganeshaSVG, lotusSVG, paisleySVG, ornate, city, cityDot, W, fmtDate, fmtTime, days, sealSVG, corners, ICON, qrSVG, ics, downloadICS, rsvpLink, mapsEmbed, directions, swatches, countdown, parseISO };
+  window.WX = { hasRSVP, contacts, cardFront, guestUrl, mealsFor, ganesha, ganeshaSVG, lotusSVG, paisleySVG, ornate, city, cityDot, W, fmtDate, fmtTime, days, sealSVG, corners, ICON, qrSVG, ics, downloadICS, rsvpLink, mapsEmbed, directions, swatches, countdown, parseISO };
 })();

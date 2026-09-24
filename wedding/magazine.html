@@ -148,7 +148,7 @@
 <script src="assets/wedding.js"></script>
 <script>
 (function () {
-  const { guestUrl, W, fmtDate, fmtTime, days, mealsFor, sealSVG, ganesha, ornate, ICON, qrSVG, swatches, directions, city, cityDot } = WX;
+  const { guestUrl, W, fmtDate, fmtTime, days, mealsFor, sealSVG, ganesha, ornate, ICON, qrSVG, swatches, directions, contacts, city, cityDot } = WX;
   const one = W.couple.one, two = W.couple.two;
   const ev = Object.fromEntries(W.events.map(e => [e.id, e]));
   const short = s => s.split(",")[0];
@@ -290,7 +290,7 @@
       <div class="row"><b>Stay</b><span>${W.stay.address} ${W.stay.note}</span></div>
       <div class="row"><b>Gifts</b><span>${W.copy.giftNote}</span></div>
       <div class="row"><b>Phones</b><span>Down for the pheras, please. Up for everything else; tag ${W.couple.hashtag}.</span></div>
-      ${W.contacts.slice(0, 2).map(c => `<div class="row"><b>${c.role}</b><span>${c.name} · ${c.phone}</span></div>`).join("")}
+      ${contacts().slice(0, 2).map(c => `<div class="row"><b>${c.role}</b><span>${c.name} · ${c.phone}</span></div>`).join("")}
     </div>
     ${folio()}`));
 

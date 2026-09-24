@@ -254,7 +254,7 @@
 <script src="assets/wedding.js"></script>
 <script>
 (function () {
-  const { W, fmtDate, fmtTime, days, mealsFor, sealSVG, cardFront, ICON, downloadICS, rsvpLink, mapsEmbed, directions, swatches, cityDot } = WX;
+  const { W, fmtDate, fmtTime, days, mealsFor, sealSVG, cardFront, ICON, downloadICS, rsvpLink, hasRSVP, contacts, mapsEmbed, directions, swatches, cityDot } = WX;
   const one = W.couple.one, two = W.couple.two;
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
   document.title = `${one.first} & ${two.first} · ${fmtDate(W.wedding.date)}`;
@@ -377,12 +377,13 @@
   document.getElementById("stay-address").textContent = W.stay.address;
   document.getElementById("stay-rows").innerHTML = `<div class="row"><b>Check-in</b><span>${W.stay.checkIn}</span></div><div class="row"><b>Check-out</b><span>${W.stay.checkOut}</span></div><div class="row"><b>Note</b><span>${W.stay.note}</span></div><div class="row"><b>Getting around</b><span>${W.stay.shuttle}</span></div>`;
   document.getElementById("travel-rows").innerHTML = W.travel.map(t => `<div class="row"><b>${t.by}</b><span>${t.text}</span></div>`).join("");
-  document.getElementById("contact-list").innerHTML = W.contacts.map(c => `<div class="contact"><div><small>${c.role}</small><b>${c.name}</b></div><a href="tel:${c.phone.replace(/\s/g, "")}">${ICON.phone}${c.phone}</a></div>`).join("");
-  const rs = document.getElementById("rsvp-main"); rs.href = rsvpLink(); rs.innerHTML = `${ICON.wa} RSVP on WhatsApp`;
+  const CL = contacts(); document.getElementById("contact-list").innerHTML = CL.map(c => `<div class="contact"><div><small>${c.role}</small><b>${c.name}</b></div><a href="tel:${c.phone.replace(/\s/g, "")}">${ICON.phone}${c.phone}</a></div>`).join("");
+  const rs = document.getElementById("rsvp-main"); if (hasRSVP()) { rs.href = rsvpLink(); rs.innerHTML = `${ICON.wa} RSVP on WhatsApp`; } else rs.remove();
+  if (!CL.length) { document.getElementById("contacts").querySelector("h2").textContent = "Numbers to call are coming soon."; document.getElementById("contacts").querySelector("h2").previousElementSibling.textContent = "Who to call"; }
   const ics = document.getElementById("ics"); ics.innerHTML = `${ICON.cal} Add to calendar`; ics.onclick = downloadICS;
   document.getElementById("gift-note").textContent = W.copy.giftNote;
   document.getElementById("footer").innerHTML = `<div class="seal gold">${sealSVG()}</div><p class="lead italic" style="color:var(--paper)">${W.copy.thankYou}</p><p class="meta" style="color:rgba(244,239,230,.55)">${one.full} &amp; ${two.full} · ${fmtDate(W.wedding.date)}${cityDot} · ${W.couple.hashtag}</p>`;
-  document.getElementById("rsvpbar").innerHTML = `<a class="btn gold" href="${rsvpLink()}" target="_blank" rel="noopener">${ICON.wa} RSVP on WhatsApp</a>`;
+  if (hasRSVP()) document.getElementById("rsvpbar").innerHTML = `<a class="btn gold" href="${rsvpLink()}" target="_blank" rel="noopener">${ICON.wa} RSVP on WhatsApp</a>`; else document.getElementById("rsvpbar").remove();
 
   /* ── Reveal on scroll, nav highlight, RSVP bar ─────────────────────── */
   const io = new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting) { en.target.classList.add("in"); io.unobserve(en.target); } }), { rootMargin: "0px 0px -10% 0px" });
@@ -391,7 +392,7 @@
   const io2 = new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting) links.forEach(a => a.classList.toggle("active", a.getAttribute("href") === "#" + en.target.id)); }), { rootMargin: "-40% 0px -55% 0px" });
   secs.forEach(s => s && io2.observe(s));
   const bar = document.getElementById("rsvpbar");
-  new IntersectionObserver(es => es.forEach(en => bar.classList.toggle("show", !en.isIntersecting && opened && innerWidth < 900)), { threshold: 0 }).observe(hero);
+  if (bar) new IntersectionObserver(es => es.forEach(en => bar.classList.toggle("show", !en.isIntersecting && opened && innerWidth < 900)), { threshold: 0 }).observe(hero);
 })();
 </script>
 </body>

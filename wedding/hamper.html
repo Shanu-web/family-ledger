@@ -141,7 +141,7 @@
 <script src="assets/wedding.js"></script>
 <script>
 (function () {
-  const { guestUrl, W, fmtDate, sealSVG, qrSVG, city, cityDot } = WX;
+  const { guestUrl, W, fmtDate, sealSVG, qrSVG, contacts, city, cityDot } = WX;
   const one = W.couple.one, two = W.couple.two;
   document.title = `${one.first} & ${two.first} · Room hamper plan`;
 
@@ -255,7 +255,7 @@
       <div class="side">
         <div><b>Your stay</b>${W.stay.hotel}<br>${W.stay.checkIn}<br>${W.stay.checkOut}</div>
         <div><b>Shuttles</b>${W.stay.shuttle}</div>
-        <div><b>Anything at all</b>${W.contacts[0].name} · ${W.contacts[0].phone}</div>
+        ${contacts().length ? `<div><b>Anything at all</b>${contacts()[0].name} · ${contacts()[0].phone}</div>` : ""}
         <div><b>Everything else</b><div class="qr">${qrSVG(guestUrl())}</div></div>
       </div>
     </div>`;

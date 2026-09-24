@@ -84,7 +84,7 @@
 <script src="assets/wedding.js"></script>
 <script>
 (function () {
-  const { guestUrl, W, fmtDate, fmtTime, days, sealSVG, ornate, ganesha, cardFront, ICON, qrSVG, downloadICS, rsvpLink, city, cityDot } = WX;
+  const { guestUrl, W, fmtDate, fmtTime, days, sealSVG, ornate, ganesha, cardFront, ICON, qrSVG, downloadICS, rsvpLink, hasRSVP, contacts, city, cityDot } = WX;
   const one = W.couple.one, two = W.couple.two;
   document.title = `${one.first} & ${two.first} · ${fmtDate(W.wedding.date)}`;
 
@@ -119,14 +119,14 @@
         <div><b>${one.familyName}</b>${one.parents}<br>${one.siblings ? "with " + one.siblings + "<br>" : ""}<span>${one.address}</span></div>
         <div><b>${two.familyName}</b>${two.parents}<br>${two.siblings ? "with " + two.siblings + "<br>" : ""}<span>${two.address}</span></div>
       </div>
-      <p class="meta" style="margin:var(--s-3) 0 0">RSVP on WhatsApp · ${W.contacts[0].name} · ${W.contacts[0].phone} · ${W.couple.hashtag}</p>
+      <p class="meta" style="margin:var(--s-3) 0 0">${hasRSVP() && contacts().length ? `RSVP on WhatsApp · ${contacts()[0].name} · ${contacts()[0].phone} · ` : ""}${W.couple.hashtag}</p>
     </div>
   `;
 
   const actions = document.getElementById("actions");
   actions.innerHTML = `
     <a class="btn" href="guest.html">${ICON.map} Map, schedule &amp; menu</a>
-    <a class="btn ghost" href="${rsvpLink()}" target="_blank" rel="noopener">${ICON.wa} RSVP on WhatsApp</a>
+    ${hasRSVP() ? `<a class="btn ghost" href="${rsvpLink()}" target="_blank" rel="noopener">${ICON.wa} RSVP on WhatsApp</a>` : ""}
     <button class="btn ghost" id="ics">${ICON.cal} Add to calendar</button>
     <button class="btn ghost" id="share">${ICON.share} Share</button>
   `;

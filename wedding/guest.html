@@ -131,7 +131,7 @@
 
   <section class="section" id="contacts"><div class="wrap narrow">
     <p class="eyebrow center">Who to call</p>
-    <h2 class="h2 center" style="font-style:italic">Real people, real phones, all three days.</h2>
+    <h2 class="h2 center" style="font-style:italic" id="contacts-h">Real people, real phones, all three days.</h2>
     <div class="contacts" id="contact-list" style="margin-top:var(--s-6)"></div>
     <div class="card deep center" style="margin-top:var(--s-6)">
       <p class="lead italic" id="gift-note"></p>
@@ -148,7 +148,7 @@
 <script src="assets/wedding.js"></script>
 <script>
 (function () {
-  const { W, fmtDate, fmtTime, days, mealsFor, sealSVG, ganesha, ICON, downloadICS, rsvpLink, mapsEmbed, directions, swatches, countdown, city, cityDot } = WX;
+  const { W, fmtDate, fmtTime, days, mealsFor, sealSVG, ganesha, ICON, downloadICS, rsvpLink, hasRSVP, contacts, mapsEmbed, directions, swatches, countdown, city, cityDot } = WX;
   const one = W.couple.one, two = W.couple.two;
   document.title = `${one.first} & ${two.first} · Guest guide`;
 
@@ -162,8 +162,8 @@
     <p class="when reveal d3">${fmtDate(W.wedding.date, "ord")}${city ? "<br>" + city : ""}</p>
     <p class="countdown reveal d3" id="countdown"></p>
     <div class="actions reveal d4">
-      <a class="btn" href="${rsvpLink()}" target="_blank" rel="noopener">${ICON.wa} RSVP on WhatsApp</a>
-      <button class="btn ghost" id="ics">${ICON.cal} Add all to calendar</button>
+      ${hasRSVP() ? `<a class="btn" href="${rsvpLink()}" target="_blank" rel="noopener">${ICON.wa} RSVP on WhatsApp</a>` : ""}
+      <button class="btn${hasRSVP() ? " ghost" : ""}" id="ics">${ICON.cal} Add all to calendar</button>
     </div>`;
   countdown(document.getElementById("countdown"));
   document.getElementById("ics").onclick = downloadICS;
@@ -221,8 +221,9 @@
     <div class="row"><b>Note</b><span>${W.stay.note}</span></div>`;
   document.getElementById("travel-rows").innerHTML = W.travel.map(t => `<div class="row"><b>${t.by}</b><span>${t.text}</span></div>`).join("");
 
-  document.getElementById("contact-list").innerHTML = W.contacts.map(c => `
+  document.getElementById("contact-list").innerHTML = contacts().map(c => `
     <div class="contact"><div><small>${c.role}</small><b>${c.name}</b></div><a href="tel:${c.phone.replace(/\s/g, "")}">${ICON.phone}${c.phone}</a></div>`).join("");
+  if (!contacts().length) document.getElementById("contacts-h").textContent = "Numbers to call are coming soon.";
   document.getElementById("gift-note").textContent = W.copy.giftNote;
   document.getElementById("hashtag").textContent = `Share your photos with ${W.couple.hashtag}`;
 

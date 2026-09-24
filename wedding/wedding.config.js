@@ -80,13 +80,14 @@ window.WEDDING = {
   ],
 
   // ── Contacts (guests will call these; keep them answered!) ────────────────
+  // Contacts without a phone number are hidden everywhere until you add one.
   contacts: [
-    { role: "Groom’s side",    name: "Gaurav Choudhary", phone: "+91 00000 00000" },   // TODO number
-    { role: "Bride’s side",    name: "Vikash Mohan",     phone: "+91 00000 00000" },   // TODO number
-    { role: "Guest relations", name: "To be named",      phone: "+91 00000 00000" },   // TODO
-    { role: "Travel & stay",   name: "To be named",      phone: "+91 00000 00000" },   // TODO
+    { role: "Groom’s side",    name: "Gaurav Choudhary", phone: "" },
+    { role: "Bride’s side",    name: "Vikash Mohan",     phone: "" },
   ],
-  rsvp: { whatsapp: "910000000000", text: "Hi! RSVP for Shanu & Sonali’s wedding — " },   // TODO digits only, with country code
+  // RSVP on WhatsApp: leave whatsapp "" and every RSVP button and bar stays hidden.
+  // When ready: digits only with country code, e.g. "919876543210".
+  rsvp: { whatsapp: "", text: "Hi! RSVP for Shanu & Sonali’s wedding — " },
 
   // ── The events (the schedule, the dress codes, the menus) ─────────────────
   events: [
