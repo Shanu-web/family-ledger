@@ -1,105 +1,122 @@
 // ─────────────────────────────────────────────────────────────────────────────
 //  WEDDING CONFIG — the single source of truth for every page in this folder.
 //  Edit this file only; invitation.html, guest.html, magazine.html and
-//  hamper.html all read from it. Values marked SAMPLE are placeholders.
+//  hamper.html all read from it. Anything marked TODO still needs your input.
 // ─────────────────────────────────────────────────────────────────────────────
+
+// TODO: the venue. Fill these two in once and every page, card and QR updates.
+const VENUE_NAME = "Venue to be confirmed";
+const VENUE_CITY = "";                       // e.g. "Pune" or "Bhagalpur"; leave "" until known
+
 window.WEDDING = {
+  // ── Look ───────────────────────────────────────────────────────────────────
+  theme: "midnight",        // "midnight" (indigo & champagne) · "kumkum" (red & gold) · "forest" (green & brass)
+                            // preview any of them by adding ?palette=forest to a page URL
+
   // ── The couple ─────────────────────────────────────────────────────────────
   couple: {
-    one: { first: "Shanu", full: "Shanu Choudhary", parents: "Smt. Sunita & Shri Rajesh Choudhary" },          // SAMPLE parents
-    two: { first: "Aanya", full: "Aanya Sharma",    parents: "Smt. Meera & Shri Vikram Sharma" },              // SAMPLE partner + parents
-    monogram: "S·A",
-    hashtag: "#ShanuWedsAanya",
+    one: {                                    // the groom
+      first: "Shanu", full: "Shanu Choudhary",
+      parents: "Mr. Sudhansu Kumar Choudhary & Mrs. Anita Choudhary",
+      siblings: "Gaurav Choudhary",
+      familyLine: "and the entire Choudhary family",
+      familyName: "The Choudharys",
+      address: "Near Gupta Medical, Kahalgaon 813203, Bihar",
+      role: "son",
+    },
+    two: {                                    // the bride
+      first: "Sonali", full: "Sonali Mohan",
+      parents: "Mr. Vijay Mohan & Late Mrs. Shobha Mohan",
+      siblings: "Vikash Mohan",
+      familyLine: "and the entire Mohan family",
+      familyName: "The Mohans",
+      address: "501-A1, Prasad Nagar, Wadgaon Sheri, Pune 411014, Maharashtra",
+      role: "daughter",
+    },
+    monogram: "S·S",
+    hashtag: "#ShanuWedsSonali",
   },
 
-  // ── Headline date & city (the wedding day itself) ──────────────────────────
+  // ── Headline date & place (the wedding evening: baraat, jaimala, reception) ─
   wedding: {
-    date: "2026-11-28",                 // ISO, local time. Countdown + calendar use this.
-    time: "18:00",
-    city: "Patna",
-    shloka: "शुभ विवाह",                // shown in Devanagari on the cover
+    date: "2026-12-11",                 // ISO, local time. Countdown + calendar use this.
+    time: "19:00",
+    city: VENUE_CITY,
+    shloka: "शुभ विवाह",
     shlokaSub: "With the blessings of our families",
   },
 
   // ── Public URL of the guest page (this is what the QR encodes) ─────────────
-  // Deploy this folder and put its final address here, e.g.
-  //   https://shanu-aanya.in/guest.html   or   https://<app-host>/wedding/guest.html
-  guestUrl: "https://example.com/wedding/guest.html",   // SAMPLE
+  // TODO: deploy this folder and put its final address here, e.g.
+  //   https://<app-host>/wedding/guest.html
+  guestUrl: "https://example.com/wedding/guest.html",
 
   // ── Venue ──────────────────────────────────────────────────────────────────
   venue: {
-    name: "The Courtyard at Bailey Road",                // SAMPLE
-    address: "Bailey Road, Patna, Bihar 800014",         // SAMPLE
-    mapsQuery: "Bailey Road, Patna, Bihar",              // used for the embedded map + directions link
-    mapsUrl: "https://maps.google.com/?q=Bailey+Road,+Patna,+Bihar",
-    landmark: "Opposite Patna High Court gate, 3 km from Patna Junction",
-    parking: "Valet at the main porch. Overflow parking in the east lot.",
+    name: VENUE_NAME,
+    address: "Address to be confirmed",                                   // TODO
+    mapsQuery: VENUE_NAME + (VENUE_CITY ? ", " + VENUE_CITY : ""),        // used for the embedded map + directions link
+    landmark: "To be confirmed",                                          // TODO
+    parking: "To be confirmed",                                           // TODO
   },
 
   // ── Stay ───────────────────────────────────────────────────────────────────
   stay: {
-    hotel: "Hotel Chanakya, Patna",                                  // SAMPLE
-    address: "Beer Chand Patel Path, Patna 800001",
-    checkIn: "Fri 27 Nov, from 12:00",
-    checkOut: "Mon 30 Nov, by 11:00",
-    note: "Rooms are booked under ‘Choudhary–Sharma wedding’. Your hamper is waiting in the room.",
-    shuttle: "Shuttles leave the hotel lobby 45 minutes before every event.",
+    hotel: "Guest hotel to be confirmed",                                 // TODO
+    address: "",
+    checkIn: "Thu 10 Dec, arrivals from the morning",
+    checkOut: "Sat 12 Dec, after the bidai",
+    note: "Rooms are booked under ‘Choudhary–Mohan wedding’. Your hamper is waiting in the room.",
+    shuttle: "Cars leave the hotel 45 minutes before every event.",
   },
 
-  // ── Travel ─────────────────────────────────────────────────────────────────
+  // ── Travel (TODO: depends on the venue city) ───────────────────────────────
   travel: [
-    { by: "Air",   text: "Jay Prakash Narayan Airport (PAT) is 25 minutes from the hotel. A car with a marigold tag will be waiting at Arrivals." },
-    { by: "Rail",  text: "Patna Junction (PNBE) and Rajendra Nagar Terminal (RJPB) are both 15 minutes away." },
-    { by: "Road",  text: "NH-22 and NH-31 both bring you to Bailey Road. Share your ETA on WhatsApp and a car will meet you at the hotel." },
+    { by: "Air",   text: "Nearest airport and pick-up arrangements to be confirmed once the venue is fixed. A car with a marigold tag will meet you at Arrivals." },
+    { by: "Rail",  text: "Nearest station and pick-up to be confirmed. Share your train number on WhatsApp and a car will be waiting." },
+    { by: "Road",  text: "Share your ETA on WhatsApp and a car will meet you at the hotel." },
   ],
 
   // ── Contacts (guests will call these; keep them answered!) ────────────────
   contacts: [
-    { role: "Guest relations", name: "Rohit", phone: "+91 98765 00001" },   // SAMPLE
-    { role: "Travel & stay",   name: "Neha",  phone: "+91 98765 00002" },   // SAMPLE
-    { role: "Groom's side",    name: "Amit",  phone: "+91 98765 00003" },   // SAMPLE
-    { role: "Bride's side",    name: "Priya", phone: "+91 98765 00004" },   // SAMPLE
+    { role: "Groom’s side",    name: "Gaurav Choudhary", phone: "+91 00000 00000" },   // TODO number
+    { role: "Bride’s side",    name: "Vikash Mohan",     phone: "+91 00000 00000" },   // TODO number
+    { role: "Guest relations", name: "To be named",      phone: "+91 00000 00000" },   // TODO
+    { role: "Travel & stay",   name: "To be named",      phone: "+91 00000 00000" },   // TODO
   ],
-  rsvp: { whatsapp: "919876500001", text: "Hi! RSVP for Shanu & Aanya's wedding — " },   // SAMPLE number, digits only with country code
+  rsvp: { whatsapp: "910000000000", text: "Hi! RSVP for Shanu & Sonali’s wedding — " },   // TODO digits only, with country code
 
   // ── The events (the schedule, the dress codes, the menus) ─────────────────
-  // Each event: id, day (ISO), start/end (24h), title, kicker, where, dress,
-  // palette (colours guests can lean into), note, and menu (array of stations).
   events: [
     {
-      id: "haldi", day: "2026-11-27", start: "10:00", end: "12:30",
-      title: "Haldi", kicker: "Turmeric & Marigold",
-      where: "Poolside Lawn, Hotel Chanakya",
-      dress: "Yellows, ivories, whites. Cottons you don’t mind turmeric on.",
-      palette: ["#E8B73B", "#F6F1E7", "#F3D98B"],
-      note: "Sit on the ground, get your hands messy, and sing. Bring sunglasses; the lawn faces east.",
+      id: "tilak", day: "2026-12-10", start: "13:30", end: "16:00",
+      title: "Tilak", kicker: "The First Blessing",
+      where: VENUE_NAME,
+      dress: "Traditional and light: ivories, creams, pastel silks. Kurtas, saris, suits.",
+      palette: ["#F6F1E7", "#D9C08F", "#6E1E2B"],
+      note: "The bride’s family welcomes the groom with the tilak, the blessing that opens the wedding. Guests arrive through the morning; lunch follows the ceremony.",
       menu: [
-        { station: "To begin",   items: ["Kesar lassi, aam panna", "Masala chaas"] },
-        { station: "Breakfast",  items: ["Litti with baingan chokha & ghee", "Sattu paratha, dahi", "Poha, jalebi, imarti", "Seasonal fruit, cold-pressed juices"] },
+        { station: "Welcome",  items: ["Kesar lassi, aam panna", "Nimbu pani, masala chaas"] },
+        { station: "Lunch",    items: ["Litti with baingan chokha & ghee", "Dal pitha, ghugni", "Paneer lababdar, aloo dum, kadhi", "Puri, jeera rice, salad, papad"] },
+        { station: "Sweet",    items: ["Anarsa, thekua", "Kesar phirni"] },
       ],
     },
     {
-      id: "mehndi", day: "2026-11-27", start: "15:00", end: "18:00",
-      title: "Mehndi", kicker: "Henna & Ghazals",
-      where: "The Terrace Garden, Hotel Chanakya",
-      dress: "Greens and teals, light silhouettes. Flats, please; it is a garden.",
-      palette: ["#4F6F52", "#A6B99A", "#F6F1E7"],
-      note: "Twelve mehndi artists, a ghazal trio, and a chaat lane. Wear what you can eat chaat in.",
-      menu: [
-        { station: "Chaat lane",   items: ["Pani puri (five waters)", "Dahi bhalla, papdi chaat", "Aloo tikki with chole", "Bhutte ka kees"] },
-        { station: "Tea counter",  items: ["Cutting chai, Kashmiri kahwa", "Filter coffee", "Nankhatai, mathri, shakkarpara"] },
-        { station: "Sweet",        items: ["Gaya tilkut, Silao khaja", "Malai kulfi on stick"] },
-      ],
-    },
-    {
-      id: "sangeet", day: "2026-11-27", start: "19:30", end: "23:30",
-      title: "Sangeet", kicker: "The Night We Dance",
-      where: "The Grand Ballroom, Hotel Chanakya",
+      id: "sangeet", day: "2026-12-10", start: "18:00", end: "23:30",
+      title: "Sangeet & Engagement", kicker: "Rings, Then Dancing",
+      where: VENUE_NAME,
       dress: "Jewel tones and shimmer: emerald, sapphire, wine. Dance-proof footwear.",
       palette: ["#1F2F5C", "#6E1E2B", "#B8935A"],
-      note: "Performances start sharp at 20:30. Family sets first, then the floor is yours till the DJ is thrown out.",
+      note: "The rings at 7. Family performances from 8, sharp. After that the floor is yours till the DJ is thrown out.",
+      timeline: [
+        { at: "18:00", what: "Doors, drinks and chaat" },
+        { at: "19:00", what: "Engagement: the rings" },
+        { at: "20:00", what: "Sangeet performances" },
+        { at: "21:30", what: "Dinner opens; the floor stays open" },
+      ],
       menu: [
         { station: "Passed around", items: ["Galouti on ulte tawa parathas", "Paneer tikka, hara bhara kebab", "Amritsari fish, chicken malai tikka", "Dahi ke kebab"] },
+        { station: "Chaat lane",    items: ["Pani puri (five waters)", "Dahi bhalla, papdi chaat", "Aloo tikki with chole"] },
         { station: "Live",          items: ["Pasta & risotto bar", "Dim sum basket (veg / chicken)", "Tandoor: naan, kulcha, roti"] },
         { station: "Mains",         items: ["Dal makhani, paneer lababdar", "Murgh musallam, mutton rogan josh", "Subz miloni, jeera rice, biryani (veg / gosht)"] },
         { station: "Dessert",       items: ["Gulab jamun with rabri", "Moong dal halwa", "Tiramisu, fruit tart", "Paan counter"] },
@@ -107,41 +124,49 @@ window.WEDDING = {
       ],
     },
     {
-      id: "wedding", day: "2026-11-28", start: "18:00", end: "23:59",
-      title: "The Wedding", kicker: "Baraat · Jaimala · Pheras",
-      where: "The Courtyard at Bailey Road",
+      id: "haldi", day: "2026-12-11", start: "11:00", end: "13:30",
+      title: "Haldi", kicker: "Turmeric & Marigold",
+      where: VENUE_NAME,
+      dress: "Yellows, ivories, whites. Cottons you don’t mind turmeric on.",
+      palette: ["#E8B73B", "#F6F1E7", "#F3D98B"],
+      note: "Sit on the ground, get your hands messy, and sing. Brunch runs alongside; bring sunglasses.",
+      menu: [
+        { station: "To begin",   items: ["Kesar lassi, aam panna", "Cutting chai, filter coffee"] },
+        { station: "Brunch",     items: ["Sattu paratha, dahi", "Poha, jalebi, imarti", "Chhole bhature", "Seasonal fruit, cold-pressed juices"] },
+        { station: "Sweet",      items: ["Gaya tilkut, Silao khaja", "Malai kulfi on stick"] },
+      ],
+    },
+    {
+      id: "wedding", day: "2026-12-11", start: "19:00", end: "23:59",
+      title: "The Wedding", kicker: "Baraat · Jaimala · Reception",
+      where: VENUE_NAME,
       dress: "Traditional. Reds, golds, ivories. Silks, bandhgalas, sherwanis, saris, lehengas.",
       palette: ["#6E1E2B", "#B8935A", "#F6F1E7"],
-      note: "Baraat leaves the hotel at 17:30 with the band. Jaimala at 19:30. Pheras at 21:30 under the courtyard mandap; sit with us, it is the heart of the evening.",
+      note: "The baraat arrives at 7 with the band; come early if you are dancing in it. Jaimala at 8, and the reception and dinner run from 8 onwards. The pheras follow later in the night; sit with us for them, it is the heart of the evening.",
       timeline: [
-        { at: "17:30", what: "Baraat departs the hotel" },
-        { at: "18:00", what: "Baraat welcome (swagat) at the venue gate" },
-        { at: "19:30", what: "Jaimala" },
-        { at: "20:00", what: "Dinner opens" },
-        { at: "21:30", what: "Pheras at the mandap" },
-        { at: "23:30", what: "Vidaai" },
+        { at: "19:00", what: "Baraat arrives; swagat at the gate" },
+        { at: "20:00", what: "Jaimala" },
+        { at: "20:00", what: "Reception and dinner, onwards" },
+        { at: "Late",  what: "Pheras at the mandap" },
       ],
       menu: [
         { station: "Welcome",   items: ["Thandai, rose sherbet", "Badam milk"] },
         { station: "Starters",  items: ["Tandoori broccoli, malai soya chaap", "Mutton seekh, murgh tikka", "Corn & cheese balls for the little ones"] },
-        { station: "Regional",  items: ["Bihari thali: litti chokha, dal pitha, ghugni", "Awadhi: nihari, sheermal", "South: appam & stew, Chettinad chicken"] },
+        { station: "Regional",  items: ["Bihari thali: litti chokha, dal pitha, ghugni", "Maharashtrian: puran poli, bharli vangi, masale bhaat", "Awadhi: nihari, sheermal"] },
         { station: "Mains",     items: ["Paneer butter masala, kadhai vegetables", "Dal tadka, dal makhani", "Chicken korma, mutton kosha", "Assorted breads, pulao, biryani"] },
-        { station: "Dessert",   items: ["Anarsa, thekua, khaja", "Kesar phirni, rasmalai", "Ice cream trolley", "Meetha paan"] },
+        { station: "Live",      items: ["Carving station: roast lamb, roast chicken", "Wood-fired pizza", "Teppanyaki noodles"] },
+        { station: "Dessert",   items: ["Wedding cake", "Anarsa, thekua, khaja", "Kesar phirni, rasmalai", "Ice cream trolley, meetha paan"] },
       ],
     },
     {
-      id: "reception", day: "2026-11-29", start: "19:00", end: "23:00",
-      title: "Reception", kicker: "One Last Evening Together",
-      where: "The Lawns, Hotel Chanakya",
-      dress: "Evening formal. Black tie, gowns, dark suits, drape saris.",
-      palette: ["#1C1A18", "#B8935A", "#C9A4A0"],
-      note: "A slow evening: a string quartet, a long dinner, a few speeches, and the couple at the door to say thank you to every one of you.",
+      id: "bidai", day: "2026-12-12", start: "05:00", end: "06:30",
+      title: "Bidai", kicker: "Before Sunrise",
+      where: VENUE_NAME,
+      dress: "Whatever you slept in, plus a shawl. It will be cold and it will be early.",
+      palette: ["#C9A4A0", "#F6F1E7", "#B8935A"],
+      note: "Before the sun is up, the bride and groom leave together. Bring a handkerchief. Chai and breakfast are laid out for everyone who stayed up, and for everyone who didn’t.",
       menu: [
-        { station: "Canapés",  items: ["Beetroot & goat cheese tarts", "Smoked salmon blinis", "Truffle mushroom vol-au-vents", "Mini vada pav sliders"] },
-        { station: "Live",     items: ["Carving station: roast lamb, roast chicken", "Wood-fired pizza", "Sushi & maki (veg / fish)", "Teppanyaki noodles"] },
-        { station: "Mains",    items: ["Lasagne (veg / meat), grilled fish in lemon butter", "Thai green & red curry, jasmine rice", "Dal, paneer, seasonal sabzi, breads"] },
-        { station: "Dessert",  items: ["Wedding cake", "Crème brûlée, chocolate fondant", "Kulfi falooda, jalebi with rabri"] },
-        { station: "Bar",      items: ["Champagne toast at 21:00", "Full bar, single malts", "Espresso martini bar"] },
+        { station: "Before dawn", items: ["Adrak chai, kahwa, filter coffee", "Poha, upma", "Puri sabzi", "Fruit, biscuits, tilkut for the road"] },
       ],
     },
   ],
@@ -150,16 +175,16 @@ window.WEDDING = {
   copy: {
     inviteLine: "request the pleasure of your company at the wedding of their children",
     welcomeLetter: [
-      "Thank you for travelling to be with us. Some of you have crossed the city, some of you have crossed oceans, and all of you have crossed something to be here.",
+      "Thank you for travelling to be with us. Some of you have crossed the city, some of you have crossed the country, and all of you have crossed something to be here.",
       "This little book is your companion for the three days: where to be, when, what to wear, and what you will eat. Keep it in your bag. Tear pages out. Spill chai on it.",
       "The only thing we ask is that you put your phone down for the pheras. We will have photographers for that; we want your eyes, not your lens.",
     ],
-    story: [
-      "We met in the queue for the wrong counter at Patna Junction in 2019. Both of us had been sent to the wrong window, both of us were annoyed, and one of us was smug about being right. (It was Aanya.)",
-      "Seven years, two cities, one very patient set of parents on each side, and one proposal on the terrace where the mehndi will be, and here we are.",
-      "This is the wedding we always wanted: at home, in Patna, with every one of you.",
+    story: [   // TODO: replace with your own story in your own words
+      "Two families, two ends of the country: the Choudharys of Kahalgaon on the banks of the Ganga, and the Mohans of Pune. It took a while for the two to find each other, and no time at all to agree.",
+      "Between the tilak on the 10th and the bidai before dawn on the 12th, we get two days to bring everyone we love into one place. That, more than anything, is what this wedding is for.",
+      "Thank you for making the journey. We will spend the rest of our lives making it worth it.",
     ],
-    giftNote: "Your presence is the present. If you insist, the couple’s blessing box will be at the reception; please, no boxed gifts.",
+    giftNote: "Your presence is the present. If you insist, the blessing box will be at the reception; please, no boxed gifts.",
     thankYou: "Thank you for being the best part of our story.",
   },
 };

@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Wedding Magazine</title>
 <meta name="description" content="A 16-page A5 booklet for guests: welcome, the three days, the events, the menus, the map and the little things.">
+<script src="wedding.config.js"></script>
+<script>(function(){var q=new URLSearchParams(location.search).get("palette");var t=q||(window.WEDDING&&window.WEDDING.theme)||"midnight";if(t!=="midnight")document.documentElement.dataset.palette=t;})();</script>
 <link rel="stylesheet" href="assets/wedding.css">
 <style>
   body { background: var(--paper-2); }
@@ -44,7 +46,7 @@
 
   /* Cover */
   .cover { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background-color: var(--kumkum); color: var(--paper); }
-  .cover.jaali { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'><g fill='none' stroke='%23D9C08F' stroke-width='0.7' stroke-opacity='0.35'><path d='M28 2 L54 28 L28 54 L2 28 Z'/><path d='M28 12 L44 28 L28 44 L12 28 Z'/><circle cx='28' cy='28' r='3'/><path d='M0 0 L8 0 M0 0 L0 8 M56 0 L48 0 M56 0 L56 8 M0 56 L8 56 M0 56 L0 48 M56 56 L48 56 M56 56 L56 48'/></g></svg>"); }
+  .cover.jaali { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'><g fill='none' stroke='%23D8C69C' stroke-width='0.7' stroke-opacity='0.35'><path d='M28 2 L54 28 L28 54 L2 28 Z'/><path d='M28 12 L44 28 L28 44 L12 28 Z'/><circle cx='28' cy='28' r='3'/><path d='M0 0 L8 0 M0 0 L0 8 M56 0 L48 0 M56 0 L56 8 M0 56 L8 56 M0 56 L0 48 M56 56 L48 56 M56 56 L56 48'/></g></svg>"); }
   .cover .inner { position: absolute; inset: 9mm; border: 1px solid var(--gold-2); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10mm; }
   .cover .inner::after { content: ""; position: absolute; inset: 4px; border: 1px solid var(--gold-2); opacity: .5; }
   .cover .seal { width: 22mm; height: 22mm; color: var(--gold-2); margin-bottom: 6mm; }
@@ -91,7 +93,6 @@
   .evt .tl { list-style: none; padding: 0; margin: 3mm 0 0; font-size: 8.5pt; }
   .evt .tl li { display: grid; grid-template-columns: 12mm 1fr; gap: 3mm; padding: 1mm 0; border-top: 1px dotted var(--paper-3); }
   .evt .tl li b { font-family: var(--font-display); font-weight: 500; font-size: 11pt; color: var(--kumkum); }
-  .evt .accent { position: absolute; top: 0; left: 0; right: 0; height: 3mm; }
 
   /* Menu pages */
   .menu .block { margin-bottom: 4mm; }
@@ -138,12 +139,11 @@
 </div>
 <div class="book" id="book"></div>
 
-<script src="wedding.config.js"></script>
 <script src="assets/vendor/qrcode-generator.js"></script>
 <script src="assets/wedding.js"></script>
 <script>
 (function () {
-  const { W, fmtDate, fmtTime, days, sealSVG, ICON, qrSVG, swatches, directions } = WX;
+  const { W, fmtDate, fmtTime, days, sealSVG, ICON, qrSVG, swatches, directions, city, cityDot } = WX;
   const one = W.couple.one, two = W.couple.two;
   const ev = Object.fromEntries(W.events.map(e => [e.id, e]));
   const short = s => s.split(",")[0];
@@ -153,7 +153,6 @@
   const folio = () => `<div class="folio">${one.first} <b>&amp;</b> ${two.first}</div>`;
   const stations = e => `<div class="cols">${e.menu.map(s => `<div class="st"><b>${s.station}</b>${s.items.map(i => `<span>${i}</span>`).join("")}</div>`).join("")}</div>`;
   const eventPage = (e, extra) => page("evt", `
-    <div class="accent" style="background:linear-gradient(90deg,${e.palette.join(",")})"></div>
     <p class="eyebrow">${fmtDate(e.day, "long")}</p>
     <h2 class="big">${e.title}</h2>
     <p class="kicker">${e.kicker}</p>
@@ -176,7 +175,7 @@
       <p class="eyebrow">The wedding of</p>
       <h1 class="display names"><em>${one.first}</em><span class="amp">&amp;</span><em>${two.first}</em></h1>
       <p class="title">A book for our guests</p>
-      <p class="dates">${fmtDate(days()[0].day, "short")} – ${fmtDate(days().at(-1).day, "short")} ${fmtDate(W.wedding.date, "year")} · ${W.wedding.city}</p>
+      <p class="dates">${fmtDate(days()[0].day, "short")} – ${fmtDate(days().at(-1).day, "short")} ${fmtDate(W.wedding.date, "year")}${cityDot}</p>
     </div>`));
 
   // 2 · Inside cover
@@ -198,17 +197,18 @@
     ${folio()}`));
 
   // 4 · Families
+  const fam = (f) => `
+    <p class="eyebrow ink">${f.familyName}</p>
+    <p class="lead">${f.parents}</p>
+    <p class="meta">${f.siblings ? "with " + f.siblings + ", " : ""}${f.familyLine}<br>welcome you on behalf of their ${f.role}, <b>${f.full}</b></p>
+    <p class="meta" style="color:var(--gold)">${f.address}</p>`;
   P.push(page("center", `
     <p class="eyebrow">The families</p>
     <h2>Two homes, <em>one</em> table.</h2>
     <div class="rule"><i></i></div>
-    <p class="eyebrow ink">The ${one.full.split(" ").at(-1)}s</p>
-    <p class="lead">${one.parents}</p>
-    <p class="meta">welcome you on behalf of their son, <b>${one.full}</b></p>
+    ${fam(two)}
     <div class="rule"><i></i></div>
-    <p class="eyebrow ink">The ${two.full.split(" ").at(-1)}s</p>
-    <p class="lead">${two.parents}</p>
-    <p class="meta">welcome you on behalf of their daughter, <b>${two.full}</b></p>
+    ${fam(one)}
     <div class="rule"><i></i></div>
     <p class="meta measure mx">Grandparents, aunts, uncles, cousins and the friends who became family: you know who you are, and we will find you at the sangeet.</p>
     ${folio()}`));
@@ -216,7 +216,7 @@
   // 5 · Story
   P.push(page("text", `
     <p class="eyebrow">Our story</p>
-    <h2>The wrong <em>counter</em>.</h2>
+    <h2>Two ends of the <em>country</em>.</h2>
     ${W.copy.story.map((t, i) => `<p class="${i ? "" : "drop"}">${t}</p>`).join("")}
     <div class="rule end"><i></i></div>
     ${folio()}`));
@@ -243,24 +243,12 @@
     </div>
     ${folio()}`));
 
-  // 8–11 · Event pages
-  P.push(page("evt", `
-    <div class="accent" style="background:linear-gradient(90deg,${ev.haldi.palette.join(",")},${ev.mehndi.palette.join(",")})"></div>
-    <p class="eyebrow">${fmtDate(ev.haldi.day, "long")}</p>
-    <h2 class="big">Haldi <span style="color:var(--gold)">&amp;</span> Mehndi</h2>
-    <p class="kicker">${ev.haldi.kicker} · ${ev.mehndi.kicker}</p>
-    <div class="facts">
-      <div><b>Haldi</b><div class="v">${fmtTime(ev.haldi.start)} · ${short(ev.haldi.where)}</div></div>
-      <div><b>Mehndi</b><div class="v">${fmtTime(ev.mehndi.start)} · ${short(ev.mehndi.where)}</div></div>
-    </div>
-    <p>${ev.haldi.note}</p>
-    <div class="dress"><b>Haldi</b>${ev.haldi.dress} ${swatches(ev.haldi.palette)}</div>
-    <p>${ev.mehndi.note}</p>
-    <div class="dress"><b>Mehndi</b>${ev.mehndi.dress} ${swatches(ev.mehndi.palette)}</div>
-    ${folio()}`));
+  // 8–11 · Event pages (bidai rides on the wedding page)
+  P.push(eventPage(ev.tilak));
   P.push(eventPage(ev.sangeet));
-  P.push(eventPage(ev.wedding));
-  P.push(eventPage(ev.reception));
+  P.push(eventPage(ev.haldi));
+  P.push(eventPage(ev.wedding, `
+    <div class="dress" style="margin-top:4mm;border-left-color:var(--rose)"><b>${fmtDate(ev.bidai.day, "long")} · ${ev.bidai.title}, ${fmtTime(ev.bidai.start)}</b>${ev.bidai.note}</div>`));
 
   // 12–13 · Menus
   const menuPage = (ids, eyebrow, head) => page("menu", `
@@ -268,8 +256,8 @@
     <h2>${head}</h2>
     ${ids.map(id => `<div class="block"><h3>${ev[id].title}<small>${fmtDate(ev[id].day, "short")} · ${fmtTime(ev[id].start)}</small></h3>${stations(ev[id])}</div>`).join("")}
     ${folio()}`);
-  P.push(menuPage(["haldi", "mehndi", "sangeet"], "The menu · day one", `Eat <em>well</em>.`));
-  P.push(menuPage(["wedding", "reception"], "The menu · days two & three", `Then eat <em>more</em>.`));
+  P.push(menuPage(["tilak", "sangeet"], "The menu · day one", `Eat <em>well</em>.`));
+  P.push(menuPage(["haldi", "wedding", "bidai"], "The menu · days two & three", `Then eat <em>more</em>.`));
 
   // 14 · Getting there
   P.push(page("", `
@@ -300,10 +288,10 @@
     <h2>Good to <em>know</em>.</h2>
     <div class="rows">
       <div class="row"><b>Stay</b><span><b style="font-family:var(--font-display);font-size:11pt;font-weight:500;color:var(--ink);letter-spacing:0;text-transform:none">${W.stay.hotel}</b><br>${W.stay.checkIn} → ${W.stay.checkOut}. ${W.stay.note}</span></div>
-      <div class="row"><b>Hamper</b><span>The basket in your room has the things you will forget to pack, and a few things from Patna you should take home.</span></div>
+      <div class="row"><b>Hamper</b><span>The basket in your room has the things you will forget to pack, and a few things from Bihar you should take home.</span></div>
       <div class="row"><b>Gifts</b><span>${W.copy.giftNote}</span></div>
       <div class="row"><b>Phones</b><span>Down for the pheras, please. Up for everything else; tag ${W.couple.hashtag}.</span></div>
-      <div class="row"><b>Kids</b><span>A supervised play corner runs at the sangeet and the reception from 8 pm.</span></div>
+      <div class="row"><b>Kids</b><span>A supervised play corner runs at the sangeet and the wedding from 8 pm.</span></div>
       ${W.contacts.map(c => `<div class="row"><b>${c.role}</b><span>${c.name} · ${c.phone}</span></div>`).join("")}
     </div>
     ${folio()}`));
@@ -315,7 +303,7 @@
     <div class="qr">${qrSVG(W.guestUrl)}</div>
     <p class="eyebrow ink">Scan for the live schedule, map &amp; menus</p>
     <p class="meta">${W.guestUrl.replace(/^https?:\/\//, "")}</p>
-    <p class="meta" style="margin-top:8mm">${one.full} &amp; ${two.full} · ${fmtDate(W.wedding.date)} · ${W.wedding.city} · ${W.couple.hashtag}</p>`));
+    <p class="meta" style="margin-top:8mm">${one.full} &amp; ${two.full} · ${fmtDate(W.wedding.date)}${cityDot} · ${W.couple.hashtag}</p>`));
 
   document.getElementById("book").innerHTML = P.join("");
   // Page numbers in the folio (cover and back cover carry none)

@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Wedding Invitation</title>
 <meta name="description" content="You are invited. Scan the code for the map, the schedule, and the menu.">
+<script src="wedding.config.js"></script>
+<script>(function(){var q=new URLSearchParams(location.search).get("palette");var t=q||(window.WEDDING&&window.WEDDING.theme)||"midnight";if(t!=="midnight")document.documentElement.dataset.palette=t;})();</script>
 <link rel="stylesheet" href="assets/wedding.css">
 <style>
   /* ── The invitation is two faces of one A5 card: front (the ask) and back (the how) ── */
@@ -50,6 +52,10 @@
   .qrblock p { font-size: var(--fs-sm); color: var(--ink-3); margin: var(--s-1) 0 0; }
   .qrblock .url { font-size: var(--fs-xs); letter-spacing: .04em; color: var(--kumkum); word-break: break-all; }
 
+  .fams { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-4); margin-top: var(--s-4); padding-top: var(--s-3); border-top: 1px solid var(--paper-3); font-size: var(--fs-xs); line-height: 1.5; color: var(--ink-2); }
+  .fams b { display: block; font-family: var(--font-display); font-size: 1.05rem; font-weight: 500; color: var(--ink); margin-bottom: 2px; }
+  .fams span { color: var(--ink-3); }
+
   /* Screen-only actions */
   .actions { display: flex; flex-wrap: wrap; gap: var(--s-3); justify-content: center; width: min(100%, 148mm); }
   .hint { width: min(100%, 148mm); text-align: center; }
@@ -90,12 +96,11 @@
   </section>
 </main>
 
-<script src="wedding.config.js"></script>
 <script src="assets/vendor/qrcode-generator.js"></script>
 <script src="assets/wedding.js"></script>
 <script>
 (function () {
-  const { W, fmtDate, fmtTime, days, sealSVG, corners, ICON, qrSVG, downloadICS, rsvpLink } = WX;
+  const { W, fmtDate, fmtTime, days, sealSVG, corners, ICON, qrSVG, downloadICS, rsvpLink, city, cityDot } = WX;
   const one = W.couple.one, two = W.couple.two;
   document.title = `${one.first} & ${two.first} · ${fmtDate(W.wedding.date)}`;
 
@@ -104,7 +109,7 @@
     <div class="seal reveal">${sealSVG()}</div>
     <div class="devanagari reveal d1">${W.wedding.shloka}</div>
     <p class="eyebrow ink reveal d1">${W.wedding.shlokaSub}</p>
-    <p class="families reveal d2"><b>${one.parents}</b><br><span class="meta">and</span><br><b>${two.parents}</b></p>
+    <p class="families reveal d2"><b>${two.parents}</b><br><span class="meta">${two.familyLine}</span><br><span class="meta">and</span><br><b>${one.parents}</b><br><span class="meta">${one.familyLine}</span></p>
     <p class="invite reveal d2">${W.copy.inviteLine}</p>
     <h1 class="display names reveal d3"><em>${one.first}</em><span class="amp">&amp;</span><em>${two.first}</em></h1>
     <div class="rule reveal d3"><i></i></div>
@@ -114,7 +119,7 @@
       <span class="yr">${fmtDate(W.wedding.date, "year")}</span>
       <span class="mo">${fmtDate(W.wedding.date, "month")} · ${fmtTime(W.wedding.time)}</span>
     </div>
-    <p class="venue reveal d4">${W.venue.name}<small>${W.venue.address}</small></p>
+    <p class="venue reveal d4">${W.venue.name}<small>${W.venue.address}${cityDot}</small></p>
   `;
 
   const ds = days();
@@ -140,7 +145,11 @@
         </div>
         <div class="qr">${qrSVG(W.guestUrl, { fg: "#1C1A18" })}</div>
       </div>
-      <p class="meta" style="margin:var(--s-4) 0 0">RSVP on WhatsApp · ${W.contacts[0].name} · ${W.contacts[0].phone} · ${W.couple.hashtag}</p>
+      <div class="fams">
+        <div><b>${two.familyName}</b>${two.parents}<br>${two.siblings ? "with " + two.siblings + "<br>" : ""}<span>${two.address}</span></div>
+        <div><b>${one.familyName}</b>${one.parents}<br>${one.siblings ? "with " + one.siblings + "<br>" : ""}<span>${one.address}</span></div>
+      </div>
+      <p class="meta" style="margin:var(--s-3) 0 0">RSVP on WhatsApp · ${W.contacts[0].name} · ${W.contacts[0].phone} · ${W.couple.hashtag}</p>
     </div>
   `;
 
@@ -154,7 +163,7 @@
   document.getElementById("ics").onclick = downloadICS;
   const share = document.getElementById("share");
   share.onclick = async () => {
-    const data = { title: document.title, text: `${one.first} & ${two.first} are getting married — ${fmtDate(W.wedding.date, "long")}, ${W.wedding.city}.`, url: location.href };
+    const data = { title: document.title, text: `${one.first} & ${two.first} are getting married — ${fmtDate(W.wedding.date, "long")}${cityDot}.`, url: location.href };
     if (navigator.share) { try { await navigator.share(data); } catch (_) {} }
     else { await navigator.clipboard.writeText(location.href); share.textContent = "Link copied"; }
   };

@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Room Hamper Plan</title>
 <meta name="description" content="The welcome hamper waiting in every guest room: tiers, contents, packaging, budget, logistics, and the printable tag and note card.">
+<script src="wedding.config.js"></script>
+<script>(function(){var q=new URLSearchParams(location.search).get("palette");var t=q||(window.WEDDING&&window.WEDDING.theme)||"midnight";if(t!=="midnight")document.documentElement.dataset.palette=t;})();</script>
 <link rel="stylesheet" href="assets/wedding.css">
 <style>
   .hero { text-align: center; padding: var(--s-8) 0 var(--s-6); }
@@ -112,7 +114,7 @@
         <p class="eyebrow">Budget</p>
         <h2 class="h3">Sample numbers, in rupees.</h2>
         <table class="budget" id="budget"></table>
-        <p class="meta" style="margin-top:var(--s-3)">Room counts are placeholders; edit the numbers in this file. Prices are Patna market estimates for planning, not quotes.</p>
+        <p class="meta" style="margin-top:var(--s-3)">Room counts are placeholders; edit the numbers in this file. Prices are planning estimates, not quotes.</p>
       </div>
     </div>
   </div></section>
@@ -135,20 +137,19 @@
 <div class="sheet cards" id="cards"></div>
 <div class="sheet tags" id="tags"></div>
 
-<script src="wedding.config.js"></script>
 <script src="assets/vendor/qrcode-generator.js"></script>
 <script src="assets/wedding.js"></script>
 <script>
 (function () {
-  const { W, fmtDate, sealSVG, qrSVG } = WX;
+  const { W, fmtDate, sealSVG, qrSVG, city, cityDot } = WX;
   const one = W.couple.one, two = W.couple.two;
   document.title = `${one.first} & ${two.first} · Room hamper plan`;
 
   document.getElementById("hero").innerHTML = `
     <div class="seal">${sealSVG()}</div>
     <p class="eyebrow">The room hamper</p>
-    <h1 class="display" style="font-size:clamp(2.4rem,8vw,4rem)">The <em>Patna</em> basket.</h1>
-    <p class="lead italic measure mx">What every out-of-town guest finds on the bed when they open the door: the things they forgot to pack, the things they will need at 2 am after the sangeet, and a few things from Patna to take home.</p>`;
+    <h1 class="display" style="font-size:clamp(2.4rem,8vw,4rem)">The <em>welcome</em> basket.</h1>
+    <p class="lead italic measure mx">What every out-of-town guest finds on the bed when they open the door: the things they forgot to pack, the things they will need at 2 am after the sangeet, and a few things from Bihar, the groom’s home, to take home.</p>`;
 
   // ── Tiers ─────────────────────────────────────────────────────────────
   const TIERS = [
@@ -187,7 +188,7 @@
     ["Itinerary card", "Pocket card, one side per day. Fits a clutch.", T, T, T],
     ["Handwritten letter", "From the couple. Tier 1 only, written the week before.", T, N, N],
     ["Sweet", null],
-    ["Silao khaja", "Patna’s flaky layered sweet. 250 g box; 500 g in a Madhubani box for tier 1.", G, T, T],
+    ["Silao khaja", "Bihar’s flaky layered sweet, from Silao. 250 g box; 500 g in a Madhubani box for tier 1.", G, T, T],
     ["Gaya tilkut", "Sesame & jaggery. Order T-3 days for freshness.", T, T, T],
     ["Dry fruit tin", "Almonds, cashews, roasted makhana.", T, T, N],
     ["Roasted makhana", "One packet, black salt.", N, N, T],
@@ -196,7 +197,7 @@
     ["Water & electrolytes", "Two glass bottles, two ORS / electrolyte sachets.", T, T, T],
     ["Emergency kit", "Paracetamol strip, antacid, plasters, safety pins, sewing kit, bindis, bobby pins, blotting paper, mints.", T, T, T],
     ["Sangeet recovery kit", "Sheet mask, eye drops, extra electrolytes, a lime.", N, T, N],
-    ["Attar roll-on", "Rose & vetiver, 6 ml, from a Patna attarwala.", T, T, N],
+    ["Attar roll-on", "Rose & vetiver, 6 ml, from a Bhagalpur attarwala.", T, T, N],
     ["Keepsake", null],
     ["Bhagalpuri silk stole", "Ivory, monogram embroidered in kumkum thread.", T, N, N],
     ["Madhubani box / coasters", "Box for tier 1, four coasters for tier 2.", T, T, N],
@@ -245,9 +246,9 @@
     <div class="notecard">
       <div>
         <div class="seal">${sealSVG()}</div>
-        <p class="eyebrow" style="margin:3mm 0 0">Welcome to ${W.wedding.city}</p>
+        <p class="eyebrow" style="margin:3mm 0 0">Welcome${city ? " to " + city : ""}</p>
         <h3>Dear <span class="name">&nbsp;</span></h3>
-        <p>Thank you for coming all this way. This basket has the things you will forget to pack, the things you will need after the sangeet, and a few things from ${W.wedding.city} we think you should take home.</p>
+        <p>Thank you for coming all this way. This basket has the things you will forget to pack, the things you will need after the sangeet, and a few things from Bihar, Shanu’s home, that we think you should take home.</p>
         <p>The little book beside it has the three days: where to be, when, what to wear, what you will eat. Keep it in your bag.</p>
         <p class="lead italic" style="font-size:12pt;margin-top:4mm">With love,<br>${one.first} &amp; ${two.first}</p>
       </div>
@@ -262,7 +263,7 @@
   const tag = `
     <div class="tag">
       <div class="seal">${sealSVG()}</div>
-      <p class="eyebrow">${fmtDate(W.wedding.date)} · ${W.wedding.city}</p>
+      <p class="eyebrow">${fmtDate(W.wedding.date)}${cityDot}</p>
       <h4>${one.first} &amp; ${two.first}</h4>
       <div class="line">For <span></span></div>
     </div>`;

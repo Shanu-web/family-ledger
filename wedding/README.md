@@ -1,4 +1,4 @@
-# The wedding suite — Kumkum & Ivory
+# The wedding suite — Shanu & Sonali
 
 Four pieces, one design system, one config file. Everything a guest touches
 looks like it came from the same hand: the invitation they receive, the page
@@ -22,10 +22,19 @@ dress code, colour palette, note, menu) and the copy (welcome letter, story,
 gift note). Values marked `SAMPLE` are placeholders; change them and every
 page updates. No build step.
 
-The two things you must change before sending anything:
+What is already in: both families with parents, brothers and home addresses,
+the monogram S·S, the hashtag, and the three days (10 Dec tilak 1:30 pm and
+sangeet + engagement 6 pm; 11 Dec haldi 11 am and baraat 7 pm with jaimala and
+reception from 8 pm; 12 Dec bidai before sunrise).
 
-1. `guestUrl` — the public address of `guest.html`. **This is what every QR encodes.**
-2. `rsvp.whatsapp` — the number RSVPs go to (digits only, with country code).
+Still marked `TODO` in the config, in order of urgency:
+
+1. `VENUE_NAME` / `VENUE_CITY` at the top of the file, plus the venue address, landmark and parking. Every page, card and QR picks them up.
+2. `guestUrl` — the public address of `guest.html`. **This is what every QR encodes.**
+3. `rsvp.whatsapp` and the four contact numbers (Gaurav and Vikash are named; numbers are zeros).
+4. The hotel, and the travel lines once the city is known.
+5. `copy.story` — three short paragraphs in your own words.
+6. `theme` — which of the three palettes (below).
 
 ## 2. Publish the guest page (so the QR works)
 
@@ -73,11 +82,14 @@ where the circle is). Cut on the dashed lines.
 
 The rule: one palette, two typefaces, three motifs, nothing else anywhere.
 
-- **Palette · Kumkum & Ivory.** Sindoor red `#6E1E2B` as the only strong
-  colour, old gold `#B8935A` for rules and motifs (never yellow), ivory
-  `#F6F1E7` as the paper, warm ink `#1C1A18` for headings, and one soft accent,
-  rose `#C9A4A0`, used sparingly. Each event has its own three-swatch palette
-  for the dress code, but the pages stay in the house colours.
+- **Palette.** Three to choose from, set once with `theme` in the config
+  (preview any page with `?palette=forest` etc.). Each is one strong colour,
+  one metallic, a warm paper, and a single accent used at most once per page.
+  - `midnight` (default) · **Midnight & Champagne**: deep indigo `#1B2A41`, champagne gold `#B99A63`, warm white `#F4EFE6`, marigold accent.
+  - `forest` · **Forest & Brass**: deep green `#1E3A34`, brass `#B08D57`, bone white `#F3EFE7`, terracotta accent.
+  - `kumkum` · **Kumkum & Ivory**: sindoor red `#6E1E2B`, old gold `#B8935A`, ivory `#F6F1E7`, rose accent. The classic, done quietly.
+  Each event also has a three-swatch palette for its dress code; that is for
+  the guests' clothes and does not leak into the page design.
 - **Type.** *Cormorant Garamond* for display (light weight for names, italic
   for warmth, never bold) and *Karla* for everything small (eyebrows are 11 px
   uppercase tracked at 0.22 em). *Tiro Devanagari Hindi* only for the shloka.

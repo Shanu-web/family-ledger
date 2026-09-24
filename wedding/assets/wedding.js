@@ -110,5 +110,7 @@
     tick(); setInterval(tick, 30000);
   }
 
-  window.WX = { W, fmtDate, fmtTime, days, sealSVG, corners, ICON, qrSVG, ics, downloadICS, rsvpLink, mapsEmbed, directions, swatches, countdown, parseISO };
+  const city = W.wedding.city || "";
+  const cityDot = city ? " · " + city : "";
+  window.WX = { city, cityDot, W, fmtDate, fmtTime, days, sealSVG, corners, ICON, qrSVG, ics, downloadICS, rsvpLink, mapsEmbed, directions, swatches, countdown, parseISO };
 })();

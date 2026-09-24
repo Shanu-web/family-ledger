@@ -9,18 +9,23 @@
   color-scheme: light;                 /* an invitation is paper: it never goes dark */
 
   /* ── Palette ─────────────────────────────────────────────────────────── */
-  --paper:     #F6F1E7;   /* ivory card stock */
-  --paper-2:   #EEE6D6;   /* a shade deeper, for panels */
-  --paper-3:   #E2D6BF;   /* hairlines on paper */
-  --ink:       #1C1A18;   /* near-black, warm */
-  --ink-2:     #4A4541;   /* body text */
-  --ink-3:     #8A8279;   /* captions, meta */
-  --kumkum:    #6E1E2B;   /* the red of sindoor, the primary */
-  --kumkum-2:  #4E131E;   /* pressed deeper */
-  --gold:      #B8935A;   /* old gold, never yellow */
-  --gold-2:    #D9C08F;   /* gold at 60% */
-  --gold-3:    #F0E4C8;   /* gold wash */
-  --rose:      #C9A4A0;   /* the one soft accent */
+  /* Three considered palettes; pick one in wedding.config.js (theme: "…").
+     Token names are semantic: --kumkum is "the one strong colour", whatever
+     hue the theme gives it; --gold is the metallic; --rose is the single accent. */
+
+  /* Default · MIDNIGHT & CHAMPAGNE: deep indigo, champagne gold, warm white, one marigold accent */
+  --paper:     #F4EFE6;
+  --paper-2:   #EAE3D6;
+  --paper-3:   #D9D0BE;
+  --ink:       #14192B;
+  --ink-2:     #3C4256;
+  --ink-3:     #7C8194;
+  --kumkum:    #1B2A41;
+  --kumkum-2:  #101A2B;
+  --gold:      #B99A63;
+  --gold-2:    #D8C69C;
+  --gold-3:    #EFE6D2;
+  --rose:      #D9A441;
 
   /* ── Type ────────────────────────────────────────────────────────────── */
   --font-display: 'Cormorant Garamond', 'Cormorant', Georgia, 'Times New Roman', serif;
@@ -46,6 +51,23 @@
   --shadow-card: 0 1px 0 rgba(28,26,24,.06), 0 12px 32px -12px rgba(78,19,30,.25);
 }
 
+/* KUMKUM & IVORY: sindoor red, old gold, ivory (the classic, done quietly) */
+:root[data-palette="kumkum"] {
+  --paper: #F6F1E7; --paper-2: #EEE6D6; --paper-3: #E2D6BF;
+  --ink: #1C1A18; --ink-2: #4A4541; --ink-3: #8A8279;
+  --kumkum: #6E1E2B; --kumkum-2: #4E131E;
+  --gold: #B8935A; --gold-2: #D9C08F; --gold-3: #F0E4C8;
+  --rose: #C9A4A0;
+}
+/* FOREST & BRASS: deep green, brass, bone white, one terracotta accent */
+:root[data-palette="forest"] {
+  --paper: #F3EFE7; --paper-2: #E9E3D7; --paper-3: #D7CFC0;
+  --ink: #141C19; --ink-2: #3B4541; --ink-3: #7B8580;
+  --kumkum: #1E3A34; --kumkum-2: #12261F;
+  --gold: #B08D57; --gold-2: #D2BA8C; --gold-3: #ECE3CF;
+  --rose: #C97B63;
+}
+
 /* ── Reset, lightly ────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
@@ -67,7 +89,7 @@ p { margin: 0 0 var(--s-4); }
 button { font: inherit; }
 
 /* ── Motif 1: the jaali (lattice) ──────────────────────────────────────── */
-:root { --jaali: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'><g fill='none' stroke='%23B8935A' stroke-width='0.7' stroke-opacity='0.28'><path d='M28 2 L54 28 L28 54 L2 28 Z'/><path d='M28 12 L44 28 L28 44 L12 28 Z'/><circle cx='28' cy='28' r='3'/><path d='M0 0 L8 0 M0 0 L0 8 M56 0 L48 0 M56 0 L56 8 M0 56 L8 56 M0 56 L0 48 M56 56 L48 56 M56 56 L56 48'/></g></svg>"); }
+:root { --jaali: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'><g fill='none' stroke='%23B99A63' stroke-width='0.7' stroke-opacity='0.28'><path d='M28 2 L54 28 L28 54 L2 28 Z'/><path d='M28 12 L44 28 L28 44 L12 28 Z'/><circle cx='28' cy='28' r='3'/><path d='M0 0 L8 0 M0 0 L0 8 M56 0 L48 0 M56 0 L56 8 M0 56 L8 56 M0 56 L0 48 M56 56 L48 56 M56 56 L56 48'/></g></svg>"); }
 .jaali { background-color: var(--paper); background-image: var(--jaali); background-size: 56px 56px; }
 .jaali-soft { position: relative; background-image: none; }          /* pattern lives in ::before so it can fade at the edges */
 .jaali-soft::before {

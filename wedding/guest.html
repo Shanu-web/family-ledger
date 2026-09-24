@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Guest Guide</title>
 <meta name="description" content="Everything a guest needs: the map, the schedule, the dress codes, the menus, the stay and who to call.">
+<script src="wedding.config.js"></script>
+<script>(function(){var q=new URLSearchParams(location.search).get("palette");var t=q||(window.WEDDING&&window.WEDDING.theme)||"midnight";if(t!=="midnight")document.documentElement.dataset.palette=t;})();</script>
 <link rel="stylesheet" href="assets/wedding.css">
 <style>
   /* Hero */
@@ -80,8 +82,8 @@
 <main>
   <section class="section" id="schedule"><div class="wrap narrow">
     <p class="eyebrow center">The schedule</p>
-    <h2 class="h2 center" style="font-style:italic">Three days, five reasons to dress up.</h2>
-    <p class="center meta">Times are Indian Standard Time. Shuttles leave the hotel lobby 45 minutes before each event.</p>
+    <h2 class="h2 center" style="font-style:italic">Three days, from the tilak to the bidai.</h2>
+    <p class="center meta">Times are Indian Standard Time. </p>
     <div id="days"></div>
   </div></section>
 
@@ -135,12 +137,11 @@
   <div class="wrap narrow" id="footer"></div>
 </footer>
 
-<script src="wedding.config.js"></script>
 <script src="assets/vendor/qrcode-generator.js"></script>
 <script src="assets/wedding.js"></script>
 <script>
 (function () {
-  const { W, fmtDate, fmtTime, days, sealSVG, ICON, downloadICS, rsvpLink, mapsEmbed, directions, swatches, countdown } = WX;
+  const { W, fmtDate, fmtTime, days, sealSVG, ICON, downloadICS, rsvpLink, mapsEmbed, directions, swatches, countdown, city, cityDot } = WX;
   const one = W.couple.one, two = W.couple.two;
   document.title = `${one.first} & ${two.first} · Guest guide`;
 
@@ -148,7 +149,7 @@
     <div class="seal reveal">${sealSVG()}</div>
     <p class="eyebrow reveal d1">You are invited to the wedding of</p>
     <h1 class="display names reveal d2"><em>${one.first}</em><span class="amp">&amp;</span><em>${two.first}</em></h1>
-    <p class="when reveal d3">${fmtDate(W.wedding.date, "ord")}<br>${W.wedding.city}</p>
+    <p class="when reveal d3">${fmtDate(W.wedding.date, "ord")}${city ? "<br>" + city : ""}</p>
     <p class="countdown reveal d3" id="countdown"></p>
     <div class="actions reveal d4">
       <a class="btn" href="${rsvpLink()}" target="_blank" rel="noopener">${ICON.wa} RSVP on WhatsApp</a>
@@ -210,7 +211,7 @@
   document.getElementById("footer").innerHTML = `
     <div class="seal gold">${sealSVG()}</div>
     <p class="lead italic">${W.copy.thankYou}</p>
-    <p class="meta">${one.full} &amp; ${two.full} · ${fmtDate(W.wedding.date)} · ${W.wedding.city}</p>`;
+    <p class="meta">${one.full} &amp; ${two.full} · ${fmtDate(W.wedding.date)}${cityDot}</p>`;
 
   // Nav highlight on scroll
   const links = [...document.querySelectorAll(".nav a")];
