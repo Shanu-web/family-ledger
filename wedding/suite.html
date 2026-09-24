@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wedding Suite</title>
+<meta name="description" content="The invitation, the guest page, the magazine and the hamper plan, all from one design system.">
+<script src="wedding.config.js"></script>
+<script>(function(){var q=new URLSearchParams(location.search).get("palette");var t=q||(window.WEDDING&&window.WEDDING.theme)||"midnight";if(t!=="midnight")document.documentElement.dataset.palette=t;})();</script>
+<link rel="stylesheet" href="assets/wedding.css">
+<style>
+  .hero { text-align: center; padding: var(--s-8) 0 var(--s-6); }
+  .hero .seal { width: 4.5rem; height: 4.5rem; margin: 0 auto var(--s-4); }
+  .pieces { display: grid; gap: var(--s-4); }
+  @media (min-width: 720px) { .pieces { grid-template-columns: 1fr 1fr; } }
+  .piece { display: block; color: inherit; text-decoration: none; }
+  .piece:hover { text-decoration: none; }
+  .piece .card { height: 100%; transition: transform .15s ease, box-shadow .15s ease; }
+  .piece:hover .card { transform: translateY(-2px); box-shadow: 0 1px 0 rgba(28,26,24,.06), 0 18px 40px -14px rgba(78,19,30,.35); }
+  .piece h3 { font-size: 1.9rem; }
+  .piece h3 span { display: block; font-size: var(--fs-md); font-style: italic; color: var(--gold); }
+  .piece p { font-size: var(--fs-sm); color: var(--ink-3); margin: var(--s-3) 0 0; }
+  .piece .k { font-size: var(--fs-xs); letter-spacing: var(--track); text-transform: uppercase; color: var(--kumkum); font-weight: 600; }
+  .tokens { display: grid; grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr)); gap: var(--s-3); }
+  .tok { border: 1px solid var(--paper-3); }
+  .tok i { display: block; height: 3.5rem; }
+  .tok b { display: block; padding: .5rem .6rem 0; font-size: var(--fs-xs); letter-spacing: .12em; text-transform: uppercase; color: var(--ink); }
+  .tok small { display: block; padding: 0 .6rem .5rem; color: var(--ink-3); font-size: var(--fs-xs); }
+  .type p { margin: 0 0 var(--s-2); }
+</style>
+</head>
+<body>
+<header class="hero jaali jaali-soft"><div class="wrap narrow" id="hero"></div></header>
+<main>
+  <section class="section"><div class="wrap">
+    <div class="pieces">
+      <a class="piece" href="invitation.html"><div class="card"><span class="k">01 · Send</span><h3>The invitation<span>Digital first, A5 card second</span></h3><p>Share the link on WhatsApp, or print it: front is the ask, back is the three days and the QR.</p></div></a>
+      <a class="piece" href="guest.html"><div class="card"><span class="k">02 · Scan</span><h3>The guest page<span>What the QR opens</span></h3><p>Map and directions, the full schedule with dress codes, every menu, the stay, travel, and who to call.</p></div></a>
+      <a class="piece" href="magazine.html"><div class="card"><span class="k">03 · Print</span><h3>The magazine<span>16 pages, A5, saddle-stitched</span></h3><p>Welcome letter, the families, the story, the three days, the events, the menus, the map, the little things.</p></div></a>
+      <a class="piece" href="hamper.html"><div class="card"><span class="k">04 · Welcome</span><h3>The room hamper<span>Three tiers, one look</span></h3><p>Contents matrix, packaging spec, budget, a ten-step logistics plan, and the printable note card and tag.</p></div></a>
+    </div>
+  </div></section>
+
+  <section class="section" style="background:var(--paper-2)"><div class="wrap">
+    <div class="grid-2">
+      <div>
+        <p class="eyebrow">The palette · <span id="pal-name"></span></p>
+        <p class="meta">Three to choose from, set once in the config: <a href="?palette=midnight">Midnight &amp; Champagne</a> · <a href="?palette=kumkum">Kumkum &amp; Ivory</a> · <a href="?palette=forest">Forest &amp; Brass</a></p>
+        <div class="tokens">
+          <div class="tok"><i style="background:var(--kumkum)"></i><b>Primary</b><small>the one strong colour</small></div>
+          <div class="tok"><i style="background:var(--kumkum-2)"></i><b>Pressed</b><small>hover, magazine cover</small></div>
+          <div class="tok"><i style="background:var(--gold)"></i><b>Metallic</b><small>rules, motifs, seal</small></div>
+          <div class="tok"><i style="background:var(--gold-2)"></i><b>Metallic 60</b><small>on the primary</small></div>
+          <div class="tok"><i style="background:var(--paper)"></i><b>Paper</b><small>the page</small></div>
+          <div class="tok"><i style="background:var(--paper-2)"></i><b>Paper deep</b><small>panels</small></div>
+          <div class="tok"><i style="background:var(--ink)"></i><b>Ink</b><small>headings</small></div>
+          <div class="tok"><i style="background:var(--rose)"></i><b>Accent</b><small>used once per page, at most</small></div>
+        </div>
+      </div>
+      <div class="type">
+        <p class="eyebrow">The type</p>
+        <p class="display" style="font-size:2.6rem"><em>Cormorant</em> Garamond</p>
+        <p class="meta">Display. Light for names, italic for warmth, never bold.</p>
+        <p style="font-weight:600;letter-spacing:var(--track);text-transform:uppercase;font-size:var(--fs-xs);color:var(--kumkum);margin-top:var(--s-4)">Karla · eyebrows &amp; body</p>
+        <p class="meta">One sans for everything small. Eyebrows are 11px, uppercase, tracked wide.</p>
+        <p class="devanagari" style="margin-top:var(--s-4)">तिरो देवनागरी</p>
+        <p class="meta">Tiro Devanagari Hindi for the shloka, and only the shloka.</p>
+        <p class="eyebrow" style="margin-top:var(--s-5)">The motifs</p>
+        <p class="meta">A jaali lattice (never above 30% opacity), a hairline rule with a diamond, and the monogram seal. Nothing else, anywhere.</p>
+      </div>
+    </div>
+  </div></section>
+</main>
+<script src="assets/wedding.js"></script>
+<script>
+(function () {
+  const { W, fmtDate, sealSVG, cityDot } = WX;
+  document.getElementById("hero").innerHTML = `
+    <div class="seal">${sealSVG()}</div>
+    <p class="eyebrow">The wedding suite</p>
+    <h1 class="display"><em>${W.couple.one.first}</em><span class="amp">&amp;</span><em>${W.couple.two.first}</em></h1>
+    <p class="lead italic">${fmtDate(W.wedding.date, "long")}${cityDot}</p>
+    <p class="meta measure mx">Four pieces, one system. Edit <code>wedding.config.js</code> and every piece updates.</p>`;
+  const names = { midnight: "Midnight & Champagne", kumkum: "Kumkum & Ivory", forest: "Forest & Brass" };
+  document.getElementById("pal-name").textContent = names[document.documentElement.dataset.palette || "midnight"];
+})();
+</script>
+</body>
+</html>

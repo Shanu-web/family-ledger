@@ -6,13 +6,14 @@ the QR opens, the magazine on the bed, and the hamper it leans against.
 
 | # | Piece | File | Output |
 |---|-------|------|--------|
+| 00 | **The website** | `index.html` | The public site: a sealed envelope you tap, the card slides out in 3D and tilts with your phone, marigold petals, countdown tiles, the three days, venue map, menus, stay, contacts, RSVP. `assets/og.jpg` is the WhatsApp link preview. |
 | 01 | **The invitation** | `invitation.html` | Digital (share the link) and a two-sided **A5 card** when printed |
 | 02 | **The guest page** | `guest.html` | What the **QR opens**: map, countdown, schedule, dress codes, menus, stay, travel, contacts, RSVP, add-to-calendar |
 | 03 | **The magazine** | `magazine.html` | **16-page A5 booklet**, saddle-stitched: welcome, families, story, schedule, events, menus, map, little things |
 | 04 | **The room hamper** | `hamper.html` | Three tiers, contents matrix, packaging, budget, 10-step logistics, plus **printable A6 note cards and tags** |
-| — | Landing | `index.html` | Links to all four, shows the palette and type |
+| — | Suite index | `suite.html` | Internal: links to every piece, shows the palette and type |
 
-Open `index.html` in a browser, or run the app and visit `/wedding/`.
+Open `suite.html` for the internal index, or run the app and visit `/wedding/` for the public site.
 
 ## 1. Edit one file
 

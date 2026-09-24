@@ -112,6 +112,30 @@
     share: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 13v6h14v-6"/></svg>`,
   };
 
+  /* ── The card front, one source for print and web ──────────────────── */
+  function cardFront(opts) {
+    opts = opts || {}; const one = W.couple.one, two = W.couple.two;
+    const r = (n) => opts.animate === false ? "" : ` reveal${n ? " d" + n : ""}`;
+    return `
+    ${ornate()}
+    <div class="${r(0).trim()}">${ganesha()}</div>
+    <p class="mantra${r(0)}">${W.wedding.ganesh}</p>
+    <p class="eyebrow${r(1)}">${W.wedding.shlokaSub}</p>
+    <p class="hosts${r(2)}">${one.parents}</p>
+    <p class="invite${r(2)}">${W.copy.inviteLine}</p>
+    <h1 class="display names${r(3)}"><em>${one.first}</em><span class="with">${W.copy.withLine}</span><em>${two.first}</em></h1>
+    <p class="of${r(3)}">${two.role} of <b>${two.parents}</b></p>
+    <div class="rule${r(3)}"><i></i></div>
+    <div class="date${r(4)}">
+      <span class="dow">${fmtDate(W.wedding.date, "day")}</span>
+      <span class="dd">${fmtDate(W.wedding.date, "dnum")}</span>
+      <span class="yr">${fmtDate(W.wedding.date, "year")}</span>
+      <span class="mo">${fmtDate(W.wedding.date, "month")} · ${fmtTime(W.wedding.time)}</span>
+    </div>
+    <p class="venue${r(4)}">${W.venue.name}<small>${W.venue.address}</small></p>
+    <p class="compliments${r(5)}">${W.copy.complimentsLine}<b>${one.siblings ? one.siblings + " " : ""}${one.familyLine}</b></p>`;
+  }
+
   /* ── QR ─────────────────────────────────────────────────────────────── */
   // Renders an SVG QR (error-correction H so the seal in the centre is safe).
   function qrSVG(url, opts) {
@@ -170,10 +194,10 @@
   // the page's own origin (so a fresh Netlify deploy is correct without editing anything).
   function guestUrl() {
     if (W.guestUrl && !/example\.com/.test(W.guestUrl)) return W.guestUrl;
-    if (typeof location !== "undefined" && /^https?:/.test(location.protocol)) return location.origin + location.pathname.replace(/[^/]*$/, "") + "guest.html";
+    if (typeof location !== "undefined" && /^https?:/.test(location.protocol)) return location.origin + location.pathname.replace(/[^/]*$/, "") + "#schedule";
     return W.guestUrl;
   }
   const city = W.wedding.city || "";
   const cityDot = city ? " · " + city : "";
-  window.WX = { guestUrl, mealsFor, ganesha, ganeshaSVG, lotusSVG, paisleySVG, ornate, city, cityDot, W, fmtDate, fmtTime, days, sealSVG, corners, ICON, qrSVG, ics, downloadICS, rsvpLink, mapsEmbed, directions, swatches, countdown, parseISO };
+  window.WX = { cardFront, guestUrl, mealsFor, ganesha, ganeshaSVG, lotusSVG, paisleySVG, ornate, city, cityDot, W, fmtDate, fmtTime, days, sealSVG, corners, ICON, qrSVG, ics, downloadICS, rsvpLink, mapsEmbed, directions, swatches, countdown, parseISO };
 })();
