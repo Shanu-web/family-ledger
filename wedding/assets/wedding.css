@@ -146,7 +146,7 @@ button { font: inherit; }
 .section { padding-block: var(--s-8); }
 @media (min-width: 720px) { :root { --gutter: 2rem; } .section { padding-block: var(--s-9); } }
 .grid-2 { display: grid; gap: var(--s-6); }
-@media (min-width: 720px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 720px) { .grid-2 { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
 .stack > * + * { margin-top: var(--s-4); }
 
 /* ── Components ────────────────────────────────────────────────────────── */
