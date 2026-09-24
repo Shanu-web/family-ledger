@@ -139,7 +139,7 @@
 <div class="toolbar no-print">
   <button class="btn" onclick="window.print()">Print / save as PDF</button>
   <a class="btn ghost" href="guest.html">Guest page</a>
-  <a class="btn ghost" href="hamper.html">Hamper plan</a>
+  <a class="btn ghost" href="invitation.html">Invitation</a>
   <p class="meta">A5 · 16 pages · saddle-stitched. Wide screens show it as spreads; print gives one page per sheet for the printer to impose.</p>
 </div>
 <div class="book" id="book"></div>
@@ -148,7 +148,7 @@
 <script src="assets/wedding.js"></script>
 <script>
 (function () {
-  const { W, fmtDate, fmtTime, days, mealsFor, sealSVG, ganesha, ornate, ICON, qrSVG, swatches, directions, city, cityDot } = WX;
+  const { guestUrl, W, fmtDate, fmtTime, days, mealsFor, sealSVG, ganesha, ornate, ICON, qrSVG, swatches, directions, city, cityDot } = WX;
   const one = W.couple.one, two = W.couple.two;
   const ev = Object.fromEntries(W.events.map(e => [e.id, e]));
   const short = s => s.split(",")[0];
@@ -298,9 +298,9 @@
   P.push(page("backcover", `
     <div class="seal">${sealSVG()}</div>
     <p class="lead italic" style="margin-top:4mm">${W.copy.thankYou}</p>
-    <div class="qr">${qrSVG(W.guestUrl)}</div>
+    <div class="qr">${qrSVG(guestUrl())}</div>
     <p class="eyebrow ink">Scan for the live schedule, map &amp; menus</p>
-    <p class="meta">${W.guestUrl.replace(/^https?:\/\//, "")}</p>
+    <p class="meta">${guestUrl().replace(/^https?:\/\//, "")}</p>
     <p class="meta" style="margin-top:8mm">${one.full} &amp; ${two.full} · ${fmtDate(W.wedding.date)}${cityDot} · ${W.couple.hashtag}</p>`));
 
   document.getElementById("book").innerHTML = P.join("");

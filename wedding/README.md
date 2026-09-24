@@ -53,8 +53,11 @@ The folder is plain static HTML. Two easy routes:
 
 - **This app.** `app.py` mounts the folder at `/wedding`, so on the deployed
   host the guest page is `https://<your-host>/wedding/guest.html`.
-- **Any static host** (GitHub Pages, Netlify, a `.in` domain): upload the
-  `wedding/` folder as-is.
+- **Netlify drag-and-drop.** Run `bash wedding/tools/build_site.sh` and drop
+  the zip it makes onto app.netlify.com/drop. The site root is the invitation;
+  `guest.html` and `magazine.html` sit beside it. The zip leaves out the
+  planner notes, the hamper page and the tools, so nothing internal goes public.
+  The QR encodes the deployed address automatically until `guestUrl` is set.
 
 Put the final URL in `guestUrl`, reload the pages, and the QR on the
 invitation back, the magazine back cover and the hamper note card all point

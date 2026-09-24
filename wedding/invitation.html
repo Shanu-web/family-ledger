@@ -108,7 +108,7 @@
 <script src="assets/wedding.js"></script>
 <script>
 (function () {
-  const { W, fmtDate, fmtTime, days, sealSVG, ornate, ganesha, ICON, qrSVG, downloadICS, rsvpLink, city, cityDot } = WX;
+  const { guestUrl, W, fmtDate, fmtTime, days, sealSVG, ornate, ganesha, ICON, qrSVG, downloadICS, rsvpLink, city, cityDot } = WX;
   const one = W.couple.one, two = W.couple.two;
   document.title = `${one.first} & ${two.first} · ${fmtDate(W.wedding.date)}`;
 
@@ -153,9 +153,9 @@
         <div>
           <h3>Scan for everything else</h3>
           <p>Map and directions, the full schedule, dress codes, the menus, travel, and who to call.</p>
-          <p class="url">${W.guestUrl.replace(/^https?:\/\//, "")}</p>
+          <p class="url">${guestUrl().replace(/^https?:\/\//, "")}</p>
         </div>
-        <div class="qr">${qrSVG(W.guestUrl, { fg: "#1C1A18" })}</div>
+        <div class="qr">${qrSVG(guestUrl(), { fg: "#1C1A18" })}</div>
       </div>
       <div class="fams">
         <div><b>${one.familyName}</b>${one.parents}<br>${one.siblings ? "with " + one.siblings + "<br>" : ""}<span>${one.address}</span></div>

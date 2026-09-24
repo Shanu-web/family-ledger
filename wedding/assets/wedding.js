@@ -166,7 +166,14 @@
     tick(); setInterval(tick, 30000);
   }
 
+  // The address the QR encodes: the configured guestUrl, or, while that is still the placeholder,
+  // the page's own origin (so a fresh Netlify deploy is correct without editing anything).
+  function guestUrl() {
+    if (W.guestUrl && !/example\.com/.test(W.guestUrl)) return W.guestUrl;
+    if (typeof location !== "undefined" && /^https?:/.test(location.protocol)) return location.origin + location.pathname.replace(/[^/]*$/, "") + "guest.html";
+    return W.guestUrl;
+  }
   const city = W.wedding.city || "";
   const cityDot = city ? " · " + city : "";
-  window.WX = { mealsFor, ganesha, ganeshaSVG, lotusSVG, paisleySVG, ornate, city, cityDot, W, fmtDate, fmtTime, days, sealSVG, corners, ICON, qrSVG, ics, downloadICS, rsvpLink, mapsEmbed, directions, swatches, countdown, parseISO };
+  window.WX = { guestUrl, mealsFor, ganesha, ganeshaSVG, lotusSVG, paisleySVG, ornate, city, cityDot, W, fmtDate, fmtTime, days, sealSVG, corners, ICON, qrSVG, ics, downloadICS, rsvpLink, mapsEmbed, directions, swatches, countdown, parseISO };
 })();
