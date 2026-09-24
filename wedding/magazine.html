@@ -45,10 +45,10 @@
   .page .end { margin-top: 8mm; }
 
   /* Cover */
-  .cover { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background-color: var(--kumkum); color: var(--paper); }
-  .cover.jaali { background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'><g fill='none' stroke='%23D8C69C' stroke-width='0.7' stroke-opacity='0.35'><path d='M28 2 L54 28 L28 54 L2 28 Z'/><path d='M28 12 L44 28 L28 44 L12 28 Z'/><circle cx='28' cy='28' r='3'/><path d='M0 0 L8 0 M0 0 L0 8 M56 0 L48 0 M56 0 L56 8 M0 56 L8 56 M0 56 L0 48 M56 56 L48 56 M56 56 L56 48'/></g></svg>"); }
-  .cover .inner { position: absolute; inset: 9mm; border: 1px solid var(--gold-2); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10mm; }
-  .cover .inner::after { content: ""; position: absolute; inset: 4px; border: 1px solid var(--gold-2); opacity: .5; }
+  .cover { color: var(--paper); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background-color: var(--kumkum); color: var(--paper); }
+  .cover.jaali { background-image: var(--jaali-gold); background-size: 64px 64px; }
+  .cover .inner { position: absolute; inset: 9mm; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10mm; }
+  .cover .orn.l { background: var(--kumkum); }
   .cover .seal { width: 22mm; height: 22mm; color: var(--gold-2); margin-bottom: 6mm; }
   .cover .eyebrow { color: var(--gold-2); }
   .cover .names { font-size: 40pt; color: var(--paper); }
@@ -143,7 +143,7 @@
 <script src="assets/wedding.js"></script>
 <script>
 (function () {
-  const { W, fmtDate, fmtTime, days, sealSVG, ICON, qrSVG, swatches, directions, city, cityDot } = WX;
+  const { W, fmtDate, fmtTime, days, sealSVG, ganeshaSVG, ornate, ICON, qrSVG, swatches, directions, city, cityDot } = WX;
   const one = W.couple.one, two = W.couple.two;
   const ev = Object.fromEntries(W.events.map(e => [e.id, e]));
   const short = s => s.split(",")[0];
@@ -171,7 +171,8 @@
 
   // 1 · Cover
   P.push(page("cover jaali full", `
-    <div class="inner">
+    <div class="inner ornate">
+      ${ornate()}
       <div class="seal">${sealSVG()}</div>
       <p class="eyebrow">The wedding of</p>
       <h1 class="display names"><em>${one.first}</em><span class="amp">&amp;</span><em>${two.first}</em></h1>
@@ -181,7 +182,8 @@
 
   // 2 · Inside cover
   P.push(page("shloka-page", `
-    <div class="seal gold">${sealSVG()}</div>
+    <div class="ganesha" style="width:22mm;height:24mm;margin-bottom:5mm">${ganeshaSVG()}</div>
+    <p class="devanagari" style="font-size:14pt;margin-bottom:8mm">${W.wedding.ganesh}</p>
     <p class="devanagari">${W.wedding.shloka}</p>
     <p class="eyebrow ink">${W.wedding.shlokaSub}</p>
     <div class="rule"><i></i></div>
@@ -207,9 +209,9 @@
     <p class="eyebrow">The families</p>
     <h2>Two homes, <em>one</em> table.</h2>
     <div class="rule"><i></i></div>
-    ${fam(two)}
-    <div class="rule"><i></i></div>
     ${fam(one)}
+    <div class="rule"><i></i></div>
+    ${fam(two)}
     <div class="rule"><i></i></div>
     <p class="meta measure mx">Grandparents, aunts, uncles, cousins and the friends who became family: you know who you are, and we will find you at the sangeet.</p>
     ${folio()}`));

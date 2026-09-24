@@ -9,34 +9,41 @@
 <script>(function(){var q=new URLSearchParams(location.search).get("palette");var t=q||(window.WEDDING&&window.WEDDING.theme)||"midnight";if(t!=="midnight")document.documentElement.dataset.palette=t;})();</script>
 <link rel="stylesheet" href="assets/wedding.css">
 <style>
-  /* ── The invitation is two faces of one A5 card: front (the ask) and back (the how) ── */
+  /* ── The invitation is two faces of one A5 card: the front (the ask, on deep navy with gold) and the back (the programme, on ivory) ── */
   body { background: var(--paper-2); }
   .stage { padding: var(--s-6) 0 var(--s-8); display: grid; gap: var(--s-6); justify-items: center; }
   .face {
     position: relative; width: min(100%, 148mm); min-height: 210mm; background-color: var(--paper); overflow: hidden;
-    box-shadow: 0 1px 0 rgba(28,26,24,.05), 0 30px 60px -30px rgba(78,19,30,.35);
-    padding: 12mm; display: flex; flex-direction: column;
+    box-shadow: 0 1px 0 rgba(28,26,24,.05), 0 30px 60px -30px rgba(20,25,43,.5);
+    padding: 11mm; display: flex; flex-direction: column;
   }
-  .face .frame { flex: 1; display: flex; flex-direction: column; justify-content: center; text-align: center; padding: 9mm 7mm; }
+  .face .ornate { flex: 1; display: flex; flex-direction: column; justify-content: center; text-align: center; padding: 11mm 8mm; }
 
-  /* Front */
-  .front .seal { width: 4.6rem; height: 4.6rem; margin: 0 auto var(--s-4); }
-  .front .devanagari { margin-bottom: var(--s-2); }
-  .front .families { font-family: var(--font-display); font-size: 1.05rem; color: var(--ink-2); line-height: 1.5; margin: 0; }
-  .front .families b { font-weight: 500; color: var(--ink); }
-  .front .invite { font-family: var(--font-display); font-style: italic; font-size: 1.05rem; color: var(--ink-3); margin: var(--s-4) 0; }
-  .front .names { font-size: clamp(2.6rem, 11vw, 4.2rem); margin: var(--s-2) 0; }
-  .front .names .amp { display: block; font-size: .55em; margin: .1em 0; }
-  .date { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: var(--s-3); margin: var(--s-5) 0 var(--s-3); }
-  .date .dow, .date .yr { font-size: var(--fs-xs); letter-spacing: var(--track); text-transform: uppercase; color: var(--kumkum); font-weight: 600; }
+  /* Front: navy card, gold ink */
+  .front { color: var(--paper); }
+  .front .ganesha { margin: 0 auto var(--s-1); width: 3.6rem; height: 3.9rem; }
+  .front .mantra { font-family: var(--font-dev); color: var(--gold-2); font-size: .95rem; letter-spacing: .04em; margin: 0 0 var(--s-3); }
+  .front .eyebrow { color: var(--gold-2); opacity: .9; letter-spacing: .16em; }
+  .front .hosts { font-family: var(--font-display); font-size: 1.08rem; font-weight: 500; color: var(--paper); line-height: 1.35; margin: 0; }
+  .front .invite { font-family: var(--font-display); font-style: italic; font-size: .95rem; color: var(--gold-2); line-height: 1.35; margin: var(--s-2) auto; max-width: 30rem; }
+  .front .names { font-size: clamp(2.6rem, 11vw, 3.9rem); color: var(--paper); margin: var(--s-1) 0; line-height: 1; }
+  .front .names em { color: var(--paper); }
+  .front .names .with { display: block; font-family: var(--font-display); font-style: italic; font-weight: 300; font-size: .34em; color: var(--gold-2); letter-spacing: .12em; margin: .15em 0; }
+  .front .of { font-family: var(--font-display); font-size: .98rem; color: var(--gold-3); margin: var(--s-2) 0 0; }
+  .front .of b { font-weight: 500; color: var(--paper); }
+  .front .rule { color: var(--gold); }
+  .date { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: var(--s-3); margin: var(--s-4) 0 var(--s-2); }
+  .date .dow, .date .yr { font-size: var(--fs-xs); letter-spacing: var(--track); text-transform: uppercase; color: var(--gold-2); font-weight: 600; }
   .date .dow { text-align: right; } .date .yr { text-align: left; }
-  .date .dd { font-family: var(--font-display); font-size: 3.6rem; line-height: 1; color: var(--ink); padding: 0 var(--s-3); border-inline: 1px solid var(--gold); }
-  .date .mo { font-family: var(--font-display); font-size: 1.15rem; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-2); grid-column: 1 / -1; }
-  .front .venue { margin-top: var(--s-4); font-family: var(--font-display); font-size: 1.15rem; color: var(--ink); }
-  .front .venue small { display: block; font-family: var(--font-text); font-size: var(--fs-sm); color: var(--ink-3); margin-top: 2px; }
+  .date .dd { font-family: var(--font-display); font-size: 3.4rem; line-height: 1; color: var(--paper); padding: 0 var(--s-3); border-inline: 1px solid var(--gold); }
+  .date .mo { font-family: var(--font-display); font-size: 1.1rem; letter-spacing: .14em; text-transform: uppercase; color: var(--gold-2); grid-column: 1 / -1; }
+  .front .venue { margin-top: var(--s-3); font-family: var(--font-display); font-size: 1.2rem; color: var(--paper); }
+  .front .venue small { display: block; font-family: var(--font-text); font-size: var(--fs-xs); letter-spacing: .06em; color: var(--gold-2); margin-top: 3px; }
+  .front .compliments { margin: var(--s-4) 0 0; font-family: var(--font-display); font-style: italic; font-size: .95rem; color: var(--gold-2); }
+  .front .compliments b { display: block; font-style: normal; font-weight: 500; color: var(--paper); }
 
-  /* Back */
-  .back .frame { justify-content: space-between; text-align: left; }
+  /* Back: ivory, the programme */
+  .back .ornate { justify-content: space-between; text-align: left; }
   .days { display: grid; gap: var(--s-3); margin-top: var(--s-4); }
   .day { display: grid; grid-template-columns: 3.2rem 1fr; gap: var(--s-3); align-items: start; padding-top: var(--s-3); border-top: 1px solid var(--paper-3); }
   .day:first-child { border-top: 0; padding-top: 0; }
@@ -46,12 +53,11 @@
   .day li { display: flex; justify-content: space-between; gap: var(--s-3); font-size: var(--fs-sm); padding: 2px 0; }
   .day li b { font-family: var(--font-display); font-weight: 500; font-size: 1.05rem; color: var(--ink); white-space: nowrap; }
   .day li span { color: var(--ink-3); text-align: right; font-variant-numeric: tabular-nums; }
-  .qrblock { display: grid; grid-template-columns: 1fr auto; gap: var(--s-4); align-items: center; margin-top: var(--s-5); padding-top: var(--s-4); border-top: 1px solid var(--paper-3); }
+  .qrblock { display: grid; grid-template-columns: 1fr auto; gap: var(--s-4); align-items: center; margin-top: var(--s-4); padding-top: var(--s-4); border-top: 1px solid var(--paper-3); }
   .qrblock .qr { width: 30mm; padding: 6px; }
   .qrblock h3 { font-size: 1.3rem; font-style: italic; }
   .qrblock p { font-size: var(--fs-sm); color: var(--ink-3); margin: var(--s-1) 0 0; }
   .qrblock .url { font-size: var(--fs-xs); letter-spacing: .04em; color: var(--kumkum); word-break: break-all; }
-
   .fams { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-4); margin-top: var(--s-4); padding-top: var(--s-3); border-top: 1px solid var(--paper-3); font-size: var(--fs-xs); line-height: 1.5; color: var(--ink-2); }
   .fams b { display: block; font-family: var(--font-display); font-size: 1.05rem; font-weight: 500; color: var(--ink); margin-bottom: 2px; }
   .fams span { color: var(--ink-3); }
@@ -68,22 +74,23 @@
     .face { width: 148mm; height: 210mm; min-height: 0; box-shadow: none; page-break-after: always; break-after: page; }
     .face:last-of-type { page-break-after: auto; break-after: auto; }
     .face { padding: 10mm; }
-    .face .frame { padding: 7mm 6mm; }
-    .front .seal { width: 3.8rem; height: 3.8rem; margin-bottom: var(--s-3); }
-    .front .names { font-size: 3.3rem; }
-    .front .invite { margin: var(--s-3) 0; }
-    .rule { margin: var(--s-4) auto; }
-    .date { margin: var(--s-4) 0 var(--s-2); }
-    .date .dd { font-size: 3rem; }
-    .jaali { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .face .ornate { padding: 8mm 7mm; }
+    .front .names { font-size: 3rem; }
+    .front .hosts { font-size: 1rem; }
+    .rule { margin: var(--s-3) auto; }
+    .date { margin: var(--s-3) 0 var(--s-1); }
+    .date .dd { font-size: 2.8rem; }
+    .front .venue { margin-top: var(--s-2); }
+    .front .compliments { margin-top: var(--s-3); }
+    .front, .jaali { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   }
 </style>
 </head>
 <body>
 <main class="stage" id="stage">
   <!-- FRONT ────────────────────────────────────────────────────────────── -->
-  <section class="face front jaali" aria-label="Invitation, front">
-    <div class="frame" id="front"></div>
+  <section class="face front jaali dark" aria-label="Invitation, front">
+    <div class="ornate" id="front"></div>
   </section>
 
   <!-- Screen actions (never printed) ─────────────────────────────────── -->
@@ -92,7 +99,7 @@
 
   <!-- BACK ─────────────────────────────────────────────────────────────── -->
   <section class="face back" aria-label="Invitation, back">
-    <div class="frame" id="back"></div>
+    <div class="ornate" id="back"></div>
   </section>
 </main>
 
@@ -100,18 +107,19 @@
 <script src="assets/wedding.js"></script>
 <script>
 (function () {
-  const { W, fmtDate, fmtTime, days, sealSVG, corners, ICON, qrSVG, downloadICS, rsvpLink, city, cityDot } = WX;
+  const { W, fmtDate, fmtTime, days, sealSVG, ornate, ganeshaSVG, ICON, qrSVG, downloadICS, rsvpLink, city, cityDot } = WX;
   const one = W.couple.one, two = W.couple.two;
   document.title = `${one.first} & ${two.first} · ${fmtDate(W.wedding.date)}`;
 
   document.getElementById("front").innerHTML = `
-    ${corners()}
-    <div class="seal reveal">${sealSVG()}</div>
-    <div class="devanagari reveal d1">${W.wedding.shloka}</div>
-    <p class="eyebrow ink reveal d1">${W.wedding.shlokaSub}</p>
-    <p class="families reveal d2"><b>${two.parents}</b><br><span class="meta">${two.familyLine}</span><br><span class="meta">and</span><br><b>${one.parents}</b><br><span class="meta">${one.familyLine}</span></p>
+    ${ornate()}
+    <div class="ganesha reveal">${ganeshaSVG()}</div>
+    <p class="mantra reveal">${W.wedding.ganesh}</p>
+    <p class="eyebrow reveal d1">${W.wedding.shlokaSub}</p>
+    <p class="hosts reveal d2">${one.parents}</p>
     <p class="invite reveal d2">${W.copy.inviteLine}</p>
-    <h1 class="display names reveal d3"><em>${one.first}</em><span class="amp">&amp;</span><em>${two.first}</em></h1>
+    <h1 class="display names reveal d3"><em>${one.first}</em><span class="with">${W.copy.withLine}</span><em>${two.first}</em></h1>
+    <p class="of reveal d3">${two.role} of <b>${two.parents}</b></p>
     <div class="rule reveal d3"><i></i></div>
     <div class="date reveal d4">
       <span class="dow">${fmtDate(W.wedding.date, "day")}</span>
@@ -119,13 +127,14 @@
       <span class="yr">${fmtDate(W.wedding.date, "year")}</span>
       <span class="mo">${fmtDate(W.wedding.date, "month")} · ${fmtTime(W.wedding.time)}</span>
     </div>
-    <p class="venue reveal d4">${W.venue.name}<small>${W.venue.address}${cityDot}</small></p>
+    <p class="venue reveal d4">${W.venue.name}<small>${W.venue.address}</small></p>
+    <p class="compliments reveal d5">${W.copy.complimentsLine}<b>${one.siblings ? one.siblings + " " : ""}${one.familyLine}</b></p>
   `;
 
   const ds = days();
   const oneVenue = W.events.every(e => e.where === W.events[0].where);
   document.getElementById("back").innerHTML = `
-    ${corners()}
+    ${ornate()}
     <div>
       <p class="eyebrow">The three days</p>
       <h2 class="h3" style="font-style:italic">We would love you at all of them.</h2>
@@ -142,14 +151,14 @@
       <div class="qrblock">
         <div>
           <h3>Scan for everything else</h3>
-          <p>Map and directions, the full schedule, dress codes, the menus, where you are staying, and who to call.</p>
+          <p>Map and directions, the full schedule, dress codes, the menus, travel, and who to call.</p>
           <p class="url">${W.guestUrl.replace(/^https?:\/\//, "")}</p>
         </div>
         <div class="qr">${qrSVG(W.guestUrl, { fg: "#1C1A18" })}</div>
       </div>
       <div class="fams">
-        <div><b>${two.familyName}</b>${two.parents}<br>${two.siblings ? "with " + two.siblings + "<br>" : ""}<span>${two.address}</span></div>
         <div><b>${one.familyName}</b>${one.parents}<br>${one.siblings ? "with " + one.siblings + "<br>" : ""}<span>${one.address}</span></div>
+        <div><b>${two.familyName}</b>${two.parents}<br>${two.siblings ? "with " + two.siblings + "<br>" : ""}<span>${two.address}</span></div>
       </div>
       <p class="meta" style="margin:var(--s-3) 0 0">RSVP on WhatsApp · ${W.contacts[0].name} · ${W.contacts[0].phone} · ${W.couple.hashtag}</p>
     </div>

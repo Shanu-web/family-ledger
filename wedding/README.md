@@ -35,8 +35,15 @@ Still marked `TODO` in the config, in order of urgency:
 4. `theme` — which of the three palettes (below).
 
 Venue is set: Sree Raaga Resorts, No. 1246, Budigere Bypass Road, Devanahalli,
-Bengaluru 562129 (25 minutes from BLR airport). Guests stay on the property,
-so the stay, travel and shuttle copy are written around that.
+Bengaluru 562129 (25 minutes from BLR airport). Stay arrangements are not
+assumed anywhere; the guest page says they will be shared personally.
+
+The card follows the traditional order: Shree Ganeshaya Namah at the top,
+the groom's parents as hosts, "the wedding ceremony of their son Shanu with
+Sonali, daughter of …", the date and venue, and "with best compliments" from
+Gaurav and the Choudhary family. The front is a deep navy card in gold with
+an ornate frame (paisley corners, lotus at each side); the back is ivory
+with the programme, the QR and both families' addresses.
 
 ## 2. Publish the guest page (so the QR works)
 
@@ -63,9 +70,9 @@ Test the QR on a phone **before** the print run.
 **Invitation card** — open `invitation.html`, print to PDF (⌘/Ctrl-P, "Save as
 PDF", no margins, background graphics on). You get two A5 pages: front and back.
 
-- Size A5 (148 × 210 mm), printed both sides. Add 3 mm bleed if the printer asks; the design has a 12 mm safe margin.
-- Stock: 350 gsm uncoated ivory cotton or wood-free board. Never gloss.
-- Upgrade: gold foil on the monogram seal only; a kumkum-lined envelope (C5), gold-ink handwritten names.
+- Size A5 (148 × 210 mm), printed both sides. Add 3 mm bleed; the design has an 11 mm safe margin.
+- Stock: 350 gsm uncoated ivory cotton or wood-free board. Never gloss. The front prints as a solid navy flood; ask for a proof.
+- Upgrade: print the front on navy board and hot-foil the gold (Ganesha, frame, names) instead of printing it; a gold-lined C5 envelope with names in gold ink.
 
 **Magazine** — open `magazine.html`, print to PDF the same way. You get 16
 single A5 pages in reading order; the printer imposes them for saddle-stitch.

@@ -42,6 +42,47 @@
       <text x="79" y="72" text-anchor="middle" font-family="Cormorant Garamond, Georgia, serif" font-size="46" font-weight="400" fill="currentColor">${b}</text>
     </svg>`;
   }
+  // Ganesha, drawn as a single continuous gold line: crown, ears, head, eyes, trunk curling to his left, one tusk, belly, hands.
+  function ganeshaSVG() {
+    return `<svg viewBox="0 0 120 130" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-label="Shree Ganesha">
+      <path d="M46 24 Q60 6 74 24"/><path d="M52 21 Q60 12 68 21"/><circle cx="60" cy="8" r="1.6" fill="currentColor" stroke="none"/>
+      <path d="M40 30 Q22 26 16 42 Q12 58 30 62"/><path d="M80 30 Q98 26 104 42 Q108 58 90 62"/>
+      <path d="M40 30 Q60 18 80 30 Q92 42 86 58 Q80 70 68 72 L52 72 Q40 70 34 58 Q28 42 40 30 Z"/>
+      <path d="M60 33 L60 38"/>
+      <path d="M46 47 Q50 43 54 47"/><path d="M66 47 Q70 43 74 47"/>
+      <path d="M66 58 L66 78 Q66 98 50 100 Q38 100 40 92 Q42 86 50 90"/>
+      <path d="M54 58 L54 72 Q54 78 60 80"/>
+      <path d="M72 70 Q84 72 80 82"/>
+      <path d="M40 80 Q26 92 30 108 Q36 122 60 122 Q84 122 90 108 Q94 92 80 80"/>
+      <path d="M30 96 Q18 100 22 110 Q26 116 34 112"/><path d="M90 96 Q102 100 98 110 Q94 116 86 112"/>
+      <path d="M26 110 Q22 106 24 102"/>
+      <path d="M96 108 Q100 100 92 96"/><circle cx="97" cy="99" r="3.2"/><path d="M95 97 Q97 94 99 97"/>
+      <path d="M34 122 Q60 130 86 122"/>
+    </svg>`;
+  }
+  // A five-petal lotus, for the midpoints of the ornate frame.
+  function lotusSVG() {
+    return `<svg viewBox="0 0 40 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linejoin="round" aria-hidden="true">
+      <path d="M20 22 Q12 14 20 2 Q28 14 20 22 Z"/>
+      <path d="M20 22 Q8 18 8 6 Q17 10 20 22 Z"/><path d="M20 22 Q32 18 32 6 Q23 10 20 22 Z"/>
+      <path d="M20 22 Q4 22 2 12 Q12 12 20 22 Z"/><path d="M20 22 Q36 22 38 12 Q28 12 20 22 Z"/>
+    </svg>`;
+  }
+  // A paisley flourish for the corners of the ornate frame.
+  function paisleySVG() {
+    return `<svg viewBox="0 0 60 60" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" aria-hidden="true">
+      <path d="M2 58 V2 H58"/>
+      <path d="M8 52 V8 H52" opacity=".55"/>
+      <path d="M14 44 Q12 22 30 16 Q44 12 46 24 Q48 36 34 36 Q24 36 26 26 Q28 20 36 22"/>
+      <path d="M14 44 Q22 46 30 40"/><path d="M14 44 Q16 36 22 34" opacity=".7"/>
+      <circle cx="40" cy="30" r="1.2" fill="currentColor" stroke="none"/>
+    </svg>`;
+  }
+  // The ornate frame: double rule, paisley corners, lotus at each side's midpoint.
+  function ornate() {
+    return `<span class="orn c tl">${paisleySVG()}</span><span class="orn c tr">${paisleySVG()}</span><span class="orn c bl">${paisleySVG()}</span><span class="orn c br">${paisleySVG()}</span>
+      <span class="orn l t">${lotusSVG()}</span><span class="orn l b">${lotusSVG()}</span><span class="orn l ls">${lotusSVG()}</span><span class="orn l rs">${lotusSVG()}</span>`;
+  }
   function cornerSVG() {
     return `<svg viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1"><path d="M1 21 V1 H21"/><path d="M5 21 V5 H21" opacity=".5"/></svg>`;
   }
@@ -112,5 +153,5 @@
 
   const city = W.wedding.city || "";
   const cityDot = city ? " · " + city : "";
-  window.WX = { city, cityDot, W, fmtDate, fmtTime, days, sealSVG, corners, ICON, qrSVG, ics, downloadICS, rsvpLink, mapsEmbed, directions, swatches, countdown, parseISO };
+  window.WX = { ganeshaSVG, lotusSVG, paisleySVG, ornate, city, cityDot, W, fmtDate, fmtTime, days, sealSVG, corners, ICON, qrSVG, ics, downloadICS, rsvpLink, mapsEmbed, directions, swatches, countdown, parseISO };
 })();

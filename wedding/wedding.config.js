@@ -42,8 +42,9 @@ window.WEDDING = {
     date: "2026-12-11",                 // ISO, local time. Countdown + calendar use this.
     time: "19:00",
     city: VENUE_CITY,
+    ganesh: "॥ श्री गणेशाय नमः ॥",
     shloka: "शुभ विवाह",
-    shlokaSub: "With the blessings of our families",
+    shlokaSub: "With the blessings of the Almighty and our elders",
   },
 
   // ── Public URL of the guest page (this is what the QR encodes) ─────────────
@@ -62,12 +63,12 @@ window.WEDDING = {
 
   // ── Stay ───────────────────────────────────────────────────────────────────
   stay: {
-    hotel: "Sree Raaga Resorts, on the property",
-    address: "Rooms, villas and row houses across the resort’s five acres. You walk to every event.",
+    hotel: "Your stay",
+    address: "Stay arrangements for outstation guests will be shared personally.",
     checkIn: "Thu 10 Dec, from the morning",
-    checkOut: "Sat 12 Dec, after the bidai and breakfast",
-    note: "Rooms are booked under ‘Choudhary–Mohan wedding’. Your hamper is waiting in the room. December evenings in Bengaluru drop to about 15 °C; bring a shawl for the sangeet lawns and the bidai.",
-    shuttle: "Everything happens on the property, so there are no shuttles. Airport and station pick-ups are arranged on request.",
+    checkOut: "Sat 12 Dec, after the bidai",
+    note: "December evenings in Bengaluru drop to about 15 °C; bring a shawl for the sangeet and the bidai.",
+    shuttle: "All events are at Sree Raaga Resorts. Airport and station pick-ups are arranged on request.",
   },
 
   // ── Travel ─────────────────────────────────────────────────────────────────
@@ -173,7 +174,9 @@ window.WEDDING = {
 
   // ── Words on the invitation & magazine ─────────────────────────────────────
   copy: {
-    inviteLine: "request the pleasure of your company at the wedding of their children",
+    inviteLine: "request the honour of your presence on the auspicious occasion of the wedding ceremony of their son",
+    withLine: "with",
+    complimentsLine: "With best compliments",
     welcomeLetter: [
       "Thank you for travelling to be with us. Some of you have crossed the city, some of you have crossed the country, and all of you have crossed something to be here.",
       "This little book is your companion for the three days: where to be, when, what to wear, and what you will eat. Keep it in your bag. Tear pages out. Spill chai on it.",
