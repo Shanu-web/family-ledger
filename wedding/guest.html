@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guest Guide</title>
+<meta name="description" content="Everything a guest needs: the map, the schedule, the dress codes, the menus, the stay and who to call.">
+<link rel="stylesheet" href="assets/wedding.css">
+<style>
+  /* Hero */
+  .hero { position: relative; padding: var(--s-8) 0 var(--s-7); text-align: center; overflow: hidden; }
+  .hero .seal { width: 5rem; height: 5rem; margin: 0 auto var(--s-4); }
+  .hero .names { font-size: clamp(3rem, 12vw, 5.5rem); }
+  .hero .when { font-family: var(--font-display); font-size: var(--fs-lg); color: var(--ink); margin: var(--s-4) 0 var(--s-2); }
+  .countdown { font-size: var(--fs-sm); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
+  .countdown .num { font-size: 1.6rem; color: var(--kumkum); margin-right: .1em; }
+  .hero .actions { display: flex; flex-wrap: wrap; gap: var(--s-3); justify-content: center; margin-top: var(--s-6); }
+
+  /* Schedule */
+  .dayhead { display: grid; grid-template-columns: auto 1fr; gap: var(--s-4); align-items: end; margin: var(--s-7) 0 var(--s-5); }
+  .dayhead .dnum { font-family: var(--font-display); font-size: 4rem; line-height: .85; color: var(--kumkum); }
+  .dayhead h2 { font-size: var(--fs-xl); font-style: italic; }
+  .dayhead .meta { margin: 0; }
+  .event { display: grid; gap: var(--s-4); padding: var(--s-5) 0; border-top: 1px solid var(--paper-3); scroll-margin-top: 4rem; }
+  @media (min-width: 720px) { .event { grid-template-columns: 7rem 1fr; } }
+  .event .time { font-family: var(--font-display); font-size: 1.5rem; color: var(--ink); line-height: 1.1; }
+  .event .time small { display: block; font-family: var(--font-text); font-size: var(--fs-xs); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); margin-top: 4px; }
+  .event h3 { font-size: 2rem; }
+  .event h3 span { display: block; font-size: var(--fs-md); font-style: italic; color: var(--gold); margin-top: 2px; }
+  .event .where { font-size: var(--fs-sm); color: var(--ink-3); margin: var(--s-2) 0 var(--s-3); }
+  .event .dress { display: grid; grid-template-columns: auto 1fr; gap: var(--s-3); align-items: start; padding: var(--s-3) var(--s-4); background: var(--paper-2); border-left: 2px solid var(--gold); margin: var(--s-3) 0; font-size: var(--fs-sm); }
+  .event .dress b { font-size: var(--fs-xs); letter-spacing: var(--track); text-transform: uppercase; color: var(--kumkum); padding-top: 2px; }
+  .event .dress .swatches { display: flex; margin: var(--s-2) 0 0; }
+  .mini { list-style: none; padding: 0; margin: var(--s-3) 0 0; display: grid; gap: 4px; font-size: var(--fs-sm); }
+  .mini li { display: grid; grid-template-columns: 4rem 1fr; gap: var(--s-3); }
+  .mini li b { font-family: var(--font-display); font-weight: 500; font-size: 1.05rem; color: var(--ink); font-variant-numeric: tabular-nums; }
+  details.menu { margin-top: var(--s-3); }
+  details.menu summary { cursor: pointer; list-style: none; display: inline-flex; align-items: center; gap: var(--s-2); font-size: var(--fs-xs); letter-spacing: var(--track); text-transform: uppercase; font-weight: 600; color: var(--kumkum); }
+  details.menu summary::-webkit-details-marker { display: none; }
+  details.menu summary::after { content: "+"; font-family: var(--font-display); font-size: 1.2rem; line-height: 1; }
+  details.menu[open] summary::after { content: "–"; }
+  .stations { display: grid; gap: var(--s-4); margin-top: var(--s-4); }
+  @media (min-width: 720px) { .stations { grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); } }
+  .station h4 { font-size: 1.15rem; font-style: italic; color: var(--kumkum); margin-bottom: var(--s-1); }
+  .station ul { list-style: none; margin: 0; padding: 0; font-size: var(--fs-sm); }
+  .station li { padding: 3px 0; border-top: 1px dotted var(--paper-3); }
+  .station li:first-child { border-top: 0; }
+
+  /* Map */
+  .map { aspect-ratio: 4 / 3; border: 1px solid var(--paper-3); background: var(--paper-2); }
+  .map iframe { width: 100%; height: 100%; border: 0; filter: saturate(.7) sepia(.15); }
+  @media (min-width: 720px) { .map { aspect-ratio: 16 / 9; } }
+
+  /* Contacts */
+  .contacts { display: grid; gap: var(--s-3); }
+  @media (min-width: 720px) { .contacts { grid-template-columns: 1fr 1fr; } }
+  .contact { display: flex; justify-content: space-between; align-items: center; gap: var(--s-3); padding: var(--s-4); border: 1px solid var(--paper-3); background: var(--paper); }
+  .contact b { display: block; font-family: var(--font-display); font-size: 1.2rem; font-weight: 500; color: var(--ink); }
+  .contact small { color: var(--ink-3); font-size: var(--fs-xs); letter-spacing: .12em; text-transform: uppercase; }
+  .contact a { display: inline-flex; align-items: center; gap: 6px; font-size: var(--fs-sm); white-space: nowrap; }
+  .contact a svg { width: 1rem; height: 1rem; }
+
+  footer { padding: var(--s-8) 0; text-align: center; }
+  footer .seal { width: 3.5rem; height: 3.5rem; margin: 0 auto var(--s-4); }
+</style>
+</head>
+<body>
+<header class="hero jaali jaali-soft" id="top">
+  <div class="wrap narrow" id="hero"></div>
+</header>
+
+<nav class="nav no-print"><div class="wrap"><ul>
+  <li><a href="#schedule">Schedule</a></li>
+  <li><a href="#venue">Venue &amp; map</a></li>
+  <li><a href="#menu">Menu</a></li>
+  <li><a href="#stay">Stay &amp; travel</a></li>
+  <li><a href="#contacts">Contacts</a></li>
+</ul></div></nav>
+
+<main>
+  <section class="section" id="schedule"><div class="wrap narrow">
+    <p class="eyebrow center">The schedule</p>
+    <h2 class="h2 center" style="font-style:italic">Three days, five reasons to dress up.</h2>
+    <p class="center meta">Times are Indian Standard Time. Shuttles leave the hotel lobby 45 minutes before each event.</p>
+    <div id="days"></div>
+  </div></section>
+
+  <section class="section" id="venue" style="background:var(--paper-2)"><div class="wrap">
+    <div class="grid-2">
+      <div>
+        <p class="eyebrow">The venue</p>
+        <h2 class="h2" id="venue-name"></h2>
+        <p class="lead" id="venue-address"></p>
+        <div class="rows" id="venue-rows"></div>
+        <p style="margin-top:var(--s-5)"><a class="btn" id="directions" target="_blank" rel="noopener"></a></p>
+      </div>
+      <div class="map"><iframe id="map" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Map to the venue"></iframe></div>
+    </div>
+  </div></section>
+
+  <section class="section" id="menu"><div class="wrap">
+    <p class="eyebrow center">What you will eat</p>
+    <h2 class="h2 center" style="font-style:italic">Every event has its own table.</h2>
+    <p class="center meta measure mx">Vegetarian and Jain options at every counter. Tell any steward about allergies; the kitchen has been briefed.</p>
+    <div id="menus" class="stack" style="margin-top:var(--s-6)"></div>
+  </div></section>
+
+  <section class="section" id="stay" style="background:var(--paper-2)"><div class="wrap">
+    <div class="grid-2">
+      <div>
+        <p class="eyebrow">Where you are staying</p>
+        <h2 class="h2" id="stay-hotel"></h2>
+        <p class="lead" id="stay-address"></p>
+        <div class="rows" id="stay-rows"></div>
+      </div>
+      <div>
+        <p class="eyebrow">Getting here</p>
+        <div class="rows" id="travel-rows"></div>
+      </div>
+    </div>
+  </div></section>
+
+  <section class="section" id="contacts"><div class="wrap narrow">
+    <p class="eyebrow center">Who to call</p>
+    <h2 class="h2 center" style="font-style:italic">Real people, real phones, all three days.</h2>
+    <div class="contacts" id="contact-list" style="margin-top:var(--s-6)"></div>
+    <div class="card deep center" style="margin-top:var(--s-6)">
+      <p class="lead italic" id="gift-note"></p>
+      <p class="meta" id="hashtag" style="margin:0"></p>
+    </div>
+  </div></section>
+</main>
+
+<footer class="jaali jaali-soft">
+  <div class="wrap narrow" id="footer"></div>
+</footer>
+
+<script src="wedding.config.js"></script>
+<script src="assets/vendor/qrcode-generator.js"></script>
+<script src="assets/wedding.js"></script>
+<script>
+(function () {
+  const { W, fmtDate, fmtTime, days, sealSVG, ICON, downloadICS, rsvpLink, mapsEmbed, directions, swatches, countdown } = WX;
+  const one = W.couple.one, two = W.couple.two;
+  document.title = `${one.first} & ${two.first} · Guest guide`;
+
+  document.getElementById("hero").innerHTML = `
+    <div class="seal reveal">${sealSVG()}</div>
+    <p class="eyebrow reveal d1">You are invited to the wedding of</p>
+    <h1 class="display names reveal d2"><em>${one.first}</em><span class="amp">&amp;</span><em>${two.first}</em></h1>
+    <p class="when reveal d3">${fmtDate(W.wedding.date, "ord")}<br>${W.wedding.city}</p>
+    <p class="countdown reveal d3" id="countdown"></p>
+    <div class="actions reveal d4">
+      <a class="btn" href="${rsvpLink()}" target="_blank" rel="noopener">${ICON.wa} RSVP on WhatsApp</a>
+      <button class="btn ghost" id="ics">${ICON.cal} Add all to calendar</button>
+    </div>`;
+  countdown(document.getElementById("countdown"));
+  document.getElementById("ics").onclick = downloadICS;
+
+  const stations = e => `<div class="stations">${e.menu.map(s => `<div class="station"><h4>${s.station}</h4><ul>${s.items.map(i => `<li>${i}</li>`).join("")}</ul></div>`).join("")}</div>`;
+
+  document.getElementById("days").innerHTML = days().map(d => `
+    <div class="dayhead">
+      <div class="dnum">${fmtDate(d.day, "dnum")}</div>
+      <div><h2>Day ${d.index}</h2><p class="meta">${fmtDate(d.day, "long")}</p></div>
+    </div>
+    ${d.events.map(e => `
+      <article class="event" id="${e.id}">
+        <div class="time">${fmtTime(e.start)}<small>till ${fmtTime(e.end)}</small></div>
+        <div>
+          <h3>${e.title}<span>${e.kicker}</span></h3>
+          <p class="where">${ICON.map.replace('<svg', '<svg style="display:inline;width:.9rem;height:.9rem;vertical-align:-2px;margin-right:4px"')}${e.where}</p>
+          <p>${e.note}</p>
+          <div class="dress"><b>Dress</b><div>${e.dress}${swatches(e.palette)}</div></div>
+          ${e.timeline ? `<ul class="mini">${e.timeline.map(t => `<li><b>${t.at}</b><span>${t.what}</span></li>`).join("")}</ul>` : ""}
+          <details class="menu"><summary>Menu for ${e.title}</summary>${stations(e)}</details>
+        </div>
+      </article>`).join("")}
+  `).join("");
+
+  document.getElementById("venue-name").textContent = W.venue.name;
+  document.getElementById("venue-address").textContent = W.venue.address;
+  document.getElementById("venue-rows").innerHTML = `
+    <div class="row"><b>Landmark</b><span>${W.venue.landmark}</span></div>
+    <div class="row"><b>Parking</b><span>${W.venue.parking}</span></div>
+    <div class="row"><b>Shuttle</b><span>${W.stay.shuttle}</span></div>`;
+  const dir = document.getElementById("directions"); dir.href = directions(); dir.innerHTML = `${ICON.map} Open in Google Maps`;
+  document.getElementById("map").src = mapsEmbed();
+
+  document.getElementById("menus").innerHTML = W.events.map(e => `
+    <div class="card plain">
+      <p class="eyebrow gold" style="margin:0">${fmtDate(e.day, "short")} · ${fmtTime(e.start)}</p>
+      <h3 class="h3" style="font-style:italic">${e.title}</h3>
+      ${stations(e)}
+    </div>`).join("");
+
+  document.getElementById("stay-hotel").textContent = W.stay.hotel;
+  document.getElementById("stay-address").textContent = W.stay.address;
+  document.getElementById("stay-rows").innerHTML = `
+    <div class="row"><b>Check-in</b><span>${W.stay.checkIn}</span></div>
+    <div class="row"><b>Check-out</b><span>${W.stay.checkOut}</span></div>
+    <div class="row"><b>Note</b><span>${W.stay.note}</span></div>`;
+  document.getElementById("travel-rows").innerHTML = W.travel.map(t => `<div class="row"><b>${t.by}</b><span>${t.text}</span></div>`).join("");
+
+  document.getElementById("contact-list").innerHTML = W.contacts.map(c => `
+    <div class="contact"><div><small>${c.role}</small><b>${c.name}</b></div><a href="tel:${c.phone.replace(/\s/g, "")}">${ICON.phone}${c.phone}</a></div>`).join("");
+  document.getElementById("gift-note").textContent = W.copy.giftNote;
+  document.getElementById("hashtag").textContent = `Share your photos with ${W.couple.hashtag}`;
+
+  document.getElementById("footer").innerHTML = `
+    <div class="seal gold">${sealSVG()}</div>
+    <p class="lead italic">${W.copy.thankYou}</p>
+    <p class="meta">${one.full} &amp; ${two.full} · ${fmtDate(W.wedding.date)} · ${W.wedding.city}</p>`;
+
+  // Nav highlight on scroll
+  const links = [...document.querySelectorAll(".nav a")];
+  const secs = links.map(a => document.querySelector(a.getAttribute("href")));
+  const io = new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting) links.forEach(a => a.classList.toggle("active", a.getAttribute("href") === "#" + en.target.id)); }), { rootMargin: "-40% 0px -55% 0px" });
+  secs.forEach(s => s && io.observe(s));
+})();
+</script>
+</body>
+</html>

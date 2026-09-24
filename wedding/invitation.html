@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wedding Invitation</title>
+<meta name="description" content="You are invited. Scan the code for the map, the schedule, and the menu.">
+<link rel="stylesheet" href="assets/wedding.css">
+<style>
+  /* ── The invitation is two faces of one A5 card: front (the ask) and back (the how) ── */
+  body { background: var(--paper-2); }
+  .stage { padding: var(--s-6) 0 var(--s-8); display: grid; gap: var(--s-6); justify-items: center; }
+  .face {
+    position: relative; width: min(100%, 148mm); min-height: 210mm; background-color: var(--paper); overflow: hidden;
+    box-shadow: 0 1px 0 rgba(28,26,24,.05), 0 30px 60px -30px rgba(78,19,30,.35);
+    padding: 12mm; display: flex; flex-direction: column;
+  }
+  .face .frame { flex: 1; display: flex; flex-direction: column; justify-content: center; text-align: center; padding: 9mm 7mm; }
+
+  /* Front */
+  .front .seal { width: 4.6rem; height: 4.6rem; margin: 0 auto var(--s-4); }
+  .front .devanagari { margin-bottom: var(--s-2); }
+  .front .families { font-family: var(--font-display); font-size: 1.05rem; color: var(--ink-2); line-height: 1.5; margin: 0; }
+  .front .families b { font-weight: 500; color: var(--ink); }
+  .front .invite { font-family: var(--font-display); font-style: italic; font-size: 1.05rem; color: var(--ink-3); margin: var(--s-4) 0; }
+  .front .names { font-size: clamp(2.6rem, 11vw, 4.2rem); margin: var(--s-2) 0; }
+  .front .names .amp { display: block; font-size: .55em; margin: .1em 0; }
+  .date { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: var(--s-3); margin: var(--s-5) 0 var(--s-3); }
+  .date .dow, .date .yr { font-size: var(--fs-xs); letter-spacing: var(--track); text-transform: uppercase; color: var(--kumkum); font-weight: 600; }
+  .date .dow { text-align: right; } .date .yr { text-align: left; }
+  .date .dd { font-family: var(--font-display); font-size: 3.6rem; line-height: 1; color: var(--ink); padding: 0 var(--s-3); border-inline: 1px solid var(--gold); }
+  .date .mo { font-family: var(--font-display); font-size: 1.15rem; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-2); grid-column: 1 / -1; }
+  .front .venue { margin-top: var(--s-4); font-family: var(--font-display); font-size: 1.15rem; color: var(--ink); }
+  .front .venue small { display: block; font-family: var(--font-text); font-size: var(--fs-sm); color: var(--ink-3); margin-top: 2px; }
+
+  /* Back */
+  .back .frame { justify-content: space-between; text-align: left; }
+  .days { display: grid; gap: var(--s-3); margin-top: var(--s-4); }
+  .day { display: grid; grid-template-columns: 3.2rem 1fr; gap: var(--s-3); align-items: start; padding-top: var(--s-3); border-top: 1px solid var(--paper-3); }
+  .day:first-child { border-top: 0; padding-top: 0; }
+  .day .dnum { font-family: var(--font-display); font-size: 2.2rem; line-height: 1; color: var(--kumkum); }
+  .day .dnum small { display: block; font-family: var(--font-text); font-size: var(--fs-xs); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); margin-top: 2px; }
+  .day ul { list-style: none; margin: 0; padding: 0; }
+  .day li { display: flex; justify-content: space-between; gap: var(--s-3); font-size: var(--fs-sm); padding: 2px 0; }
+  .day li b { font-family: var(--font-display); font-weight: 500; font-size: 1.05rem; color: var(--ink); white-space: nowrap; }
+  .day li span { color: var(--ink-3); text-align: right; font-variant-numeric: tabular-nums; }
+  .qrblock { display: grid; grid-template-columns: 1fr auto; gap: var(--s-4); align-items: center; margin-top: var(--s-5); padding-top: var(--s-4); border-top: 1px solid var(--paper-3); }
+  .qrblock .qr { width: 30mm; padding: 6px; }
+  .qrblock h3 { font-size: 1.3rem; font-style: italic; }
+  .qrblock p { font-size: var(--fs-sm); color: var(--ink-3); margin: var(--s-1) 0 0; }
+  .qrblock .url { font-size: var(--fs-xs); letter-spacing: .04em; color: var(--kumkum); word-break: break-all; }
+
+  /* Screen-only actions */
+  .actions { display: flex; flex-wrap: wrap; gap: var(--s-3); justify-content: center; width: min(100%, 148mm); }
+  .hint { width: min(100%, 148mm); text-align: center; }
+
+  /* Print: one face per A5 sheet, no browser margins */
+  @page { size: A5 portrait; margin: 0; }
+  @media print {
+    body { background: #fff; }
+    .stage { padding: 0; gap: 0; display: block; }
+    .face { width: 148mm; height: 210mm; min-height: 0; box-shadow: none; page-break-after: always; break-after: page; }
+    .face:last-of-type { page-break-after: auto; break-after: auto; }
+    .face { padding: 10mm; }
+    .face .frame { padding: 7mm 6mm; }
+    .front .seal { width: 3.8rem; height: 3.8rem; margin-bottom: var(--s-3); }
+    .front .names { font-size: 3.3rem; }
+    .front .invite { margin: var(--s-3) 0; }
+    .rule { margin: var(--s-4) auto; }
+    .date { margin: var(--s-4) 0 var(--s-2); }
+    .date .dd { font-size: 3rem; }
+    .jaali { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+<main class="stage" id="stage">
+  <!-- FRONT ────────────────────────────────────────────────────────────── -->
+  <section class="face front jaali" aria-label="Invitation, front">
+    <div class="frame" id="front"></div>
+  </section>
+
+  <!-- Screen actions (never printed) ─────────────────────────────────── -->
+  <div class="actions no-print reveal d4" id="actions"></div>
+  <p class="hint meta no-print reveal d5">Scroll for the three days and the QR. Print this page (⌘/Ctrl-P) for the A5 card: front and back come out as two sheets.</p>
+
+  <!-- BACK ─────────────────────────────────────────────────────────────── -->
+  <section class="face back" aria-label="Invitation, back">
+    <div class="frame" id="back"></div>
+  </section>
+</main>
+
+<script src="wedding.config.js"></script>
+<script src="assets/vendor/qrcode-generator.js"></script>
+<script src="assets/wedding.js"></script>
+<script>
+(function () {
+  const { W, fmtDate, fmtTime, days, sealSVG, corners, ICON, qrSVG, downloadICS, rsvpLink } = WX;
+  const one = W.couple.one, two = W.couple.two;
+  document.title = `${one.first} & ${two.first} · ${fmtDate(W.wedding.date)}`;
+
+  document.getElementById("front").innerHTML = `
+    ${corners()}
+    <div class="seal reveal">${sealSVG()}</div>
+    <div class="devanagari reveal d1">${W.wedding.shloka}</div>
+    <p class="eyebrow ink reveal d1">${W.wedding.shlokaSub}</p>
+    <p class="families reveal d2"><b>${one.parents}</b><br><span class="meta">and</span><br><b>${two.parents}</b></p>
+    <p class="invite reveal d2">${W.copy.inviteLine}</p>
+    <h1 class="display names reveal d3"><em>${one.first}</em><span class="amp">&amp;</span><em>${two.first}</em></h1>
+    <div class="rule reveal d3"><i></i></div>
+    <div class="date reveal d4">
+      <span class="dow">${fmtDate(W.wedding.date, "day")}</span>
+      <span class="dd">${fmtDate(W.wedding.date, "dnum")}</span>
+      <span class="yr">${fmtDate(W.wedding.date, "year")}</span>
+      <span class="mo">${fmtDate(W.wedding.date, "month")} · ${fmtTime(W.wedding.time)}</span>
+    </div>
+    <p class="venue reveal d4">${W.venue.name}<small>${W.venue.address}</small></p>
+  `;
+
+  const ds = days();
+  document.getElementById("back").innerHTML = `
+    ${corners()}
+    <div>
+      <p class="eyebrow">The three days</p>
+      <h2 class="h3" style="font-style:italic">We would love you at all of them.</h2>
+      <div class="days">
+        ${ds.map(d => `
+          <div class="day">
+            <div class="dnum">${fmtDate(d.day, "dnum")}<small>${fmtDate(d.day, "day").slice(0,3)} · ${fmtDate(d.day, "month").slice(0,3)}</small></div>
+            <ul>${d.events.map(e => `<li><b>${e.title}</b><span>${fmtTime(e.start)} · ${e.where.split(",")[0]}</span></li>`).join("")}</ul>
+          </div>`).join("")}
+      </div>
+    </div>
+    <div>
+      <div class="qrblock">
+        <div>
+          <h3>Scan for everything else</h3>
+          <p>Map and directions, the full schedule, dress codes, the menus, where you are staying, and who to call.</p>
+          <p class="url">${W.guestUrl.replace(/^https?:\/\//, "")}</p>
+        </div>
+        <div class="qr">${qrSVG(W.guestUrl, { fg: "#1C1A18" })}</div>
+      </div>
+      <p class="meta" style="margin:var(--s-4) 0 0">RSVP on WhatsApp · ${W.contacts[0].name} · ${W.contacts[0].phone} · ${W.couple.hashtag}</p>
+    </div>
+  `;
+
+  const actions = document.getElementById("actions");
+  actions.innerHTML = `
+    <a class="btn" href="guest.html">${ICON.map} Map, schedule &amp; menu</a>
+    <a class="btn ghost" href="${rsvpLink()}" target="_blank" rel="noopener">${ICON.wa} RSVP on WhatsApp</a>
+    <button class="btn ghost" id="ics">${ICON.cal} Add to calendar</button>
+    <button class="btn ghost" id="share">${ICON.share} Share</button>
+  `;
+  document.getElementById("ics").onclick = downloadICS;
+  const share = document.getElementById("share");
+  share.onclick = async () => {
+    const data = { title: document.title, text: `${one.first} & ${two.first} are getting married — ${fmtDate(W.wedding.date, "long")}, ${W.wedding.city}.`, url: location.href };
+    if (navigator.share) { try { await navigator.share(data); } catch (_) {} }
+    else { await navigator.clipboard.writeText(location.href); share.textContent = "Link copied"; }
+  };
+})();
+</script>
+</body>
+</html>

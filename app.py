@@ -1612,3 +1612,5 @@ def index():
     return FileResponse("static/index.html")
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
+# Wedding suite (invitation, QR guest page, magazine, hamper plan) — see wedding/README.md
+app.mount("/wedding", StaticFiles(directory="wedding", html=True), name="wedding")

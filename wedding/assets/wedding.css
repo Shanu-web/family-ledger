@@ -1,0 +1,205 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   KUMKUM & IVORY — design system for the wedding suite
+   One palette, two typefaces, three motifs. Every page imports this file.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Karla:ital,wght@0,400;0,500;0,600;1,400&family=Tiro+Devanagari+Hindi&display=swap');
+
+:root {
+  color-scheme: light;                 /* an invitation is paper: it never goes dark */
+
+  /* ── Palette ─────────────────────────────────────────────────────────── */
+  --paper:     #F6F1E7;   /* ivory card stock */
+  --paper-2:   #EEE6D6;   /* a shade deeper, for panels */
+  --paper-3:   #E2D6BF;   /* hairlines on paper */
+  --ink:       #1C1A18;   /* near-black, warm */
+  --ink-2:     #4A4541;   /* body text */
+  --ink-3:     #8A8279;   /* captions, meta */
+  --kumkum:    #6E1E2B;   /* the red of sindoor, the primary */
+  --kumkum-2:  #4E131E;   /* pressed deeper */
+  --gold:      #B8935A;   /* old gold, never yellow */
+  --gold-2:    #D9C08F;   /* gold at 60% */
+  --gold-3:    #F0E4C8;   /* gold wash */
+  --rose:      #C9A4A0;   /* the one soft accent */
+
+  /* ── Type ────────────────────────────────────────────────────────────── */
+  --font-display: 'Cormorant Garamond', 'Cormorant', Georgia, 'Times New Roman', serif;
+  --font-text:    'Karla', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-dev:     'Tiro Devanagari Hindi', 'Noto Serif Devanagari', serif;
+
+  --fs-xs: 0.6875rem;  /* 11px  eyebrows */
+  --fs-sm: 0.8125rem;  /* 13px  meta */
+  --fs-md: 1rem;       /* 16px  body */
+  --fs-lg: 1.25rem;    /* 20px  lead */
+  --fs-xl: 1.75rem;    /* 28px  h3 */
+  --fs-2xl: 2.5rem;    /* 40px  h2 */
+  --fs-3xl: clamp(3rem, 8vw, 5.5rem);   /* names */
+
+  --track: 0.22em;     /* eyebrow letter-spacing */
+
+  /* ── Space & shape ───────────────────────────────────────────────────── */
+  --s-1: 0.25rem; --s-2: 0.5rem; --s-3: 0.75rem; --s-4: 1rem; --s-5: 1.5rem;
+  --s-6: 2rem;  --s-7: 3rem;  --s-8: 4rem;  --s-9: 6rem;
+  --gutter: 1rem;
+  --measure: 34rem;
+  --radius: 2px;       /* paper has corners, not pills */
+  --shadow-card: 0 1px 0 rgba(28,26,24,.06), 0 12px 32px -12px rgba(78,19,30,.25);
+}
+
+/* ── Reset, lightly ────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink-2);
+  font-family: var(--font-text);
+  font-size: var(--fs-md);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+img, svg { display: block; max-width: 100%; }
+a { color: var(--kumkum); text-decoration: none; }
+a:hover { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+h1, h2, h3, h4 { margin: 0; font-family: var(--font-display); font-weight: 400; color: var(--ink); line-height: 1.05; }
+p { margin: 0 0 var(--s-4); }
+button { font: inherit; }
+
+/* ── Motif 1: the jaali (lattice) ──────────────────────────────────────── */
+:root { --jaali: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'><g fill='none' stroke='%23B8935A' stroke-width='0.7' stroke-opacity='0.28'><path d='M28 2 L54 28 L28 54 L2 28 Z'/><path d='M28 12 L44 28 L28 44 L12 28 Z'/><circle cx='28' cy='28' r='3'/><path d='M0 0 L8 0 M0 0 L0 8 M56 0 L48 0 M56 0 L56 8 M0 56 L8 56 M0 56 L0 48 M56 56 L48 56 M56 56 L56 48'/></g></svg>"); }
+.jaali { background-color: var(--paper); background-image: var(--jaali); background-size: 56px 56px; }
+.jaali-soft { position: relative; background-image: none; }          /* pattern lives in ::before so it can fade at the edges */
+.jaali-soft::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  background-image: var(--jaali); background-size: 56px 56px;
+  -webkit-mask-image: radial-gradient(ellipse 70% 80% at center, #000 20%, transparent 80%);
+          mask-image: radial-gradient(ellipse 70% 80% at center, #000 20%, transparent 80%);
+}
+.jaali-soft > * { position: relative; z-index: 1; }
+
+/* ── Motif 2: the rule with a diamond ──────────────────────────────────── */
+.rule {
+  display: flex; align-items: center; gap: var(--s-3);
+  color: var(--gold); margin: var(--s-5) auto; width: min(100%, 18rem);
+}
+.rule::before, .rule::after { content: ""; flex: 1; height: 1px; background: currentColor; opacity: .7; }
+.rule > i { width: 6px; height: 6px; background: currentColor; transform: rotate(45deg); }
+.rule.long { width: min(100%, 32rem); }
+.rule.ink { color: var(--ink-3); }
+
+/* ── Motif 3: the seal (monogram) ──────────────────────────────────────── */
+.seal { display: inline-block; width: 6rem; height: 6rem; color: var(--kumkum); }
+.seal svg { width: 100%; height: 100%; }
+.seal.gold { color: var(--gold); }
+.seal.ink  { color: var(--ink); }
+.seal.paper { color: var(--paper); }
+
+/* ── Typography helpers ────────────────────────────────────────────────── */
+.eyebrow {
+  font-family: var(--font-text); font-size: var(--fs-xs); font-weight: 600;
+  letter-spacing: var(--track); text-transform: uppercase; color: var(--kumkum);
+  margin: 0 0 var(--s-3);
+}
+.eyebrow.gold { color: var(--gold); }
+.eyebrow.ink  { color: var(--ink-3); }
+.display { font-family: var(--font-display); font-weight: 300; font-size: var(--fs-3xl); line-height: .95; color: var(--ink); letter-spacing: -0.01em; }
+.display em { font-style: italic; font-weight: 400; color: var(--kumkum); }
+.display .amp { font-style: italic; font-weight: 300; color: var(--gold); font-size: .78em; margin: 0 .08em; }
+.h2 { font-size: var(--fs-2xl); }
+.h3 { font-size: var(--fs-xl); }
+.lead { font-family: var(--font-display); font-size: var(--fs-lg); font-weight: 400; line-height: 1.45; color: var(--ink); }
+.lead.italic { font-style: italic; }
+.meta { font-size: var(--fs-sm); color: var(--ink-3); }
+.devanagari { font-family: var(--font-dev); color: var(--kumkum); font-size: 1.35rem; letter-spacing: .02em; }
+.measure { max-width: var(--measure); }
+.center { text-align: center; }
+.mx { margin-left: auto; margin-right: auto; }
+.smallcaps { font-variant: small-caps; letter-spacing: .06em; }
+.num { font-family: var(--font-display); font-variant-numeric: lining-nums tabular-nums; }
+
+/* ── Layout ────────────────────────────────────────────────────────────── */
+.wrap { width: min(100% - 2 * var(--gutter), 64rem); margin-inline: auto; }
+.wrap.narrow { max-width: 42rem; }
+.section { padding-block: var(--s-8); }
+@media (min-width: 720px) { :root { --gutter: 2rem; } .section { padding-block: var(--s-9); } }
+.grid-2 { display: grid; gap: var(--s-6); }
+@media (min-width: 720px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
+.stack > * + * { margin-top: var(--s-4); }
+
+/* ── Components ────────────────────────────────────────────────────────── */
+.card {
+  background: var(--paper); border: 1px solid var(--paper-3); border-radius: var(--radius);
+  padding: var(--s-5); box-shadow: var(--shadow-card);
+}
+.card.plain { box-shadow: none; }
+.card.deep { background: var(--paper-2); }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--s-2);
+  padding: .85rem 1.4rem; border-radius: var(--radius); border: 1px solid var(--kumkum);
+  background: var(--kumkum); color: var(--paper); font-weight: 600; font-size: var(--fs-sm);
+  letter-spacing: .08em; text-transform: uppercase; cursor: pointer; text-decoration: none;
+  transition: background .15s ease, color .15s ease, transform .15s ease;
+}
+.btn:hover { background: var(--kumkum-2); text-decoration: none; transform: translateY(-1px); }
+.btn.ghost { background: transparent; color: var(--kumkum); }
+.btn.ghost:hover { background: var(--gold-3); }
+.btn.gold { background: var(--gold); border-color: var(--gold); color: var(--ink); }
+.btn.gold:hover { background: var(--gold-2); }
+.btn svg { width: 1rem; height: 1rem; }
+
+.swatches { display: inline-flex; gap: 4px; vertical-align: middle; margin-left: .35em; }
+.swatches i { width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(28,26,24,.15); display: inline-block; }
+
+.frame {                                   /* the double hairline border on cards & pages */
+  position: relative; padding: var(--s-6);
+  border: 1px solid var(--gold);
+}
+.frame::after {
+  content: ""; position: absolute; inset: 5px; border: 1px solid var(--gold); opacity: .55; pointer-events: none;
+}
+.frame > * { position: relative; z-index: 1; }
+
+.corner { position: absolute; width: 22px; height: 22px; color: var(--gold); pointer-events: none; }
+.corner svg { width: 100%; height: 100%; }
+.corner.tl { top: 10px; left: 10px; } .corner.tr { top: 10px; right: 10px; transform: scaleX(-1); }
+.corner.bl { bottom: 10px; left: 10px; transform: scaleY(-1); } .corner.br { bottom: 10px; right: 10px; transform: scale(-1); }
+
+/* QR block */
+.qr { display: inline-block; padding: 10px; background: #fff; border: 1px solid var(--paper-3); border-radius: var(--radius); }
+.qr svg { width: 100%; height: auto; }
+
+/* Definition rows */
+.rows { display: grid; gap: var(--s-3); }
+.row { display: grid; grid-template-columns: 6.5rem 1fr; gap: var(--s-3); align-items: baseline; padding-block: var(--s-2); border-top: 1px solid var(--paper-3); }
+.row:first-child { border-top: 0; }
+.row b { font-family: var(--font-text); font-size: var(--fs-xs); font-weight: 600; letter-spacing: var(--track); text-transform: uppercase; color: var(--ink-3); }
+.row .num { font-size: 1.15rem; color: var(--ink); }
+
+/* Chips */
+.chip { display: inline-block; padding: .25rem .6rem; border: 1px solid var(--gold-2); border-radius: 999px; font-size: var(--fs-xs); letter-spacing: .12em; text-transform: uppercase; color: var(--kumkum); background: var(--gold-3); }
+
+/* Sticky nav (guest page) */
+.nav {
+  position: sticky; top: 0; z-index: 20; background: rgba(246,241,231,.92); backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--paper-3);
+}
+.nav ul { list-style: none; margin: 0; padding: 0; display: flex; gap: var(--s-5); overflow-x: auto; scrollbar-width: none; }
+.nav ul::-webkit-scrollbar { display: none; }
+.nav li { flex: none; }
+.nav a { display: block; padding: .9rem 0; font-size: var(--fs-xs); letter-spacing: var(--track); text-transform: uppercase; font-weight: 600; color: var(--ink-3); border-bottom: 2px solid transparent; }
+.nav a:hover, .nav a.active { color: var(--kumkum); text-decoration: none; border-bottom-color: var(--kumkum); }
+
+/* Reveal animation */
+.reveal { opacity: 0; transform: translateY(14px); animation: reveal .9s cubic-bezier(.2,.7,.2,1) forwards; }
+.reveal.d1 { animation-delay: .15s } .reveal.d2 { animation-delay: .35s } .reveal.d3 { animation-delay: .55s } .reveal.d4 { animation-delay: .8s } .reveal.d5 { animation-delay: 1.05s }
+@keyframes reveal { to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .reveal { animation: none; opacity: 1; transform: none; } }
+
+/* Print defaults */
+@media print {
+  body { background: #fff; }
+  .no-print { display: none !important; }
+  a { color: inherit; }
+}

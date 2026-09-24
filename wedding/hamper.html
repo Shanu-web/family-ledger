@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Room Hamper Plan</title>
+<meta name="description" content="The welcome hamper waiting in every guest room: tiers, contents, packaging, budget, logistics, and the printable tag and note card.">
+<link rel="stylesheet" href="assets/wedding.css">
+<style>
+  .hero { text-align: center; padding: var(--s-8) 0 var(--s-6); }
+  .hero .seal { width: 4rem; height: 4rem; margin: 0 auto var(--s-4); }
+  .tiers { display: grid; gap: var(--s-4); }
+  @media (min-width: 900px) { .tiers { grid-template-columns: repeat(3, 1fr); } }
+  .tier { position: relative; padding: var(--s-6) var(--s-5) var(--s-5); border-top: 3px solid var(--gold); }
+  .tier.one { border-top-color: var(--kumkum); }
+  .tier h3 { font-size: 2rem; }
+  .tier h3 span { display: block; font-size: var(--fs-md); font-style: italic; color: var(--gold); }
+  .tier .who { font-size: var(--fs-sm); color: var(--ink-3); margin: var(--s-2) 0 var(--s-4); }
+  .tier .price { font-family: var(--font-display); font-size: 1.6rem; color: var(--kumkum); }
+  .tier .price small { font-family: var(--font-text); font-size: var(--fs-xs); letter-spacing: var(--track); text-transform: uppercase; color: var(--ink-3); margin-left: .5em; }
+  .tier ul { margin: var(--s-4) 0 0; padding: 0; list-style: none; font-size: var(--fs-sm); }
+  .tier li { padding: 6px 0; border-top: 1px dotted var(--paper-3); }
+  .tier li b { color: var(--ink); font-weight: 600; }
+
+  table.matrix { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
+  .matrix th, .matrix td { padding: .6rem .5rem; border-bottom: 1px solid var(--paper-3); text-align: left; vertical-align: top; }
+  .matrix th { font-size: var(--fs-xs); letter-spacing: var(--track); text-transform: uppercase; color: var(--ink-3); font-weight: 600; }
+  .matrix th:not(:first-child), .matrix td:not(:first-child) { text-align: center; width: 5.5rem; }
+  .matrix td:first-child b { display: block; color: var(--ink); font-family: var(--font-display); font-size: 1.1rem; font-weight: 500; }
+  .matrix td:first-child span { color: var(--ink-3); }
+  .matrix tr.group td { padding-top: var(--s-5); border-bottom: 1px solid var(--gold); font-size: var(--fs-xs); letter-spacing: var(--track); text-transform: uppercase; color: var(--kumkum); font-weight: 600; }
+  .tick { display: inline-block; width: 10px; height: 10px; background: var(--kumkum); transform: rotate(45deg); }
+  .tick.gold { background: var(--gold); }
+  .wrapx { overflow-x: auto; }
+
+  .steps { counter-reset: s; list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s-3); }
+  .steps li { counter-increment: s; display: grid; grid-template-columns: 3rem 1fr; gap: var(--s-3); padding: var(--s-3) 0; border-top: 1px solid var(--paper-3); }
+  .steps li::before { content: counter(s, decimal-leading-zero); font-family: var(--font-display); font-size: 1.6rem; color: var(--kumkum); line-height: 1; }
+  .steps li b { display: block; color: var(--ink); font-family: var(--font-display); font-size: 1.15rem; font-weight: 500; }
+  .steps li small { display: block; font-size: var(--fs-xs); letter-spacing: .12em; text-transform: uppercase; color: var(--gold); margin-bottom: 2px; }
+
+  table.budget { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
+  .budget th, .budget td { padding: .5rem .5rem; border-bottom: 1px solid var(--paper-3); }
+  .budget th { text-align: left; font-size: var(--fs-xs); letter-spacing: var(--track); text-transform: uppercase; color: var(--ink-3); }
+  .budget td:not(:first-child), .budget th:not(:first-child) { text-align: right; font-variant-numeric: tabular-nums; }
+  .budget tr.total td { font-family: var(--font-display); font-size: 1.15rem; color: var(--ink); border-bottom: 0; border-top: 1px solid var(--gold); }
+
+  /* ── Printables: A4 sheets ───────────────────────────────────────────── */
+  .sheet { width: 210mm; min-height: 297mm; background: #fff; margin: var(--s-6) auto; padding: 12mm; box-shadow: var(--shadow-card); display: grid; align-content: start; }
+  .sheet.cards { grid-template-rows: repeat(2, 130mm); gap: 8mm; }
+  .notecard { position: relative; width: 186mm; height: 130mm; background-color: var(--paper); padding: 12mm 14mm; display: grid; grid-template-columns: 1fr 52mm; gap: 8mm; outline: 1px dashed var(--paper-3); }
+  .notecard .seal { width: 16mm; height: 16mm; }
+  .notecard h3 { font-size: 20pt; margin: 3mm 0; }
+  .notecard p { font-size: 9.5pt; line-height: 1.5; }
+  .notecard .name { font-family: var(--font-display); font-size: 13pt; color: var(--ink); border-bottom: 1px solid var(--gold); display: inline-block; min-width: 55mm; margin-left: 2mm; }
+  .notecard .side { border-left: 1px solid var(--gold); padding-left: 8mm; display: flex; flex-direction: column; justify-content: space-between; font-size: 8pt; color: var(--ink-3); }
+  .notecard .side b { display: block; font-size: 6.5pt; letter-spacing: .2em; text-transform: uppercase; color: var(--kumkum); margin-bottom: 1mm; }
+  .notecard .side .qr { width: 26mm; padding: 1mm; }
+  .sheet.tags { grid-template-columns: repeat(2, 90mm); grid-auto-rows: 55mm; gap: 6mm; justify-content: center; }
+  .tag { position: relative; background-color: var(--kumkum); color: var(--paper); padding: 6mm 8mm 6mm 14mm; display: flex; flex-direction: column; justify-content: center; outline: 1px dashed var(--paper-3); }
+  .tag::before { content: ""; position: absolute; left: 5mm; top: 50%; width: 4mm; height: 4mm; border-radius: 50%; border: 1px solid var(--gold-2); transform: translateY(-50%); }
+  .tag .seal { width: 12mm; height: 12mm; color: var(--gold-2); position: absolute; right: 6mm; top: 50%; transform: translateY(-50%); }
+  .tag .eyebrow { color: var(--gold-2); margin-bottom: 1mm; }
+  .tag h4 { font-size: 15pt; color: var(--paper); }
+  .tag .line { margin-top: 3mm; font-size: 7pt; letter-spacing: .1em; text-transform: uppercase; color: var(--gold-2); }
+  .tag .line span { display: inline-block; width: 38mm; border-bottom: 1px solid var(--gold-2); margin-left: 2mm; }
+
+  @page { size: A4 portrait; margin: 0; }
+  @media print {
+    .screen-only { display: none !important; }
+    .sheet { margin: 0; box-shadow: none; page-break-after: always; break-after: page; }
+    .sheet:last-child { page-break-after: auto; }
+    .notecard, .tag, .seal { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .notecard, .tag { outline: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="screen-only">
+<header class="hero jaali jaali-soft"><div class="wrap narrow" id="hero"></div></header>
+
+<main>
+  <section class="section"><div class="wrap">
+    <p class="eyebrow center">Three tiers, one look</p>
+    <h2 class="h2 center" style="font-style:italic">Everyone gets the basket. The basket knows who you are.</h2>
+    <p class="center meta measure mx">Same cane basket, same ivory muslin, same kumkum ribbon and monogram tag for every room, so no guest can tell the tiers apart at a glance. What changes is what is inside.</p>
+    <div class="tiers" style="margin-top:var(--s-6)" id="tiers"></div>
+  </div></section>
+
+  <section class="section" style="background:var(--paper-2)"><div class="wrap">
+    <p class="eyebrow">What goes in</p>
+    <h2 class="h2">The contents <em style="color:var(--kumkum)">matrix</em>.</h2>
+    <p class="meta">Diamonds mark what a tier gets. Gold diamonds are upgrades of the same item (a bigger box, a better tea).</p>
+    <div class="wrapx"><table class="matrix" id="matrix"></table></div>
+  </div></section>
+
+  <section class="section"><div class="wrap">
+    <div class="grid-2">
+      <div>
+        <p class="eyebrow">Packaging</p>
+        <h2 class="h3">How it looks on the bed.</h2>
+        <div class="rows">
+          <div class="row"><b>Basket</b><span>Round cane basket with handle, 30 cm (tier 3) or oval 38 cm (tiers 1–2). Natural finish, no varnish.</span></div>
+          <div class="row"><b>Lining</b><span>Ivory mulmul (muslin) square, 60 cm, gathered up and over the contents. Doubles as a dupatta-sized cloth guests keep.</span></div>
+          <div class="row"><b>Ribbon</b><span>Kumkum satin, 25 mm, single knot (no bow). Tag threaded through the knot.</span></div>
+          <div class="row"><b>Tag</b><span>90 × 55 mm, kumkum card with gold foil monogram, the guest’s name handwritten in gold ink. Printable below.</span></div>
+          <div class="row"><b>Note</b><span>A6 ivory card, letterpress if budget allows, else 300 gsm uncoated. Printable below. Sits on top, name facing up.</span></div>
+          <div class="row"><b>Placement</b><span>Centred on the bed, magazine leaning against it, water on the nightstand. Housekeeping gets a photo of the “correct” bed.</span></div>
+        </div>
+      </div>
+      <div>
+        <p class="eyebrow">Budget</p>
+        <h2 class="h3">Sample numbers, in rupees.</h2>
+        <table class="budget" id="budget"></table>
+        <p class="meta" style="margin-top:var(--s-3)">Room counts are placeholders; edit the numbers in this file. Prices are Patna market estimates for planning, not quotes.</p>
+      </div>
+    </div>
+  </div></section>
+
+  <section class="section" style="background:var(--paper-2)"><div class="wrap narrow">
+    <p class="eyebrow">Logistics</p>
+    <h2 class="h2">From order to <em style="color:var(--kumkum)">bedside</em>.</h2>
+    <ol class="steps" id="steps"></ol>
+  </div></section>
+
+  <section class="section"><div class="wrap narrow center">
+    <p class="eyebrow">Printables</p>
+    <h2 class="h2" style="font-style:italic">The note card and the tag.</h2>
+    <p class="meta">Print this page (⌘/Ctrl-P) on A4: sheet one has two A6 note cards, sheet two has eight tags. Cut along the dashed lines.</p>
+    <p><button class="btn" onclick="window.print()">Print the sheets</button> <a class="btn ghost" href="magazine.html">Magazine</a> <a class="btn ghost" href="guest.html">Guest page</a></p>
+  </div></section>
+</main>
+</div>
+
+<div class="sheet cards" id="cards"></div>
+<div class="sheet tags" id="tags"></div>
+
+<script src="wedding.config.js"></script>
+<script src="assets/vendor/qrcode-generator.js"></script>
+<script src="assets/wedding.js"></script>
+<script>
+(function () {
+  const { W, fmtDate, sealSVG, qrSVG } = WX;
+  const one = W.couple.one, two = W.couple.two;
+  document.title = `${one.first} & ${two.first} · Room hamper plan`;
+
+  document.getElementById("hero").innerHTML = `
+    <div class="seal">${sealSVG()}</div>
+    <p class="eyebrow">The room hamper</p>
+    <h1 class="display" style="font-size:clamp(2.4rem,8vw,4rem)">The <em>Patna</em> basket.</h1>
+    <p class="lead italic measure mx">What every out-of-town guest finds on the bed when they open the door: the things they forgot to pack, the things they will need at 2 am after the sangeet, and a few things from Patna to take home.</p>`;
+
+  // ── Tiers ─────────────────────────────────────────────────────────────
+  const TIERS = [
+    { id: "one", name: "Parivaar", sub: "Family & elders", who: "Parents’ siblings, grandparents, the couple’s closest relatives, the pandit. About 15% of rooms.", price: "5,500", extra: [
+      "<b>Bhagalpuri silk stole</b> in ivory with a hand-embroidered monogram",
+      "<b>Madhubani hand-painted box</b> holding the sweets (the box is the keepsake)",
+      "<b>Brass diya</b> with a small packet of ghee wicks",
+      "<b>Handwritten note</b> from the couple, not printed",
+    ]},
+    { id: "two", name: "Dost", sub: "Close friends & cousins", who: "The people at every event, the ones performing at the sangeet. About 35% of rooms.", price: "2,600", extra: [
+      "<b>Jute tote</b> with the monogram, for carrying the magazine and the phone all weekend",
+      "<b>Madhubani coasters</b>, set of four",
+      "<b>Dry fruit tin</b>: almonds, cashews, Bihar makhana (fox nut), roasted with black salt",
+      "<b>Sangeet recovery kit</b>: electrolyte sachets, a sheet mask, mints, eye drops",
+    ]},
+    { id: "three", name: "Mehmaan", sub: "Every other room", who: "Colleagues, neighbours, family friends, plus-ones. The remaining rooms, and the buffer.", price: "1,200", extra: [
+      "<b>The core basket</b>: the note, the magazine, the itinerary card, sweets, water and the emergency kit",
+      "<b>Makhana</b>, one roasted packet",
+      "Everything a guest needs, nothing that feels like a downgrade",
+    ]},
+  ];
+  document.getElementById("tiers").innerHTML = TIERS.map(t => `
+    <div class="card tier ${t.id}">
+      <h3>${t.name}<span>${t.sub}</span></h3>
+      <p class="who">${t.who}</p>
+      <div class="price">₹${t.price}<small>per room, approx.</small></div>
+      <ul>${t.extra.map(x => `<li>${x}</li>`).join("")}</ul>
+    </div>`).join("");
+
+  // ── Matrix ────────────────────────────────────────────────────────────
+  const T = "<span class='tick'></span>", G = "<span class='tick gold'></span>", N = "";
+  const ROWS = [
+    ["Paper", null],
+    ["Welcome note card", "A6, printable below. Name handwritten in gold ink.", T, T, T],
+    ["The magazine", "The 16-page booklet: schedule, dress, menus, map.", T, T, T],
+    ["Itinerary card", "Pocket card, one side per day. Fits a clutch.", T, T, T],
+    ["Handwritten letter", "From the couple. Tier 1 only, written the week before.", T, N, N],
+    ["Sweet", null],
+    ["Silao khaja", "Patna’s flaky layered sweet. 250 g box; 500 g in a Madhubani box for tier 1.", G, T, T],
+    ["Gaya tilkut", "Sesame & jaggery. Order T-3 days for freshness.", T, T, T],
+    ["Dry fruit tin", "Almonds, cashews, roasted makhana.", T, T, N],
+    ["Roasted makhana", "One packet, black salt.", N, N, T],
+    ["Darjeeling tea", "Second flush, 50 g tin with a strainer.", T, N, N],
+    ["Useful", null],
+    ["Water & electrolytes", "Two glass bottles, two ORS / electrolyte sachets.", T, T, T],
+    ["Emergency kit", "Paracetamol strip, antacid, plasters, safety pins, sewing kit, bindis, bobby pins, blotting paper, mints.", T, T, T],
+    ["Sangeet recovery kit", "Sheet mask, eye drops, extra electrolytes, a lime.", N, T, N],
+    ["Attar roll-on", "Rose & vetiver, 6 ml, from a Patna attarwala.", T, T, N],
+    ["Keepsake", null],
+    ["Bhagalpuri silk stole", "Ivory, monogram embroidered in kumkum thread.", T, N, N],
+    ["Madhubani box / coasters", "Box for tier 1, four coasters for tier 2.", T, T, N],
+    ["Brass diya", "With ghee wicks. Goes home.", T, N, N],
+    ["Jute tote with monogram", "Screen-printed in kumkum.", N, T, N],
+    ["For the little ones", null],
+    ["Kids’ add-on", "Colouring book of the wedding motifs, crayons, juice, biscuits. Add to any room with a child.", G, G, G],
+  ];
+  document.getElementById("matrix").innerHTML = `<thead><tr><th>Item</th><th>Parivaar</th><th>Dost</th><th>Mehmaan</th></tr></thead><tbody>` +
+    ROWS.map(r => r[1] === null ? `<tr class="group"><td colspan="4">${r[0]}</td></tr>` :
+      `<tr><td><b>${r[0]}</b><span>${r[1]}</span></td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td></tr>`).join("") + `</tbody>`;
+
+  // ── Budget ────────────────────────────────────────────────────────────
+  const ROOMS = { one: 8, two: 18, three: 26 };           // ← edit room counts
+  const PRICE = { one: 5500, two: 2600, three: 1200 };
+  const packaging = 220;                                  // basket + muslin + ribbon + tag per room
+  const buffer = Math.ceil((ROOMS.one + ROOMS.two + ROOMS.three) * 0.1);
+  const fmt = n => n.toLocaleString("en-IN");
+  const lines = TIERS.map(t => [t.name, ROOMS[t.id], PRICE[t.id], ROOMS[t.id] * PRICE[t.id]]);
+  const totalRooms = ROOMS.one + ROOMS.two + ROOMS.three;
+  lines.push(["Packaging (all rooms + buffer)", totalRooms + buffer, packaging, (totalRooms + buffer) * packaging]);
+  lines.push(["Buffer baskets (Mehmaan)", buffer, PRICE.three, buffer * PRICE.three]);
+  lines.push(["Kids’ add-ons (est. 10)", 10, 350, 3500]);
+  const total = lines.reduce((a, l) => a + l[3], 0);
+  document.getElementById("budget").innerHTML = `<thead><tr><th>Line</th><th>Qty</th><th>Each</th><th>Total</th></tr></thead><tbody>` +
+    lines.map(l => `<tr><td>${l[0]}</td><td>${l[1]}</td><td>₹${fmt(l[2])}</td><td>₹${fmt(l[3])}</td></tr>`).join("") +
+    `<tr class="total"><td>Total</td><td>${totalRooms} rooms</td><td></td><td>₹${fmt(total)}</td></tr></tbody>`;
+
+  // ── Steps ─────────────────────────────────────────────────────────────
+  const STEPS = [
+    ["T – 8 weeks", "Lock the room list and the tiers", "One sheet: guest name, room, tier, kids, dietary flags (sugar-free, Jain). This sheet drives everything below."],
+    ["T – 8 weeks", "Commission the handmade pieces", "Madhubani boxes and coasters (Madhubani district artists need 4–6 weeks), Bhagalpuri stoles with embroidery, brass diyas, jute totes."],
+    ["T – 5 weeks", "Print", "Note cards, tags, itinerary cards and the magazine go to the printer together, same paper stock, one colour proof signed off."],
+    ["T – 3 weeks", "Baskets, muslin, ribbon", "Order 10% over the room count. Wash and iron the muslin; store baskets flat and dry."],
+    ["T – 1 week", "Shelf-stable items", "Tea, makhana, dry fruit tins, attar, emergency-kit contents, water. Pack the kits into small muslin pouches now."],
+    ["T – 3 days", "Sweets", "Khaja and tilkut are ordered for delivery on assembly day. Khaja keeps a week; tilkut longer."],
+    ["T – 2 days", "Assembly line", "Book a banquet room at the hotel. Six people, one tier per table, the room sheet on the wall. Photograph one finished basket per tier as the reference."],
+    ["T – 1 day", "Handwriting", "Names on tags in gold ink; tier-1 letters written by the couple. Cross-check every tag against the room sheet."],
+    ["Check-in day", "Placement", "Baskets go into rooms with housekeeping two hours before the first arrival, against the room sheet. The hamper captain walks every corridor once."],
+    ["During", "Top-ups", "Keep the buffer baskets and spare water at the front desk for late arrivals, room changes and the guest who brought a friend."],
+  ];
+  document.getElementById("steps").innerHTML = STEPS.map(s => `<li><div><small>${s[0]}</small><b>${s[1]}</b>${s[2]}</div></li>`).join("");
+
+  // ── Printables ────────────────────────────────────────────────────────
+  const card = `
+    <div class="notecard">
+      <div>
+        <div class="seal">${sealSVG()}</div>
+        <p class="eyebrow" style="margin:3mm 0 0">Welcome to ${W.wedding.city}</p>
+        <h3>Dear <span class="name">&nbsp;</span></h3>
+        <p>Thank you for coming all this way. This basket has the things you will forget to pack, the things you will need after the sangeet, and a few things from ${W.wedding.city} we think you should take home.</p>
+        <p>The little book beside it has the three days: where to be, when, what to wear, what you will eat. Keep it in your bag.</p>
+        <p class="lead italic" style="font-size:12pt;margin-top:4mm">With love,<br>${one.first} &amp; ${two.first}</p>
+      </div>
+      <div class="side">
+        <div><b>Your stay</b>${W.stay.hotel}<br>${W.stay.checkIn}<br>${W.stay.checkOut}</div>
+        <div><b>Shuttles</b>${W.stay.shuttle}</div>
+        <div><b>Anything at all</b>${W.contacts[0].name} · ${W.contacts[0].phone}</div>
+        <div><b>Everything else</b><div class="qr">${qrSVG(W.guestUrl)}</div></div>
+      </div>
+    </div>`;
+  document.getElementById("cards").innerHTML = card + card;
+  const tag = `
+    <div class="tag">
+      <div class="seal">${sealSVG()}</div>
+      <p class="eyebrow">${fmtDate(W.wedding.date)} · ${W.wedding.city}</p>
+      <h4>${one.first} &amp; ${two.first}</h4>
+      <div class="line">For <span></span></div>
+    </div>`;
+  document.getElementById("tags").innerHTML = tag.repeat(8);
+})();
+</script>
+</body>
+</html>
