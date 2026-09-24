@@ -22,6 +22,7 @@
   /* Front: navy card, gold ink */
   .front { color: var(--paper); }
   .front .ganesha { margin: 0 auto var(--s-1); width: 3.6rem; height: 3.9rem; }
+  .front .arch { width: 4.8rem; margin: 0 auto var(--s-2); }
   .front .mantra { font-family: var(--font-dev); color: var(--gold-2); font-size: .95rem; letter-spacing: .04em; margin: 0 0 var(--s-3); }
   .front .eyebrow { color: var(--gold-2); opacity: .9; letter-spacing: .16em; }
   .front .hosts { font-family: var(--font-display); font-size: 1.08rem; font-weight: 500; color: var(--paper); line-height: 1.35; margin: 0; }
@@ -107,13 +108,13 @@
 <script src="assets/wedding.js"></script>
 <script>
 (function () {
-  const { W, fmtDate, fmtTime, days, sealSVG, ornate, ganeshaSVG, ICON, qrSVG, downloadICS, rsvpLink, city, cityDot } = WX;
+  const { W, fmtDate, fmtTime, days, sealSVG, ornate, ganesha, ICON, qrSVG, downloadICS, rsvpLink, city, cityDot } = WX;
   const one = W.couple.one, two = W.couple.two;
   document.title = `${one.first} & ${two.first} · ${fmtDate(W.wedding.date)}`;
 
   document.getElementById("front").innerHTML = `
     ${ornate()}
-    <div class="ganesha reveal">${ganeshaSVG()}</div>
+    <div class="reveal">${ganesha()}</div>
     <p class="mantra reveal">${W.wedding.ganesh}</p>
     <p class="eyebrow reveal d1">${W.wedding.shlokaSub}</p>
     <p class="hosts reveal d2">${one.parents}</p>

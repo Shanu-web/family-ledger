@@ -204,6 +204,10 @@ button { font: inherit; }
 .orn.l.ls { left: -17px; top: 50%; transform: translateY(-50%) rotate(-90deg); width: 34px; } .orn.l.rs { right: -17px; top: 50%; transform: translateY(-50%) rotate(90deg); }
 .dark .orn.l { background: var(--kumkum-2); }
 .ganesha { display: inline-block; width: 3.4rem; height: 3.7rem; color: var(--gold); }
+/* The photo of Ganesha in a gold mehrab (arch): a double gold rim, image clipped to the arch */
+.arch { display: inline-block; width: 4.6rem; padding: 3px; border: 1px solid var(--gold); border-radius: 50% 50% 4px 4px / 42% 42% 4px 4px; background: var(--gold-3); }
+.arch img { display: block; width: 100%; aspect-ratio: 4 / 5; object-fit: cover; object-position: 50% 30%; border-radius: 50% 50% 3px 3px / 42% 42% 3px 3px; border: 1px solid var(--gold-2); }
+.dark .arch { background: transparent; }
 .ganesha svg { width: 100%; height: 100%; }
 
 /* QR block */

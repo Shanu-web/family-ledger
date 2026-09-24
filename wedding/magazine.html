@@ -61,6 +61,7 @@
   .shloka-page { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
   .shloka-page .devanagari { font-size: 30pt; line-height: 1.3; }
   .shloka-page .seal { width: 18mm; height: 18mm; margin-bottom: 8mm; }
+  .shloka-page .arch { width: 30mm; }
 
   /* Schedule page */
   .sched .dayblk { margin-bottom: 4mm; }
@@ -73,6 +74,9 @@
   .sched td.t { width: 16mm; font-family: var(--font-display); font-size: 11pt; color: var(--ink); white-space: nowrap; }
   .sched td.n b { font-family: var(--font-display); font-weight: 500; font-size: 11pt; color: var(--ink); display: block; line-height: 1.1; }
   .sched td.n span { color: var(--ink-3); }
+  .sched tr.m td { padding: .8mm 0; }
+  .sched tr.m td.t { font-size: 9.5pt; color: var(--ink-3); }
+  .sched td.n i { font-family: var(--font-display); font-size: 10pt; color: var(--ink-2); display: block; line-height: 1.1; }
 
   /* Dress page */
   .wear { display: grid; gap: 3mm; }
@@ -95,11 +99,12 @@
   .evt .tl li b { font-family: var(--font-display); font-weight: 500; font-size: 11pt; color: var(--kumkum); }
 
   /* Menu pages */
-  .menu .block { margin-bottom: 4mm; }
+  .menu .block { margin-bottom: 3mm; }
   .menu .block h3 { display: flex; align-items: baseline; justify-content: space-between; border-bottom: 1px solid var(--gold); padding-bottom: 1mm; margin: 0 0 2mm; }
   .menu .block h3 small { font-family: var(--font-text); font-size: 6.5pt; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-3); }
-  .menu .cols { columns: 2; column-gap: 5mm; font-size: 8pt; line-height: 1.4; }
-  .menu .st { break-inside: avoid; margin-bottom: 2mm; }
+  .menu .cols { columns: 2; column-gap: 5mm; font-size: 7.6pt; line-height: 1.35; }
+  .menu .cols.three { columns: 3; column-gap: 4mm; }
+  .menu .st { break-inside: avoid; margin-bottom: 1.6mm; }
   .menu .st b { display: block; font-family: var(--font-display); font-style: italic; font-weight: 400; font-size: 10.5pt; color: var(--kumkum); }
   .menu .st span { display: block; }
 
@@ -111,7 +116,7 @@
   .mapcard .qr { position: absolute; right: 3mm; bottom: 3mm; width: 22mm; padding: 1.5mm; }
   .mapcard .qrl { position: absolute; right: 3mm; bottom: 26mm; width: 22mm; font-size: 6.2pt; letter-spacing: .12em; text-transform: uppercase; color: var(--kumkum); text-align: center; line-height: 1.3; }
   .rows { gap: 0; }
-  .row { grid-template-columns: 17mm 1fr; padding: 1.8mm 0; font-size: 8.5pt; }
+  .row { grid-template-columns: 17mm 1fr; padding: 1.5mm 0; font-size: 8pt; line-height: 1.4; }
   .row b { font-size: 6.5pt; }
 
   /* Back cover */
@@ -143,7 +148,7 @@
 <script src="assets/wedding.js"></script>
 <script>
 (function () {
-  const { W, fmtDate, fmtTime, days, sealSVG, ganeshaSVG, ornate, ICON, qrSVG, swatches, directions, city, cityDot } = WX;
+  const { W, fmtDate, fmtTime, days, mealsFor, sealSVG, ganesha, ornate, ICON, qrSVG, swatches, directions, city, cityDot } = WX;
   const one = W.couple.one, two = W.couple.two;
   const ev = Object.fromEntries(W.events.map(e => [e.id, e]));
   const short = s => s.split(",")[0];
@@ -151,7 +156,8 @@
 
   const page = (cls, html) => `<section class="page ${cls}">${html}</section>`;
   const folio = () => `<div class="folio">${one.first} <b>&amp;</b> ${two.first}</div>`;
-  const stations = e => `<div class="cols">${e.menu.map(s => `<div class="st"><b>${s.station}</b>${s.items.map(i => `<span>${i}</span>`).join("")}</div>`).join("")}</div>`;
+  const stations = m => `<div class="cols ${m.stations.length >= 5 ? "three" : ""}">${m.stations.map(s => `<div class="st"><b>${s.station}</b>${s.items.map(i => `<span>${i}</span>`).join("")}</div>`).join("")}</div>`;
+  const meal = (id) => (W.meals || []).find(m => m.id === id);
   const eventPage = (e, extra) => page("evt", `
     <p class="eyebrow">${fmtDate(e.day, "long")}</p>
     <h2 class="big">${e.title}</h2>
@@ -182,7 +188,7 @@
 
   // 2 · Inside cover
   P.push(page("shloka-page", `
-    <div class="ganesha" style="width:22mm;height:24mm;margin-bottom:5mm">${ganeshaSVG()}</div>
+    <div style="margin-bottom:5mm">${ganesha()}</div>
     <p class="devanagari" style="font-size:14pt;margin-bottom:8mm">${W.wedding.ganesh}</p>
     <p class="devanagari">${W.wedding.shloka}</p>
     <p class="eyebrow ink">${W.wedding.shlokaSub}</p>
@@ -231,9 +237,9 @@
     ${days().map(d => `
       <div class="dayblk">
         <h3><b>${fmtDate(d.day, "dnum")}</b><span>${fmtDate(d.day, "long")} · Day ${d.index}</span></h3>
-        <table>${d.events.map(e => `<tr><td class="t">${fmtTime(e.start)}</td><td class="n"><b>${e.title}</b><span>${oneVenue ? e.kicker : e.where}</span></td></tr>`).join("")}</table>
+        <table>${d.agenda.map(e => e.kind === "meal" ? `<tr class="m"><td class="t">${fmtTime(e.start)}</td><td class="n"><i>${e.title}</i><span>till ${fmtTime(e.end)}</span></td></tr>` : `<tr><td class="t">${fmtTime(e.start)}</td><td class="n"><b>${e.title}</b><span>${oneVenue ? e.kicker : e.where}</span></td></tr>`).join("")}</table>
       </div>`).join("")}
-    <p class="meta" style="margin-top:3mm">${oneVenue ? "Everything at " + W.venue.name + ", " + W.wedding.city + ". " : ""}${W.stay.shuttle}</p>
+    <p class="meta" style="margin-top:3mm">${oneVenue ? "Everything at " + W.venue.name + ", " + W.wedding.city + ". " : ""}${W.alwaysOn}</p>
     ${folio()}`));
 
   // 7 · What to wear
@@ -253,49 +259,38 @@
   P.push(eventPage(ev.wedding, `
     <div class="dress" style="margin-top:4mm;border-left-color:var(--rose)"><b>${fmtDate(ev.bidai.day, "long")} · ${ev.bidai.title}, ${fmtTime(ev.bidai.start)}</b>${ev.bidai.note}</div>`));
 
-  // 12–13 · Menus
-  const menuPage = (ids, eyebrow, head) => page("menu", `
+  // 12–14 · Menus (the resort’s menu, entirely vegetarian)
+  const menuPage = (ids, eyebrow, head, foot) => page("menu", `
     <p class="eyebrow">${eyebrow}</p>
     <h2>${head}</h2>
-    ${ids.map(id => `<div class="block"><h3>${ev[id].title}<small>${fmtDate(ev[id].day, "short")} · ${fmtTime(ev[id].start)}</small></h3>${stations(ev[id])}</div>`).join("")}
+    ${ids.map(id => meal(id)).filter(Boolean).map(m => `<div class="block"><h3>${m.title}<small>${fmtDate(m.day, "short")} · ${fmtTime(m.start)} – ${fmtTime(m.end)}</small></h3>${stations(m)}</div>`).join("")}
+    ${foot ? `<p class="meta" style="margin-top:2mm">${foot}</p>` : ""}
     ${folio()}`);
-  P.push(menuPage(["tilak", "sangeet"], "The menu · day one", `Eat <em>well</em>.`));
-  P.push(menuPage(["haldi", "wedding", "bidai"], "The menu · days two & three", `Then eat <em>more</em>.`));
+  P.push(menuPage(["lunch-10", "tea-10", "dinner-10"], "The menu · day one", `Eat <em>well</em>.`, "The whole wedding is vegetarian. " + W.alwaysOn));
+  P.push(menuPage(["breakfast-11", "haldi-11", "lunch-11", "tea-11"], "The menu · day two", `Then eat <em>more</em>.`));
+  P.push(menuPage(["dinner-11", "breakfast-12"], "The menu · the wedding dinner, and the morning after", `Eighteen <em>counters</em>.`, "Dinner is served from 7 till 11:30, so eat whenever you arrive; the counters are replenished all evening."));
 
-  // 14 · Getting there
+  // 15 · Getting there & the little things
   P.push(page("", `
-    <p class="eyebrow">Getting there</p>
+    <p class="eyebrow">Getting there &amp; the little things</p>
     <h2>${W.venue.name}</h2>
     <p class="meta">${W.venue.address}</p>
-    <div class="mapcard">
-      <svg class="roads" viewBox="0 0 300 140" preserveAspectRatio="none" fill="none" stroke="#B8935A" stroke-opacity=".5">
+    <div class="mapcard" style="height:34mm">
+      <svg class="roads" viewBox="0 0 300 140" preserveAspectRatio="none" fill="none" stroke="#B99A63" stroke-opacity=".5">
         <path d="M-10 40 C 60 30, 120 70, 310 55" stroke-width="2"/><path d="M-10 100 C 80 110, 160 80, 310 95" stroke-width="1.2"/>
         <path d="M70 -10 C 80 60, 60 100, 90 150" stroke-width="1.2"/><path d="M210 -10 C 200 50, 230 100, 220 150" stroke-width="2"/>
-        <path d="M-10 70 L310 70" stroke-width=".6" stroke-dasharray="3 4"/>
       </svg>
-      <svg class="pin" viewBox="0 0 24 30" fill="currentColor"><path d="M12 30s-9-9.6-9-17a9 9 0 0 1 18 0c0 7.4-9 17-9 17z"/><circle cx="12" cy="13" r="3.5" fill="#F6F1E7"/></svg>
-      <div class="lbl">${short(W.venue.name)}</div>
-      <div class="qrl">Scan for<br>directions</div>
-      <div class="qr">${qrSVG(directions(), { seal: false })}</div>
+      <svg class="pin" viewBox="0 0 24 30" fill="currentColor"><path d="M12 30s-9-9.6-9-17a9 9 0 0 1 18 0c0 7.4-9 17-9 17z"/><circle cx="12" cy="13" r="3.5" fill="#F4EFE6"/></svg>
+      <div class="lbl">${W.venue.name}</div>
+      <div class="qrl" style="bottom:22mm">Scan for<br>directions</div>
+      <div class="qr" style="width:18mm">${qrSVG(directions(), { seal: false })}</div>
     </div>
     <div class="rows">
-      <div class="row"><b>Landmark</b><span>${W.venue.landmark}</span></div>
-      <div class="row"><b>Parking</b><span>${W.venue.parking}</span></div>
       ${W.travel.map(t => `<div class="row"><b>By ${t.by}</b><span>${t.text}</span></div>`).join("")}
-    </div>
-    ${folio()}`));
-
-  // 15 · The little things
-  P.push(page("", `
-    <p class="eyebrow">The little things</p>
-    <h2>Good to <em>know</em>.</h2>
-    <div class="rows">
-      <div class="row"><b>Stay</b><span><b style="font-family:var(--font-display);font-size:11pt;font-weight:500;color:var(--ink);letter-spacing:0;text-transform:none">${W.stay.hotel}</b><br>${W.stay.checkIn} → ${W.stay.checkOut}. ${W.stay.note}</span></div>
-      <div class="row"><b>Hamper</b><span>The basket in your room has the things you will forget to pack, and a few things from Bihar you should take home.</span></div>
+      <div class="row"><b>Stay</b><span>${W.stay.address} ${W.stay.note}</span></div>
       <div class="row"><b>Gifts</b><span>${W.copy.giftNote}</span></div>
       <div class="row"><b>Phones</b><span>Down for the pheras, please. Up for everything else; tag ${W.couple.hashtag}.</span></div>
-      <div class="row"><b>Kids</b><span>A supervised play corner runs at the sangeet and the wedding from 8 pm.</span></div>
-      ${W.contacts.map(c => `<div class="row"><b>${c.role}</b><span>${c.name} · ${c.phone}</span></div>`).join("")}
+      ${W.contacts.slice(0, 2).map(c => `<div class="row"><b>${c.role}</b><span>${c.name} · ${c.phone}</span></div>`).join("")}
     </div>
     ${folio()}`));
 

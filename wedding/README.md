@@ -35,8 +35,10 @@ Still marked `TODO` in the config, in order of urgency:
 4. `theme` — which of the three palettes (below).
 
 Venue is set: Sree Raaga Resorts, No. 1246, Budigere Bypass Road, Devanahalli,
-Bengaluru 562129 (25 minutes from BLR airport). Stay arrangements are not
-assumed anywhere; the guest page says they will be shared personally.
+Bengaluru 562129 (25 minutes from BLR airport). The resort is booked
+exclusively, 55 rooms, 10–12 December, and the menus on every page are the
+resort's own (all vegetarian). Counts, counters, staffing and the quotation
+live in `planner/catering-and-booking.md`, never on a guest page.
 
 The card follows the traditional order: Shree Ganeshaya Namah at the top,
 the groom's parents as hosts, "the wedding ceremony of their son Shanu with
@@ -139,5 +141,6 @@ wedding/
 │   ├── wedding.js        helpers: dates, QR, .ics, seal
 │   ├── qr-guest.*        print-ready QR exports (regenerate with tools/make_qr.py)
 │   └── vendor/qrcode-generator.js   MIT, Kazuhiko Arase
+├── planner/catering-and-booking.md   counts, counters, rates — planners only
 └── tools/make_qr.py      vector QR export for the printer
 ```

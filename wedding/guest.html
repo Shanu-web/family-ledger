@@ -12,6 +12,7 @@
   /* Hero */
   .hero { position: relative; padding: var(--s-8) 0 var(--s-7); text-align: center; overflow: hidden; }
   .hero .ganesha { width: 4rem; height: 4.4rem; margin: 0 auto var(--s-2); }
+  .hero .arch { width: 5.4rem; margin: 0 auto var(--s-3); }
   .hero .names { font-size: clamp(3rem, 12vw, 5.5rem); }
   .hero .when { font-family: var(--font-display); font-size: var(--fs-lg); color: var(--ink); margin: var(--s-4) 0 var(--s-2); }
   .countdown { font-size: var(--fs-sm); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
@@ -37,6 +38,12 @@
   .mini li { display: grid; grid-template-columns: 4rem 1fr; gap: var(--s-3); }
   .mini li b { font-family: var(--font-display); font-weight: 500; font-size: 1.05rem; color: var(--ink); font-variant-numeric: tabular-nums; }
   details.menu { margin-top: var(--s-3); }
+  .event.meal { padding: var(--s-4) 0; }
+  .event.meal .time { font-size: 1.2rem; color: var(--ink-3); }
+  .event.meal .mealtitle { font-size: 1.35rem; font-style: italic; color: var(--ink-2); }
+  .mealhead { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s-3); margin-top: var(--s-5); padding-bottom: var(--s-2); border-bottom: 1px solid var(--gold); }
+  .mealhead b { font-family: var(--font-display); font-weight: 500; font-size: 1.3rem; color: var(--ink); }
+  .mealhead span { font-size: var(--fs-xs); letter-spacing: var(--track); text-transform: uppercase; color: var(--ink-3); }
   details.menu summary { cursor: pointer; list-style: none; display: inline-flex; align-items: center; gap: var(--s-2); font-size: var(--fs-xs); letter-spacing: var(--track); text-transform: uppercase; font-weight: 600; color: var(--kumkum); }
   details.menu summary::-webkit-details-marker { display: none; }
   details.menu summary::after { content: "+"; font-family: var(--font-display); font-size: 1.2rem; line-height: 1; }
@@ -102,8 +109,8 @@
 
   <section class="section" id="menu"><div class="wrap">
     <p class="eyebrow center">What you will eat</p>
-    <h2 class="h2 center" style="font-style:italic">Every event has its own table.</h2>
-    <p class="center meta measure mx">Vegetarian and Jain options at every counter. Tell any steward about allergies; the kitchen has been briefed.</p>
+    <h2 class="h2 center" style="font-style:italic">Every meal, all three days.</h2>
+    <p class="center meta measure mx">The whole wedding is vegetarian. Tell any steward about allergies; the kitchen has been briefed.</p>
     <div id="menus" class="stack" style="margin-top:var(--s-6)"></div>
   </div></section>
 
@@ -141,12 +148,12 @@
 <script src="assets/wedding.js"></script>
 <script>
 (function () {
-  const { W, fmtDate, fmtTime, days, sealSVG, ganeshaSVG, ICON, downloadICS, rsvpLink, mapsEmbed, directions, swatches, countdown, city, cityDot } = WX;
+  const { W, fmtDate, fmtTime, days, mealsFor, sealSVG, ganesha, ICON, downloadICS, rsvpLink, mapsEmbed, directions, swatches, countdown, city, cityDot } = WX;
   const one = W.couple.one, two = W.couple.two;
   document.title = `${one.first} & ${two.first} · Guest guide`;
 
   document.getElementById("hero").innerHTML = `
-    <div class="ganesha reveal">${ganeshaSVG()}</div>
+    <div class="reveal">${ganesha()}</div>
     <p class="devanagari reveal" style="font-size:1rem;color:var(--gold);margin:0 0 var(--s-5)">${W.wedding.ganesh}</p>
     <p class="lead reveal d1" style="font-size:1.1rem;margin:0">${one.parents}</p>
     <p class="eyebrow reveal d1" style="margin-top:var(--s-1)">invite you to the wedding of their son</p>
@@ -161,14 +168,22 @@
   countdown(document.getElementById("countdown"));
   document.getElementById("ics").onclick = downloadICS;
 
-  const stations = e => `<div class="stations">${e.menu.map(s => `<div class="station"><h4>${s.station}</h4><ul>${s.items.map(i => `<li>${i}</li>`).join("")}</ul></div>`).join("")}</div>`;
+  const stations = m => `<div class="stations">${m.stations.map(s => `<div class="station"><h4>${s.station}</h4><ul>${s.items.map(i => `<li>${i}</li>`).join("")}</ul></div>`).join("")}</div>`;
+  const mealBlock = m => `<div class="mealhead"><b>${m.title}</b><span>${fmtTime(m.start)} – ${fmtTime(m.end)}</span></div>${stations(m)}`;
 
   document.getElementById("days").innerHTML = days().map(d => `
     <div class="dayhead">
       <div class="dnum">${fmtDate(d.day, "dnum")}</div>
       <div><h2>Day ${d.index}</h2><p class="meta">${fmtDate(d.day, "long")}</p></div>
     </div>
-    ${d.events.map(e => `
+    ${d.agenda.map(e => e.kind === "meal" ? `
+      <article class="event meal" id="${e.id}">
+        <div class="time">${fmtTime(e.start)}<small>till ${fmtTime(e.end)}</small></div>
+        <div>
+          <h3 class="mealtitle">${e.title}</h3>
+          <details class="menu"><summary>What’s on</summary>${stations(e)}</details>
+        </div>
+      </article>` : `
       <article class="event" id="${e.id}">
         <div class="time">${fmtTime(e.start)}<small>till ${fmtTime(e.end)}</small></div>
         <div>
@@ -177,7 +192,7 @@
           <p>${e.note}</p>
           <div class="dress"><b>Dress</b><div>${e.dress}${swatches(e.palette)}</div></div>
           ${e.timeline ? `<ul class="mini">${e.timeline.map(t => `<li><b>${t.at}</b><span>${t.what}</span></li>`).join("")}</ul>` : ""}
-          <details class="menu"><summary>Menu for ${e.title}</summary>${stations(e)}</details>
+          ${mealsFor(e.id).map(m => `<details class="menu"><summary>${m.title} · ${fmtTime(m.start)} – ${fmtTime(m.end)}</summary>${stations(m)}</details>`).join("")}
         </div>
       </article>`).join("")}
   `).join("");
@@ -191,12 +206,12 @@
   const dir = document.getElementById("directions"); dir.href = directions(); dir.innerHTML = `${ICON.map} Open in Google Maps`;
   document.getElementById("map").src = mapsEmbed();
 
-  document.getElementById("menus").innerHTML = W.events.map(e => `
+  document.getElementById("menus").innerHTML = days().map(d => `
     <div class="card plain">
-      <p class="eyebrow gold" style="margin:0">${fmtDate(e.day, "short")} · ${fmtTime(e.start)}</p>
-      <h3 class="h3" style="font-style:italic">${e.title}</h3>
-      ${stations(e)}
-    </div>`).join("");
+      <p class="eyebrow gold" style="margin:0">Day ${d.index}</p>
+      <h3 class="h3" style="font-style:italic">${fmtDate(d.day, "long")}</h3>
+      ${d.meals.map(mealBlock).join("")}
+    </div>`).join("") + `<p class="center meta" style="margin-top:var(--s-4)">${W.alwaysOn}</p>`;
 
   document.getElementById("stay-hotel").textContent = W.stay.hotel;
   document.getElementById("stay-address").textContent = W.stay.address;

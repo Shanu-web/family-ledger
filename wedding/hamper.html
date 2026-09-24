@@ -114,7 +114,7 @@
         <p class="eyebrow">Budget</p>
         <h2 class="h3">Sample numbers, in rupees.</h2>
         <table class="budget" id="budget"></table>
-        <p class="meta" style="margin-top:var(--s-3)">Room counts are placeholders; edit the numbers in this file. Prices are planning estimates, not quotes.</p>
+        <p class="meta" style="margin-top:var(--s-3)">The resort has 55 rooms reserved for the wedding; split across tiers here, edit as the guest list firms up. Prices are planning estimates, not quotes.</p>
       </div>
     </div>
   </div></section>
@@ -211,7 +211,7 @@
       `<tr><td><b>${r[0]}</b><span>${r[1]}</span></td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td></tr>`).join("") + `</tbody>`;
 
   // ── Budget ────────────────────────────────────────────────────────────
-  const ROOMS = { one: 8, two: 18, three: 26 };           // ← edit room counts
+  const ROOMS = { one: 8, two: 19, three: 28 };           // 55 rooms reserved at the resort, 10–12 Dec
   const PRICE = { one: 5500, two: 2600, three: 1200 };
   const packaging = 220;                                  // basket + muslin + ribbon + tag per room
   const buffer = Math.ceil((ROOMS.one + ROOMS.two + ROOMS.three) * 0.1);

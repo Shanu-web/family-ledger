@@ -43,6 +43,7 @@ window.WEDDING = {
     time: "19:00",
     city: VENUE_CITY,
     ganesh: "॥ श्री गणेशाय नमः ॥",
+    ganeshImage: "assets/ganesha.jpg",   // the photo at the top of the card; set to "" to use the line drawing instead
     shloka: "शुभ विवाह",
     shlokaSub: "With the blessings of the Almighty and our elders",
   },
@@ -63,12 +64,12 @@ window.WEDDING = {
 
   // ── Stay ───────────────────────────────────────────────────────────────────
   stay: {
-    hotel: "Your stay",
-    address: "Stay arrangements for outstation guests will be shared personally.",
-    checkIn: "Thu 10 Dec, from the morning",
-    checkOut: "Sat 12 Dec, after the bidai",
-    note: "December evenings in Bengaluru drop to about 15 °C; bring a shawl for the sangeet and the bidai.",
-    shuttle: "All events are at Sree Raaga Resorts. Airport and station pick-ups are arranged on request.",
+    hotel: "Sree Raaga Resorts, on the property",
+    address: "The whole resort is ours for the three days: every room, the lawns, the banquet hall and the dining hall.",
+    checkIn: "Thu 10 Dec, from the morning (flexible to your arrival)",
+    checkOut: "Fri 12 Dec, flexible to your train or flight",
+    note: "Your room is allotted at reception on arrival, against the guest list. Tea, coffee and cookies are available round the clock, in your room on request. December evenings drop to about 15 °C; bring a shawl for the sangeet and the bidai.",
+    shuttle: "Every event is on the property, a short walk from your room. Airport and station pick-ups are arranged on request.",
   },
 
   // ── Travel ─────────────────────────────────────────────────────────────────
@@ -90,52 +91,35 @@ window.WEDDING = {
   // ── The events (the schedule, the dress codes, the menus) ─────────────────
   events: [
     {
-      id: "tilak", day: "2026-12-10", start: "13:30", end: "16:00",
+      id: "tilak", day: "2026-12-10", start: "13:30", end: "15:30",
       title: "Tilak", kicker: "The First Blessing",
       where: VENUE_NAME,
       dress: "Traditional and light: ivories, creams, pastel silks. Kurtas, saris, suits.",
       palette: ["#F6F1E7", "#D9C08F", "#6E1E2B"],
-      note: "The bride’s family welcomes the groom with the tilak, the blessing that opens the wedding. Guests arrive through the morning; lunch follows the ceremony.",
-      menu: [
-        { station: "Welcome",  items: ["Kesar lassi, aam panna", "Nimbu pani, masala chaas"] },
-        { station: "Lunch",    items: ["Litti with baingan chokha & ghee", "Dal pitha, ghugni", "Paneer lababdar, aloo dum, kadhi", "Puri, jeera rice, salad, papad"] },
-        { station: "Sweet",    items: ["Anarsa, thekua", "Kesar phirni"] },
-      ],
+      note: "The bride’s family welcomes the groom with the tilak, the blessing that opens the wedding. A fruit punch is waiting as you arrive; lunch runs alongside the ceremony.",
     },
     {
-      id: "sangeet", day: "2026-12-10", start: "18:00", end: "23:30",
+      id: "sangeet", day: "2026-12-10", start: "18:00", end: "23:00",
       title: "Sangeet & Engagement", kicker: "Rings, Then Dancing",
       where: VENUE_NAME,
       dress: "Jewel tones and shimmer: emerald, sapphire, wine. Dance-proof footwear.",
       palette: ["#1F2F5C", "#6E1E2B", "#B8935A"],
-      note: "The rings at 7. Family performances from 8, sharp. After that the floor is yours till the DJ is thrown out.",
+      note: "The rings at 7. Family performances from 8, sharp. Starters go round from 6:30 and dinner is served from 7:30, so eat between dances.",
       timeline: [
-        { at: "18:00", what: "Doors, drinks and chaat" },
+        { at: "18:00", what: "Doors and fresh juices" },
+        { at: "18:30", what: "Starters and the chaat counter open" },
         { at: "19:00", what: "Engagement: the rings" },
-        { at: "20:00", what: "Sangeet performances" },
-        { at: "21:30", what: "Dinner opens; the floor stays open" },
-      ],
-      menu: [
-        { station: "Passed around", items: ["Galouti on ulte tawa parathas", "Paneer tikka, hara bhara kebab", "Amritsari fish, chicken malai tikka", "Dahi ke kebab"] },
-        { station: "Chaat lane",    items: ["Pani puri (five waters)", "Dahi bhalla, papdi chaat", "Aloo tikki with chole"] },
-        { station: "Live",          items: ["Pasta & risotto bar", "Dim sum basket (veg / chicken)", "Tandoor: naan, kulcha, roti"] },
-        { station: "Mains",         items: ["Dal makhani, paneer lababdar", "Murgh musallam, mutton rogan josh", "Subz miloni, jeera rice, biryani (veg / gosht)"] },
-        { station: "Dessert",       items: ["Gulab jamun with rabri", "Moong dal halwa", "Tiramisu, fruit tart", "Paan counter"] },
-        { station: "Bar",           items: ["Signature: Marigold Sour, Kumkum Negroni", "Wines, whiskies, gin & tonic bar", "Mocktails: jamun spritz, kokum cooler"] },
+        { at: "19:30", what: "Dinner counters open, till 10" },
+        { at: "20:00", what: "Sangeet performances, then the floor is yours" },
       ],
     },
     {
-      id: "haldi", day: "2026-12-11", start: "11:00", end: "13:30",
+      id: "haldi", day: "2026-12-11", start: "11:00", end: "13:00",
       title: "Haldi", kicker: "Turmeric & Marigold",
       where: VENUE_NAME,
       dress: "Yellows, ivories, whites. Cottons you don’t mind turmeric on.",
       palette: ["#E8B73B", "#F6F1E7", "#F3D98B"],
-      note: "Sit on the ground, get your hands messy, and sing. Brunch runs alongside; bring sunglasses.",
-      menu: [
-        { station: "To begin",   items: ["Kesar lassi, aam panna", "Cutting chai, filter coffee"] },
-        { station: "Brunch",     items: ["Sattu paratha, dahi", "Poha, jalebi, imarti", "Chhole bhature", "Seasonal fruit, cold-pressed juices"] },
-        { station: "Sweet",      items: ["Gaya tilkut, Silao khaja", "Malai kulfi on stick"] },
-      ],
+      note: "Sit on the ground, get your hands messy, and sing. Mint mojitos, watermelon juice and cocktail samosas go round; lunch follows at 1.",
     },
     {
       id: "wedding", day: "2026-12-11", start: "19:00", end: "23:59",
@@ -143,20 +127,13 @@ window.WEDDING = {
       where: VENUE_NAME,
       dress: "Traditional. Reds, golds, ivories. Silks, bandhgalas, sherwanis, saris, lehengas.",
       palette: ["#6E1E2B", "#B8935A", "#F6F1E7"],
-      note: "The baraat arrives at 7 with the band; come early if you are dancing in it. Jaimala at 8, and the reception and dinner run from 8 onwards. The pheras follow later in the night; sit with us for them, it is the heart of the evening.",
+      note: "The baraat arrives at 7 with the band; come early if you are dancing in it. Jaimala at 8, and the reception runs from 8 onwards with dinner served across eighteen counters till 11:30. The pheras follow later in the night; sit with us for them, it is the heart of the evening.",
       timeline: [
-        { at: "19:00", what: "Baraat arrives; swagat at the gate" },
+        { at: "19:00", what: "Baraat arrives; swagat at the gate. Dinner counters open" },
         { at: "20:00", what: "Jaimala" },
-        { at: "20:00", what: "Reception and dinner, onwards" },
+        { at: "20:00", what: "Reception, onwards" },
+        { at: "23:30", what: "Dinner service closes" },
         { at: "Late",  what: "Pheras at the mandap" },
-      ],
-      menu: [
-        { station: "Welcome",   items: ["Thandai, rose sherbet", "Badam milk"] },
-        { station: "Starters",  items: ["Tandoori broccoli, malai soya chaap", "Mutton seekh, murgh tikka", "Corn & cheese balls for the little ones"] },
-        { station: "Regional",  items: ["Bihari thali: litti chokha, dal pitha, ghugni", "Maharashtrian: puran poli, bharli vangi, masale bhaat", "Awadhi: nihari, sheermal"] },
-        { station: "Mains",     items: ["Paneer butter masala, kadhai vegetables", "Dal tadka, dal makhani", "Chicken korma, mutton kosha", "Assorted breads, pulao, biryani"] },
-        { station: "Live",      items: ["Carving station: roast lamb, roast chicken", "Wood-fired pizza", "Teppanyaki noodles"] },
-        { station: "Dessert",   items: ["Wedding cake", "Anarsa, thekua, khaja", "Kesar phirni, rasmalai", "Ice cream trolley, meetha paan"] },
       ],
     },
     {
@@ -165,12 +142,82 @@ window.WEDDING = {
       where: VENUE_NAME,
       dress: "Whatever you slept in, plus a shawl. It will be cold and it will be early.",
       palette: ["#C9A4A0", "#F6F1E7", "#B8935A"],
-      note: "Before the sun is up, the bride and groom leave together. Bring a handkerchief. Chai and breakfast are laid out for everyone who stayed up, and for everyone who didn’t.",
-      menu: [
-        { station: "Before dawn", items: ["Adrak chai, kahwa, filter coffee", "Poha, upma", "Puri sabzi", "Fruit, biscuits, tilkut for the road"] },
-      ],
+      note: "Before the sun is up, the bride and groom leave together. Bring a handkerchief. Tea and coffee are on all night; breakfast is laid out from 8 for everyone who stayed up, and for everyone who didn’t.",
     },
   ],
+
+  // ── Meals (from the resort’s menu, updated 21 September 2026). Entirely vegetarian. ──
+  // Each meal: day, start/end, title, optional `for` (the event it belongs to), stations.
+  vegetarian: true,
+  meals: [
+    { id: "lunch-10", day: "2026-12-10", start: "12:30", end: "15:00", title: "Lunch", for: "tilak", stations: [
+      { station: "As you arrive", items: ["Fruit punch"] },
+      { station: "Beverage",      items: ["Jaljeera"] },
+      { station: "Main course",   items: ["Paneer lababdar", "Bharwa bhindi", "Kum palak (mushroom)", "Dal tadka", "Jeera rice, steamed rice"] },
+      { station: "Breads",        items: ["Phulka", "Puri"] },
+      { station: "Desserts",      items: ["Gulab jamun", "Rasgulla"] },
+      { station: "On the side",   items: ["Papad, pickle, curd, salad"] },
+    ]},
+    { id: "tea-10", day: "2026-12-10", start: "16:00", end: "18:00", title: "High tea", stations: [
+      { station: "Beverages", items: ["Tea", "Coffee"] },
+      { station: "Snacks",    items: ["Methi pakoda", "Mixed vegetable pakoda", "Dhokla"] },
+      { station: "Chutneys",  items: ["Green chutney, sweet chutney, ketchup"] },
+    ]},
+    { id: "dinner-10", day: "2026-12-10", start: "18:30", end: "22:00", title: "Sangeet dinner", for: "sangeet", stations: [
+      { station: "Fresh juices",  items: ["Watermelon", "Pineapple"] },
+      { station: "Starters",      items: ["Palak cheese kebab", "Paneer tikka", "Hara bhara kebab"] },
+      { station: "Chaat counter", items: ["Dahi vada chaat", "Aloo tikki chaat"] },
+      { station: "Soup",          items: ["Manchow soup"] },
+      { station: "Chinese",       items: ["Vegetable noodles", "Vegetable Manchurian"] },
+      { station: "Main course",   items: ["Matar mushroom", "Palak paneer", "Dal sultani", "Vegetable biryani, steamed rice"] },
+      { station: "Breads",        items: ["Missi roti", "Butter naan", "Tandoori roti"] },
+      { station: "Desserts",      items: ["Malpua with rabri", "Rajbhog", "Vanilla ice cream"] },
+      { station: "On the side",   items: ["Salad, papad, pickle"] },
+    ]},
+    { id: "breakfast-11", day: "2026-12-11", start: "08:00", end: "10:30", title: "Breakfast", stations: [
+      { station: "To start",  items: ["Cut fruits, fresh juice", "Tea, coffee, milk"] },
+      { station: "South",     items: ["Idli, vada, dosa", "Sambar, chutney", "Upma, kesari bath"] },
+      { station: "North",     items: ["Puri with aloo sagu", "Aloo paratha", "Bread, butter, jam, toast"] },
+      { station: "On the side", items: ["Curd, pickle, salad"] },
+    ]},
+    { id: "haldi-11", day: "2026-12-11", start: "11:00", end: "13:00", title: "Haldi refreshments", for: "haldi", stations: [
+      { station: "Beverages", items: ["Mint mojito (non-alcoholic)", "Watermelon juice"] },
+      { station: "Snacks",    items: ["Cocktail samosa", "Green chutney, sweet chutney"] },
+    ]},
+    { id: "lunch-11", day: "2026-12-11", start: "13:00", end: "15:00", title: "Lunch", stations: [
+      { station: "Beverages",   items: ["Lemon soda", "Mint mojito (non-alcoholic)", "Watermelon juice"] },
+      { station: "Main course", items: ["Aloo kathal", "Panchmel dal", "Chana masala", "Palak paneer kofta", "Steamed rice"] },
+      { station: "Breads",      items: ["Kulcha", "Naan", "Tandoori roti"] },
+      { station: "Desserts",    items: ["Angoori rasmalai", "Moong dal halwa"] },
+      { station: "On the side", items: ["Salad, papad, pickle"] },
+    ]},
+    { id: "tea-11", day: "2026-12-11", start: "16:00", end: "18:00", title: "High tea", stations: [
+      { station: "Beverages", items: ["Tea", "Coffee"] },
+      { station: "Bakes",     items: ["Muffins", "Cookies"] },
+    ]},
+    { id: "dinner-11", day: "2026-12-11", start: "19:00", end: "23:30", title: "Wedding dinner", for: "wedding", stations: [
+      { station: "Mocktails",        items: ["The chef’s selection of non-alcoholic mocktails"] },
+      { station: "Soups",            items: ["Manchow soup", "Rainbow soup"] },
+      { station: "Starters",         items: ["Golden baby corn", "Paneer tikka", "Kalmi vada", "Spring rolls", "Bhokara (paneer-stuffed aloo)"] },
+      { station: "Chaat & grill",    items: ["Pani puri", "Dahi kebab", "Palak patta chaat", "Paneer chilla", "Tikki chaat with ragda", "Soya chaap"] },
+      { station: "Main course",      items: ["Kadai paneer", "Subz seekh kofta", "Kaju makhana", "Tawa sabzi", "Dal makhani", "Handi dum biryani", "Plain kaju rice", "Pineapple raita"] },
+      { station: "Breads",           items: ["Butter naan", "Kulcha", "Missi roti", "Tandoori roti", "Palak puri"] },
+      { station: "Chinese & pasta",  items: ["Mongolian hotchpotch", "Hakka noodles", "Red sauce pasta", "White sauce pasta"] },
+      { station: "Bihari counter",   items: ["Litti chokha", "Baingan bhaja", "Green chutney, sweet chutney, ghee"] },
+      { station: "Punjabi counter",  items: ["Sarson ka saag", "Makki ki roti", "Bajra roti"] },
+      { station: "South Indian",     items: ["Plain dosa", "Masala dosa", "Chutney, sambar"] },
+      { station: "Momos",            items: ["Vegetable momos"] },
+      { station: "Halwa counter",    items: ["Carrot halwa", "Dry fruit tawa halwa"] },
+      { station: "Desserts",         items: ["Live jalebi with rabri", "Kesar kulfi", "Mysore pak", "Vanilla ice cream with hot chocolate and nuts"] },
+      { station: "On the side",      items: ["Plain curd, salad"] },
+    ]},
+    { id: "breakfast-12", day: "2026-12-12", start: "08:00", end: "11:00", title: "Breakfast", for: "bidai", stations: [
+      { station: "To start",  items: ["Cut fruits, fresh juice", "Tea, coffee, milk"] },
+      { station: "South",     items: ["Dosa, idli", "Chutney, sambar", "Upma, kesari bath"] },
+      { station: "North",     items: ["Chole puri", "Paneer paratha", "Bread, butter, jam, toast"] },
+    ]},
+  ],
+  alwaysOn: "Tea, coffee and cookies, round the clock from the 10th till you leave, in your room on request.",
 
   // ── Words on the invitation & magazine ─────────────────────────────────────
   copy: {

@@ -26,8 +26,17 @@
   function days() {
     const map = new Map();
     for (const e of W.events) { if (!map.has(e.day)) map.set(e.day, []); map.get(e.day).push(e); }
-    return [...map.entries()].map(([day, events], i) => ({ day, events, index: i + 1 }));
+    for (const m of (W.meals || [])) { if (!map.has(m.day)) map.set(m.day, []); }
+    return [...map.keys()].sort().map((day, i) => ({
+      day, index: i + 1,
+      events: map.get(day),
+      meals: (W.meals || []).filter(m => m.day === day),
+      // ceremonies and meals interleaved by start time; meals attached to a ceremony ride with it
+      agenda: [...map.get(day).map(e => ({ kind: "event", ...e })), ...(W.meals || []).filter(m => m.day === day && !m.for).map(m => ({ kind: "meal", ...m }))]
+                .sort((a, b) => a.start.localeCompare(b.start)),
+    }));
   }
+  function mealsFor(eventId) { return (W.meals || []).filter(m => m.for === eventId); }
 
   /* ── SVG motifs ─────────────────────────────────────────────────────── */
   function sealSVG(text) {
@@ -59,6 +68,12 @@
       <path d="M96 108 Q100 100 92 96"/><circle cx="97" cy="99" r="3.2"/><path d="M95 97 Q97 94 99 97"/>
       <path d="M34 122 Q60 130 86 122"/>
     </svg>`;
+  }
+  // Ganesha for the top of a page: the photo in a gold arch (mehrab) when one is set, else the line drawing.
+  function ganesha() {
+    return W.wedding.ganeshImage
+      ? `<span class="arch"><img src="${W.wedding.ganeshImage}" alt="Shree Ganesha"></span>`
+      : `<span class="ganesha">${ganeshaSVG()}</span>`;
   }
   // A five-petal lotus, for the midpoints of the ornate frame.
   function lotusSVG() {
@@ -153,5 +168,5 @@
 
   const city = W.wedding.city || "";
   const cityDot = city ? " · " + city : "";
-  window.WX = { ganeshaSVG, lotusSVG, paisleySVG, ornate, city, cityDot, W, fmtDate, fmtTime, days, sealSVG, corners, ICON, qrSVG, ics, downloadICS, rsvpLink, mapsEmbed, directions, swatches, countdown, parseISO };
+  window.WX = { mealsFor, ganesha, ganeshaSVG, lotusSVG, paisleySVG, ornate, city, cityDot, W, fmtDate, fmtTime, days, sealSVG, corners, ICON, qrSVG, ics, downloadICS, rsvpLink, mapsEmbed, directions, swatches, countdown, parseISO };
 })();
