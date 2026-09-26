@@ -67,18 +67,18 @@ window.WEDDING = {
   // ── Stay ───────────────────────────────────────────────────────────────────
   stay: {
     hotel: "You are staying at Sree Raaga Resorts, right where the celebrations are.",
-    address: "For three days the whole resort is ours: every room, the lawns, the banquet hall and the dining hall. No shuttles, no traffic, just a short walk from your room to every ceremony.",
+    address: "For three days the whole resort is ours: every room, the lawns, the banquet hall and the dining hall. Every ceremony is a short walk from your room.",
     checkIn: "Thu 10 Dec, from the morning (flexible to your arrival)",
     checkOut: "Fri 12 Dec, flexible to your train or flight",
     note: "Your room will be ready at reception when you arrive. December evenings in Bengaluru are cool, about 15 °C, so pack a shawl for the sangeet and the bidai.",
-    shuttle: "Airport and station pick-ups are ours to arrange; just tell us when you land.",
+    shuttle: "Every ceremony is on the property, a short walk from your room.",
   },
 
   // ── Travel ─────────────────────────────────────────────────────────────────
   travel: [
-    { by: "Air",   text: "Kempegowda International Airport (BLR) is 25 minutes away, the closest a Bengaluru venue can be. Send your flight number on WhatsApp and a car with a marigold tag will be at Arrivals." },
-    { by: "Rail",  text: "KSR Bengaluru City (SBC) and Yesvantpur (YPR) are about 1¼ hours by road; Yelahanka (YNK) is closer, about 40 minutes. Share your train and coach and a car will be waiting." },
-    { by: "Road",  text: "Take NH-44 towards the airport, exit for Budigere Cross, then Budigere Bypass Road. Pin: search ‘Sree Raaga Resorts’ in Google Maps, or scan the code on your card." },
+    { by: "Air",   text: "Kempegowda International Airport (BLR) is about 25 minutes away. Leave the airport towards Budigere Cross; the resort is on Budigere Bypass Road, Devanahalli." },
+    { by: "Rail",  text: "Yelahanka (YNK) is the closest station, about 40 minutes by road. KSR Bengaluru City (SBC) and Yesvantpur (YPR) are about 1¼ hours." },
+    { by: "Road",  text: "From the city, take NH-44 towards the airport, exit at Budigere Cross, then Budigere Bypass Road. Search ‘Sree Raaga Resorts’ in Google Maps or use the directions button." },
   ],
 
   // ── Contacts (guests will call these; keep them answered!) ────────────────
