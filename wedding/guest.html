@@ -202,7 +202,7 @@
   document.getElementById("venue-rows").innerHTML = `
     <div class="row"><b>Landmark</b><span>${W.venue.landmark}</span></div>
     <div class="row"><b>Parking</b><span>${W.venue.parking}</span></div>
-    <div class="row"><b>Shuttle</b><span>${W.stay.shuttle}</span></div>`;
+    <div class="row"><b>On site</b><span>${W.stay.shuttle}</span></div>`;
   const dir = document.getElementById("directions"); dir.href = directions(); dir.innerHTML = `${ICON.map} Open in Google Maps`;
   document.getElementById("map").src = mapsEmbed();
 
