@@ -35,7 +35,7 @@ window.WEDDING = {
     },
     monogram: "S·S",
     hashtag: "#ShanuKiSonali",
-    tagline: "Two names. One aesthetic.",          // the line under the names: website hero, card back, magazine back cover
+    tagline: "Two souls. One journey.",            // the line under the names: website hero, card back, magazine back cover
     taglineSub: "The Shanu & Sonali Story",
   },
 
