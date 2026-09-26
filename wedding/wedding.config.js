@@ -37,6 +37,7 @@ window.WEDDING = {
     hashtag: "#ShanuKiShehnai",                    // alternates: #ShanuKaSaathSonaliKaHaath · #SaatPhereShanuSonali · #SonaliBaniShanuKi · #ShanuSangSonali
     tagline: "Shehnai baji, Sonali aayi.",         // shown on the site; the Devanagari line below goes on the card back and the magazine
     taglineHindi: "शहनाई बजी, सोनाली आई",
+    heroTagline: "Shanu ki Sona, Forever ka hona",   // the lit-up line on the website hero and the sangeet stage
   },
 
   // ── Headline date & place (the wedding evening: baraat, jaimala, reception) ─
