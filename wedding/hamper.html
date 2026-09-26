@@ -253,7 +253,7 @@
         <p class="lead italic" style="font-size:12pt;margin-top:4mm">With love,<br>${one.first} &amp; ${two.first}</p>
       </div>
       <div class="side">
-        <div><b>Your stay</b>${W.stay.hotel}<br>${W.stay.checkIn}<br>${W.stay.checkOut}</div>
+        <div><b>Your stay</b>${W.stay.hotel}<br>${WX.checkIn()}<br>${WX.checkOut()}</div>
         <div><b>Shuttles</b>${W.stay.shuttle}</div>
         ${contacts().length ? `<div><b>Anything at all</b>${contacts()[0].name} · ${contacts()[0].phone}</div>` : ""}
         <div><b>Everything else</b><div class="qr">${qrSVG(guestUrl())}</div></div>

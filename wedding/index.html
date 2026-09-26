@@ -370,7 +370,7 @@
   /* Stay & travel */
   document.getElementById("stay-hotel").textContent = W.stay.hotel;
   document.getElementById("stay-address").textContent = W.stay.address;
-  document.getElementById("stay-rows").innerHTML = `<div class="row"><b>Check-in</b><span>${W.stay.checkIn}</span></div><div class="row"><b>Check-out</b><span>${W.stay.checkOut}</span></div><div class="row"><b>Note</b><span>${W.stay.note}</span></div>`;
+  document.getElementById("stay-rows").innerHTML = `<div class="row"><b>Check-in</b><span>${WX.checkIn()}</span></div><div class="row"><b>Check-out</b><span>${WX.checkOut()}</span></div><div class="row"><b>Note</b><span>${W.stay.note}</span></div>`;
   document.getElementById("travel-rows").innerHTML = W.travel.map(t => `<div class="row"><b>${t.by}</b><span>${t.text}</span></div>`).join("");
 
   /* Families (groom first) */

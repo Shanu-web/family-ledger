@@ -68,8 +68,9 @@ window.WEDDING = {
   stay: {
     hotel: "You are staying at Sree Raaga Resorts, right where the celebrations are.",
     address: "For three days the whole resort is ours: every room, the lawns, the banquet hall and the dining hall. Every ceremony is a short walk from your room.",
-    checkIn: "Thu 10 Dec, from the morning (flexible to your arrival)",
-    checkOut: "Sat 12 Dec, flexible to your train or flight",
+    // The weekday and date are filled in from the first and last event days; write only what follows.
+    checkInNote: "from the morning, flexible to your arrival",
+    checkOutNote: "flexible to your train or flight",
     note: "Your room will be ready at reception when you arrive. December evenings in Bengaluru are about 15 °C.",
     shuttle: "Every ceremony is on the property, a short walk from your room.",
   },

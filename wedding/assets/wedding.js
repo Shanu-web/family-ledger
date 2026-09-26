@@ -36,6 +36,9 @@
                 .sort((a, b) => a.start.localeCompare(b.start)),
     }));
   }
+  // Check-in / check-out lines derived from the first and last day, so the weekday can never be wrong.
+  function checkIn()  { const d = days()[0].day;   return `${fmtDate(d, "short")}, ${W.stay.checkInNote || ""}`.replace(/, $/, ""); }
+  function checkOut() { const d = days().at(-1).day; return `${fmtDate(d, "short")}, ${W.stay.checkOutNote || ""}`.replace(/, $/, ""); }
   function mealsFor(eventId) { return (W.meals || []).filter(m => m.for === eventId); }
 
   /* ── SVG motifs ─────────────────────────────────────────────────────── */
@@ -213,5 +216,5 @@
   }
   const city = W.wedding.city || "";
   const cityDot = city ? " · " + city : "";
-  window.WX = { icsURL, gcalLink, hasRSVP, contacts, cardFront, guestUrl, mealsFor, ganesha, ganeshaSVG, lotusSVG, paisleySVG, ornate, city, cityDot, W, fmtDate, fmtTime, days, sealSVG, corners, ICON, qrSVG, ics, downloadICS, rsvpLink, mapsEmbed, directions, swatches, countdown, parseISO };
+  window.WX = { checkIn, checkOut, icsURL, gcalLink, hasRSVP, contacts, cardFront, guestUrl, mealsFor, ganesha, ganeshaSVG, lotusSVG, paisleySVG, ornate, city, cityDot, W, fmtDate, fmtTime, days, sealSVG, corners, ICON, qrSVG, ics, downloadICS, rsvpLink, mapsEmbed, directions, swatches, countdown, parseISO };
 })();
