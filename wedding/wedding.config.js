@@ -34,7 +34,7 @@ window.WEDDING = {
       role: "daughter",
     },
     monogram: "S·S",
-    hashtag: "",                                   // empty until confirmed; nothing shows anywhere while it is empty
+    hashtag: "#ShanuKiSonali",
     tagline: "Two names. One aesthetic.",          // the line under the names: website hero, card back, magazine back cover
     taglineSub: "The Shanu & Sonali Story",
   },
