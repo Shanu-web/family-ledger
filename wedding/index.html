@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Shanu & Sonali</title>
-<meta name="description" content="Shanu ki Sona, Forever ka hona · 10–12 December 2026 · Sree Raaga Resorts, Bengaluru.">
+<meta name="description" content="Two names. One aesthetic. The Shanu & Sonali Story · 10–12 December 2026 · Sree Raaga Resorts, Bengaluru.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Shanu & Sonali · 10–12 December 2026">
-<meta property="og:description" content="Shanu ki Sona, Forever ka hona. The three days, the venue, the menus. #ShanuKiShehnai">
+<meta property="og:description" content="Two names. One aesthetic. The Shanu & Sonali Story. 10–12 December 2026, Sree Raaga Resorts, Bengaluru.">
 <meta property="og:image" content="assets/og.jpg">
 <meta name="theme-color" content="#150827">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -83,19 +83,37 @@
   .btn svg { width: 1.05rem; height: 1.05rem; }
 
   /* ── Hero ───────────────────────────────────────────────────────────── */
-  .hero { position: relative; z-index: 2; min-height: 100svh; display: grid; align-items: end; padding: 0; overflow: hidden; }
-  .hero .bg { position: absolute; inset: 0; background: url(assets/hero-portrait.jpg) center 40% / cover no-repeat; transform: scale(1.06); animation: kenburns 24s ease-in-out infinite alternate; }
-  @media (min-width: 720px) { .hero .bg { background-image: url(assets/hero.jpg); background-position: center 35%; } }
-  @keyframes kenburns { to { transform: scale(1.14) translateY(-1.5%); } }
-  @media (prefers-reduced-motion: reduce) { .hero .bg { animation: none; } }
-  .hero .veil { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(21,8,39,.55) 0%, rgba(21,8,39,.2) 30%, rgba(21,8,39,.82) 62%, var(--bg) 100%); }
-  .hero .content { position: relative; text-align: center; padding: 6rem 1rem 5.5rem; width: min(100%, 60rem); margin-inline: auto; }
+  .hero { position: relative; z-index: 2; min-height: 100svh; display: grid; align-items: center; padding: 0; overflow: hidden; }
+  .hero .bg { position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 70% 45% at 50% 62%, rgba(255,46,147,.55), transparent 70%),
+      radial-gradient(ellipse 60% 40% at 20% 30%, rgba(138,70,255,.5), transparent 70%),
+      radial-gradient(ellipse 60% 40% at 80% 30%, rgba(255,46,147,.35), transparent 70%),
+      radial-gradient(ellipse 90% 30% at 50% 100%, rgba(255,154,60,.35), transparent 70%),
+      linear-gradient(180deg, #0E0520 0%, #2A0F4A 45%, #4A1560 75%, #150827 100%); }
+  /* strings of light hanging from the truss */
+  .hero .strings { position: absolute; inset: 0; opacity: .9;
+    background-image:
+      repeating-linear-gradient(90deg, transparent 0 34px, rgba(255,227,163,.55) 34px 35px, transparent 35px 71px, rgba(255,227,163,.25) 71px 72px, transparent 72px 118px, rgba(255,196,102,.45) 118px 119px, transparent 119px 160px);
+    -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,.9) 0%, rgba(0,0,0,.6) 22%, transparent 55%); mask-image: linear-gradient(180deg, rgba(0,0,0,.9) 0%, rgba(0,0,0,.6) 22%, transparent 55%); }
+  .hero .strings::after { content: ""; position: absolute; inset: 0;
+    background-image: radial-gradient(circle, rgba(255,227,163,.9) 0 1px, transparent 2px), radial-gradient(circle, rgba(255,123,192,.8) 0 1px, transparent 2px);
+    background-size: 71px 37px, 118px 53px; background-position: 34px 12px, 118px 30px;
+    -webkit-mask-image: linear-gradient(180deg, #000 0%, transparent 50%); mask-image: linear-gradient(180deg, #000 0%, transparent 50%); animation: twinkle 3.2s ease-in-out infinite alternate; }
+  @keyframes twinkle { to { opacity: .45; } }
+  /* the floor: a glossy reflection band */
+  .hero .floor { position: absolute; left: 0; right: 0; bottom: 0; height: 11%;
+    background: linear-gradient(180deg, transparent, rgba(255,46,147,.18) 30%, rgba(255,196,102,.16) 60%, var(--bg) 100%); }
+  .hero .floor::before { content: ""; position: absolute; left: 10%; right: 10%; top: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--gold-2), var(--pink), var(--gold-2), transparent); box-shadow: 0 0 24px rgba(255,196,102,.8), 0 0 60px rgba(255,46,147,.6); }
+  @media (prefers-reduced-motion: reduce) { .hero .strings::after { animation: none; } }
+  .hero .veil { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(21,8,39,.35) 0%, transparent 30%, rgba(21,8,39,.35) 70%, var(--bg) 100%); }
+  .hero .content { position: relative; text-align: center; padding: 5rem 1rem 6rem; width: min(100%, 60rem); margin-inline: auto; }
   .hero .ganesh { font-family: var(--dev); color: var(--gold-2); font-size: 1.05rem; letter-spacing: .06em; text-shadow: var(--glow-gold); margin-bottom: 1.2rem; }
   .hero .invite { font-family: var(--serif); font-style: italic; font-size: clamp(1rem, 2.6vw, 1.3rem); color: var(--muted); margin: 0 0 .4rem; }
   .hero .names { font-family: var(--script); font-size: clamp(4.2rem, 15vw, 9.5rem); line-height: .95; color: #fff; text-shadow: 0 0 22px rgba(255,255,255,.35), var(--glow-pink); }
   .hero .names .amp { display: inline-block; font-family: var(--serif); font-style: italic; font-size: .42em; color: var(--gold); margin: 0 .12em; vertical-align: .35em; text-shadow: var(--glow-gold); }
   .hero .tagline { font-family: var(--script); font-size: clamp(2rem, 7vw, 3.6rem); color: var(--gold-2); text-shadow: var(--glow-gold); margin: .3rem 0 1.4rem; }
-  .hero .tagline i { font-style: normal; color: var(--pink); text-shadow: var(--glow-pink); margin: 0 .3em; font-size: .7em; vertical-align: .15em; }
+  .hero .sub { font-size: .78rem; letter-spacing: .34em; text-transform: uppercase; color: var(--pink); text-shadow: var(--glow-pink); font-weight: 600; margin: -.6rem 0 1.6rem; }
   .hero .when { font-family: var(--serif); font-size: clamp(1.15rem, 3vw, 1.6rem); letter-spacing: .04em; color: var(--text); }
   .hero .when b { font-weight: 500; color: var(--gold-2); }
   .hero .where { color: var(--muted); font-size: .95rem; margin-top: .25rem; }
@@ -202,7 +220,7 @@
 <canvas id="fx" aria-hidden="true"></canvas>
 
 <header class="hero" id="home">
-  <div class="bg"></div><div class="veil"></div>
+  <div class="bg"></div><div class="strings"></div><div class="floor"></div><div class="veil"></div>
   <div class="content" id="hero"></div>
   <span class="down" aria-hidden="true"></span>
 </header>
@@ -267,14 +285,15 @@
   const D = days();
   document.title = `${one.first} & ${two.first} · ${fmtDate(W.wedding.date)}`;
   const sw = p => `<span class="sw">${p.map(c => `<i style="background:${c}"></i>`).join("")}</span>`;
-  const heroTag = W.couple.heroTagline || W.couple.tagline || "";
+  const heroTag = W.couple.tagline || "", heroSub = W.couple.taglineSub || "";
 
   /* Hero */
   document.getElementById("hero").innerHTML = `
     <div class="ganesh rise">${W.wedding.ganesh}</div>
     <p class="invite rise d1">${one.parents}<br>invite you to the wedding of their son</p>
     <h1 class="names rise d2">${one.first}<span class="amp">&amp;</span>${two.first}</h1>
-    <p class="tagline rise d3">${heroTag.replace(/,\s*/, '<i>♥</i>')}</p>
+    <p class="tagline rise d3">${heroTag}</p>
+    ${heroSub ? `<p class="sub rise d3">${heroSub}</p>` : ""}
     <p class="when rise d4"><b>${fmtDate(D[0].day, "short")} – ${fmtDate(D.at(-1).day, "short")} ${fmtDate(W.wedding.date, "year")}</b><br>${W.venue.name}</p>
     <p class="where rise d4">${W.venue.address}</p>
     <div class="cta rise d5">
@@ -352,7 +371,7 @@
   const rs = document.getElementById("rsvp-main"); if (hasRSVP()) { rs.href = rsvpLink(); rs.innerHTML = `${ICON.wa} RSVP on WhatsApp`; } else rs.remove();
   const ics = document.getElementById("ics"); ics.innerHTML = `${ICON.cal} Add all to calendar`; ics.onclick = downloadICS;
   document.getElementById("gift-note").textContent = W.copy.giftNote;
-  document.getElementById("footer").innerHTML = `<div class="script">${heroTag}</div><div class="tag">${W.couple.hashtag}</div><p class="meta">${one.full} &amp; ${two.full} · ${fmtDate(D[0].day, "short")} – ${fmtDate(D.at(-1).day, "short")} ${fmtDate(W.wedding.date, "year")}${cityDot}</p>`;
+  document.getElementById("footer").innerHTML = `<div class="script">${heroTag}</div>${heroSub ? `<div class="tag">${heroSub}</div>` : ""}${W.couple.hashtag ? `<div class="tag" style="color:var(--gold-2);text-shadow:var(--glow-gold)">${W.couple.hashtag}</div>` : ""}<p class="meta">${one.full} &amp; ${two.full} · ${fmtDate(D[0].day, "short")} – ${fmtDate(D.at(-1).day, "short")} ${fmtDate(W.wedding.date, "year")}${cityDot}</p>`;
 
   /* Reveal + nav highlight */
   const io = new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting) { en.target.classList.add("in"); io.unobserve(en.target); } }), { rootMargin: "0px 0px -8% 0px" });

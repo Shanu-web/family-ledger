@@ -96,7 +96,8 @@
     ${ornate()}
     <div>
       <p class="eyebrow">The three days</p>
-      ${W.couple.taglineHindi ? `<p class="devanagari" style="font-size:1.5rem;margin:0 0 var(--s-1)">${W.couple.taglineHindi}</p><p class="meta" style="margin:0">${W.couple.tagline} · ${W.couple.hashtag}</p>` : `<h2 class="h3" style="font-style:italic">${W.couple.tagline || "We would love you at all of them."}</h2>`}
+      <h2 class="h3" style="font-style:italic">${W.couple.tagline || "We would love you at all of them."}</h2>
+      ${W.couple.taglineSub ? `<p class="eyebrow gold" style="margin:var(--s-1) 0 0">${W.couple.taglineSub}</p>` : ""}
       ${oneVenue ? `<p class="meta" style="margin:var(--s-2) 0 0">All at ${W.venue.name}, ${W.venue.address}</p>` : ""}
       <div class="days">
         ${ds.map(d => `
@@ -119,7 +120,7 @@
         <div><b>${one.familyName}</b>${one.parents}<br>${one.siblings ? "with " + one.siblings + "<br>" : ""}<span>${one.address}</span></div>
         <div><b>${two.familyName}</b>${two.parents}<br>${two.siblings ? "with " + two.siblings + "<br>" : ""}<span>${two.address}</span></div>
       </div>
-      <p class="meta" style="margin:var(--s-3) 0 0">${hasRSVP() && contacts().length ? `RSVP on WhatsApp · ${contacts()[0].name} · ${contacts()[0].phone} · ` : ""}${W.couple.hashtag}</p>
+      ${hasRSVP() && contacts().length || W.couple.hashtag ? `<p class="meta" style="margin:var(--s-3) 0 0">${hasRSVP() && contacts().length ? `RSVP on WhatsApp · ${contacts()[0].name} · ${contacts()[0].phone}` : ""}${hasRSVP() && contacts().length && W.couple.hashtag ? " · " : ""}${W.couple.hashtag || ""}</p>` : ""}
     </div>
   `;
 

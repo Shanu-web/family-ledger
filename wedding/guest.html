@@ -225,7 +225,7 @@
     <div class="contact"><div><small>${c.role}</small><b>${c.name}</b></div><a href="tel:${c.phone.replace(/\s/g, "")}">${ICON.phone}${c.phone}</a></div>`).join("");
   if (!contacts().length) document.getElementById("contacts-h").textContent = "Numbers to call are coming soon.";
   document.getElementById("gift-note").textContent = W.copy.giftNote;
-  document.getElementById("hashtag").textContent = `Share your photos with ${W.couple.hashtag}`;
+  document.getElementById("hashtag").textContent = W.couple.hashtag ? `Share your photos with ${W.couple.hashtag}` : "";
 
   document.getElementById("footer").innerHTML = `
     <div class="seal gold">${sealSVG()}</div>

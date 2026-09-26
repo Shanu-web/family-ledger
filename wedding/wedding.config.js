@@ -34,10 +34,9 @@ window.WEDDING = {
       role: "daughter",
     },
     monogram: "S·S",
-    hashtag: "#ShanuKiShehnai",                    // alternates: #ShanuKaSaathSonaliKaHaath · #SaatPhereShanuSonali · #SonaliBaniShanuKi · #ShanuSangSonali
-    tagline: "Shehnai baji, Sonali aayi.",         // shown on the site; the Devanagari line below goes on the card back and the magazine
-    taglineHindi: "शहनाई बजी, सोनाली आई",
-    heroTagline: "Shanu ki Sona, Forever ka hona",   // the lit-up line on the website hero and the sangeet stage
+    hashtag: "",                                   // empty until confirmed; nothing shows anywhere while it is empty
+    tagline: "Two names. One aesthetic.",          // the line under the names: website hero, card back, magazine back cover
+    taglineSub: "The Shanu & Sonali Story",
   },
 
   // ── Headline date & place (the wedding evening: baraat, jaimala, reception) ─

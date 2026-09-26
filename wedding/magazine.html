@@ -289,7 +289,7 @@
       ${W.travel.map(t => `<div class="row"><b>By ${t.by}</b><span>${t.text}</span></div>`).join("")}
       <div class="row"><b>Stay</b><span>${W.stay.address} ${W.stay.note}</span></div>
       <div class="row"><b>Gifts</b><span>${W.copy.giftNote}</span></div>
-      <div class="row"><b>Phones</b><span>Down for the pheras, please. Up for everything else; tag ${W.couple.hashtag}.</span></div>
+      <div class="row"><b>Phones</b><span>Down for the pheras, please. Up for everything else${W.couple.hashtag ? "; tag " + W.couple.hashtag : ""}.</span></div>
       ${contacts().slice(0, 2).map(c => `<div class="row"><b>${c.role}</b><span>${c.name} · ${c.phone}</span></div>`).join("")}
     </div>
     ${folio()}`));
@@ -297,12 +297,12 @@
   // 16 · Back cover
   P.push(page("backcover", `
     <div class="seal">${sealSVG()}</div>
-    ${W.couple.taglineHindi ? `<p class="devanagari" style="font-size:16pt;margin-top:4mm">${W.couple.taglineHindi}</p>` : ""}
-    <p class="lead italic" style="margin-top:2mm">${W.couple.tagline || W.copy.thankYou}</p>
+    <p class="lead italic" style="margin-top:4mm">${W.couple.tagline || W.copy.thankYou}</p>
+    ${W.couple.taglineSub ? `<p class="eyebrow gold">${W.couple.taglineSub}</p>` : ""}
     <div class="qr">${qrSVG(guestUrl())}</div>
     <p class="eyebrow ink">Scan for the live schedule, map &amp; menus</p>
     <p class="meta">${guestUrl().replace(/^https?:\/\//, "")}</p>
-    <p class="meta" style="margin-top:8mm">${one.full} &amp; ${two.full} · ${fmtDate(W.wedding.date)}${cityDot} · ${W.couple.hashtag}</p>`));
+    <p class="meta" style="margin-top:8mm">${one.full} &amp; ${two.full} · ${fmtDate(W.wedding.date)}${cityDot}${W.couple.hashtag ? " · " + W.couple.hashtag : ""}</p>`));
 
   document.getElementById("book").innerHTML = P.join("");
   // Page numbers in the folio (cover and back cover carry none)

@@ -161,7 +161,7 @@
     const L = ["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//wedding//EN","CALSCALE:GREGORIAN"];
     for (const e of W.events) {
       L.push("BEGIN:VEVENT",
-        `UID:${e.id}@${W.couple.hashtag.replace('#','').toLowerCase()}`,
+        `UID:${e.id}@${(W.couple.hashtag || W.couple.one.first + W.couple.two.first).replace('#','').toLowerCase()}`,
         `DTSTART:${icsStamp(e.day, e.start)}`, `DTEND:${icsStamp(e.day, e.end)}`,
         `SUMMARY:${e.title} — ${W.couple.one.first} & ${W.couple.two.first}`,
         `LOCATION:${e.where}`, `DESCRIPTION:${(e.kicker + ". Dress: " + e.dress).replace(/,/g, "\\,")}`,
