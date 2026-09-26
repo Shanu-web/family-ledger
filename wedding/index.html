@@ -11,7 +11,7 @@
 <meta property="og:image" content="assets/og.jpg">
 <meta name="theme-color" content="#150827">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Tiro+Devanagari+Hindi&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Montserrat:wght@400;500;600;700&family=Tiro+Devanagari+Hindi&display=swap">
 <script src="wedding.config.js"></script>
 <style>
   :root {
@@ -22,7 +22,7 @@
     --glass: rgba(255,255,255,.06); --glass-2: rgba(255,255,255,.1); --line: rgba(255,255,255,.14);
     --script: 'Great Vibes', 'Cormorant Garamond', cursive;
     --serif: 'Cormorant Garamond', Georgia, serif;
-    --sans: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --sans: 'Montserrat', system-ui, -apple-system, 'Segoe UI', sans-serif;
     --dev: 'Tiro Devanagari Hindi', serif;
     --glow-pink: 0 0 18px rgba(255,46,147,.55), 0 0 42px rgba(255,46,147,.35);
     --glow-gold: 0 0 14px rgba(255,196,102,.6), 0 0 36px rgba(255,196,102,.35), 0 0 80px rgba(255,196,102,.18);
@@ -30,7 +30,7 @@
   }
   *, *::before, *::after { box-sizing: border-box; }
   html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
-  body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 16px; line-height: 1.6; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 15.5px; line-height: 1.7; letter-spacing: .01em; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
   a { color: inherit; text-decoration: none; }
   h1, h2, h3, h4 { margin: 0; font-weight: 400; line-height: 1.05; }
   p { margin: 0 0 1rem; }
@@ -45,6 +45,7 @@
   .aurora i:nth-child(3) { width: 45vmax; height: 45vmax; left: 20vw; bottom: -25vmax; background: radial-gradient(circle, #FF9A3C, transparent 60%); opacity: .35; animation-delay: -18s; }
   @keyframes drift { to { transform: translate(8vw, 6vh) scale(1.12); } }
   #fx { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+  .texture { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: .5; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'><g fill='none' stroke='%23FFC466' stroke-width='0.6' stroke-opacity='0.16'><path d='M48 8 L56 40 L88 48 L56 56 L48 88 L40 56 L8 48 L40 40 Z'/><path d='M48 22 L53 43 L74 48 L53 53 L48 74 L43 53 L22 48 L43 43 Z' stroke-opacity='0.1'/><circle cx='48' cy='48' r='2.5'/><path d='M0 0 L14 0 M0 0 L0 14 M96 0 L82 0 M96 0 L96 14 M0 96 L14 96 M0 96 L0 82 M96 96 L82 96 M96 96 L96 82'/></g></svg>"); background-size: 96px 96px; -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 40vh); mask-image: linear-gradient(180deg, transparent 0, #000 40vh); }
   @media (prefers-reduced-motion: reduce) { .aurora i { animation: none; } }
 
   /* ── Type ───────────────────────────────────────────────────────────── */
@@ -56,21 +57,24 @@
   .grad { background: linear-gradient(92deg, var(--gold-2), var(--gold) 35%, var(--pink) 70%, var(--magenta)); -webkit-background-clip: text; background-clip: text; color: transparent; }
   .h2 { font-family: var(--serif); font-size: clamp(2.2rem, 6vw, 3.6rem); font-weight: 300; letter-spacing: -.01em; }
   .h2 em { font-style: italic; color: var(--gold-2); }
-  .lead { font-family: var(--serif); font-size: 1.25rem; font-style: italic; color: var(--muted); }
+  .lead { font-family: var(--sans); font-size: 1rem; font-weight: 400; line-height: 1.85; letter-spacing: .01em; color: var(--muted); max-width: 60ch; margin-top: .9rem; }
+  .center .lead { margin-inline: auto; }
   .dev { font-family: var(--dev); }
 
   /* ── Layout ─────────────────────────────────────────────────────────── */
   .wrap { position: relative; z-index: 2; width: min(100% - 2rem, 72rem); margin-inline: auto; }
   .wrap.narrow { max-width: 46rem; }
   section { position: relative; z-index: 2; padding: clamp(4rem, 10vw, 7rem) 0; }
+  section + section::before { content: ""; position: absolute; top: 0; left: 50%; width: min(60%, 18rem); height: 1px; transform: translateX(-50%); background: linear-gradient(90deg, transparent, var(--gold), transparent); opacity: .6; }
+  section + section::after { content: ""; position: absolute; top: -4px; left: 50%; width: 9px; height: 9px; transform: translateX(-50%) rotate(45deg); background: var(--gold); box-shadow: 0 0 12px rgba(255,196,102,.8); }
   .center { text-align: center; }
   .grid-2 { display: grid; gap: 1.5rem; }
   @media (min-width: 820px) { .grid-2 { grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 2.5rem; } }
 
   /* ── Glass ──────────────────────────────────────────────────────────── */
-  .glass { position: relative; background: var(--glass); border: 1px solid var(--line); border-radius: var(--r); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: 0 30px 80px -30px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.08); }
-  .glass.pad { padding: 1.5rem; }
-  @media (min-width: 720px) { .glass.pad { padding: 2rem; } }
+  .glass { position: relative; background: var(--glass); border: 1px solid var(--line); border-radius: var(--r); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); box-shadow: 0 12px 40px -18px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.08); }
+  .glass.pad { padding: 1.75rem; }
+  @media (min-width: 720px) { .glass.pad { padding: 2.5rem; } }
   .glass.rim::before { content: ""; position: absolute; inset: -1px; border-radius: inherit; padding: 1px; background: linear-gradient(135deg, rgba(255,196,102,.9), rgba(255,46,147,.6) 50%, rgba(138,70,255,.6)); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; }
 
   /* ── Buttons ────────────────────────────────────────────────────────── */
@@ -139,8 +143,8 @@
   /* ── Events carousel ────────────────────────────────────────────────── */
   .rail { display: grid; grid-auto-flow: column; grid-auto-columns: min(84vw, 22rem); align-items: start; gap: 1rem; overflow-x: auto; scroll-snap-type: x mandatory; padding: 1rem .5rem 1.6rem; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
   .rail::-webkit-scrollbar { display: none; }
-  @media (min-width: 1100px) { .rail { grid-auto-columns: 1fr; grid-auto-flow: row; grid-template-columns: repeat(5, 1fr); overflow: visible; } }
-  .ev { scroll-snap-align: center; display: flex; flex-direction: column; padding: 1.4rem 1.3rem 1.3rem; transition: transform .3s ease; }
+  @media (min-width: 900px) { .rail { grid-auto-flow: row; grid-auto-columns: auto; grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr)); gap: 1.5rem; overflow: visible; padding: 1.5rem 0; } }
+  .ev { scroll-snap-align: center; display: flex; flex-direction: column; padding: 2rem 1.75rem 1.75rem; transition: transform .3s ease; }
   .ev:hover { transform: translateY(-6px); }
   .ev .ico { width: 54px; height: 54px; border-radius: 16px; display: grid; place-items: center; background: linear-gradient(135deg, rgba(255,46,147,.35), rgba(255,196,102,.25)); border: 1px solid var(--line); margin-bottom: 1rem; }
   .ev .ico svg { width: 28px; height: 28px; }
@@ -148,7 +152,7 @@
   .ev h3 { font-family: var(--serif); font-size: 1.9rem; margin: .3rem 0 0; color: #fff; }
   .ev .kk { font-family: var(--serif); font-style: italic; color: var(--pink); margin-bottom: .6rem; }
   .ev .t { font-family: var(--serif); font-size: 1.25rem; color: var(--gold-2); }
-  .ev p { font-size: .9rem; color: var(--muted); margin: .6rem 0 0; }
+  .ev p { font-size: .92rem; color: var(--muted); margin: .7rem 0 0; max-width: 60ch; line-height: 1.65; }
   .ev .dress { margin-top: auto; padding-top: .9rem; border-top: 1px solid var(--line); font-size: .78rem; color: var(--muted); }
   .ev .dress b { display: block; font-size: .62rem; letter-spacing: .22em; text-transform: uppercase; color: var(--gold); margin-bottom: .25rem; }
   .sw { display: inline-flex; gap: 5px; margin-top: .45rem; }
@@ -180,11 +184,14 @@
   .meal .stations { grid-template-columns: 1fr 1fr; }
 
   /* ── Venue, stay ────────────────────────────────────────────────────── */
-  .map { overflow: hidden; aspect-ratio: 4/3; min-width: 0; }
+  .map { overflow: hidden; aspect-ratio: 4/3; min-width: 0; background: radial-gradient(ellipse at 50% 40%, rgba(255,46,147,.35), transparent 60%), linear-gradient(180deg, var(--bg-3), var(--bg)); display: grid; place-items: center; }
+  .map::before { content: "Sree Raaga Resorts · Devanahalli"; position: absolute; font-family: var(--serif); font-size: 1.3rem; color: var(--gold-2); text-shadow: var(--glow-gold); }
+  .map iframe { position: relative; }
   .map iframe { width: 100%; height: 100%; border: 0; filter: saturate(.9) hue-rotate(-10deg) brightness(.9); }
   @media (min-width: 820px) { .map { aspect-ratio: 16/11; } }
   .rows { display: grid; }
-  .row { display: grid; grid-template-columns: 6rem 1fr; gap: .8rem; padding: .8rem 0; border-top: 1px solid var(--line); font-size: .92rem; color: var(--muted); }
+  .row { display: grid; grid-template-columns: 6rem 1fr; gap: 1rem; padding: 1rem 0; border-top: 1px solid var(--line); font-size: .95rem; color: var(--muted); line-height: 1.65; }
+  .row span { max-width: 60ch; }
   .row:first-child { border-top: 0; }
   .row b { font-size: .62rem; letter-spacing: .22em; text-transform: uppercase; color: var(--gold); padding-top: .3rem; }
 
@@ -217,6 +224,7 @@
 </head>
 <body>
 <div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
+<div class="texture" aria-hidden="true"></div>
 <canvas id="fx" aria-hidden="true"></canvas>
 
 <header class="hero" id="home">
@@ -228,21 +236,22 @@
 <nav class="bnav" id="bnav" aria-label="Sections"></nav>
 
 <section id="countdown"><div class="wrap narrow center io">
-  <p class="kicker">Until the baraat</p>
-  <h2 class="h2" id="cd-title"></h2>
+  <p class="kicker">Awaiting the Baraat</p>
+  <h2 class="h2">The countdown to <em>our forever</em> begins.</h2>
+  <p class="lead" id="cd-title" style="margin-top:.6rem"></p>
   <div class="tiles" id="tiles"></div>
 </div></section>
 
 <section id="events"><div class="wrap">
-  <div class="center io"><p class="kicker">The celebration</p><h2 class="h2">Three days, <em>five moments</em>.</h2><p class="lead" id="ev-sub"></p></div>
+  <div class="center io"><p class="kicker">The Festivities</p><h2 class="h2">Three Days of Joy. <em>A Lifetime of Memories.</em></h2><p class="lead">Join us as we honor our traditions, celebrate our love, and create unforgettable moments together.</p></div>
   <div class="rail io" id="rail"></div>
 </div></section>
 
 <section id="venue"><div class="wrap"><div class="grid-2">
   <div class="io glass rim pad">
-    <p class="kicker">The venue</p>
-    <h2 class="h2" id="venue-name" style="font-size:2.4rem"></h2>
-    <p class="lead" id="venue-address" style="font-size:1.05rem"></p>
+    <p class="kicker">The Destination</p>
+    <h2 class="h2" style="font-size:2.4rem">Where the <em>magic</em> happens.</h2>
+    <p class="lead" style="font-size:1.05rem" id="venue-lead"></p><p id="venue-address" style="color:var(--muted);font-size:.95rem"></p>
     <div class="rows" id="venue-rows"></div>
     <p style="margin:1.4rem 0 0"><a class="btn primary" id="directions" target="_blank" rel="noopener"></a></p>
   </div>
@@ -250,24 +259,24 @@
 </div></div></section>
 
 <section id="menu"><div class="wrap">
-  <div class="center io"><p class="kicker">What you will eat</p><h2 class="h2">Every meal, <em>all three days</em>.</h2><p class="lead">The whole wedding is vegetarian.</p></div>
+  <div class="center io"><p class="kicker">A Culinary Journey</p><h2 class="h2">A Feast for <em>the Senses</em>.</h2><p class="lead">Food is love made visible. We are delighted to host a beautifully curated, fully vegetarian culinary experience across all three days of our celebration. Come ready to savor rich, traditional flavors and exquisite delicacies.</p></div>
   <div class="tabs io" id="mtabs"></div>
   <div class="meals io" id="meals"></div>
   <p class="center io" id="always" style="margin-top:1.5rem;color:var(--faint);font-size:.9rem"></p>
 </div></section>
 
 <section id="stay"><div class="wrap"><div class="grid-2">
-  <div class="io glass pad"><p class="kicker">Your stay</p><h2 class="h2" id="stay-hotel" style="font-size:2.2rem"></h2><p class="lead" id="stay-address" style="font-size:1.05rem"></p><div class="rows" id="stay-rows"></div></div>
-  <div class="io glass pad"><p class="kicker">Getting here</p><div class="rows" id="travel-rows"></div></div>
+  <div class="io glass pad"><p class="kicker">Your Home Away From Home</p><h2 class="h2" style="font-size:2.2rem">Rest &amp; <em>Rejuvenate</em>.</h2><p class="lead" style="font-size:1.05rem">We have arranged comfortable accommodations for you to relax between the festivities. Your comfort is our utmost priority.</p><p id="stay-hotel" style="color:var(--gold-2);font-size:.95rem"></p><p class="lead" id="stay-address" style="font-size:1.05rem"></p><div class="rows" id="stay-rows"></div></div>
+  <div class="io glass pad"><p class="kicker">Your Home Away From Home</p><h2 class="h2" style="font-size:2.2rem">Journey to <em>the Celebration</em>.</h2><p class="lead" style="font-size:1.05rem">Whether you are flying in or driving down, here is everything you need to know to reach us smoothly.</p><div class="rows" id="travel-rows"></div></div>
 </div></div></section>
 
 <section id="families"><div class="wrap narrow">
-  <div class="center io"><p class="kicker">With the blessings of</p><h2 class="h2">Two homes, <em>one celebration</em>.</h2></div>
+  <div class="center io"><p class="kicker">With Gratitude &amp; Blessings</p><h2 class="h2">Two Families. <em>One Beautiful Beginning.</em></h2><p class="lead">This joyous union is made possible through the endless love, guidance, and blessings of our parents and elders.</p></div>
   <div class="fams io" id="fams" style="margin-top:2rem"></div>
 </div></section>
 
 <section id="contacts"><div class="wrap narrow">
-  <div class="center io"><p class="kicker">Who to call</p><h2 class="h2" id="contacts-h">Real people, all three days.</h2></div>
+  <div class="center io"><p class="kicker">Your Hosts &amp; Concierge</p><h2 class="h2" id="contacts-h">We're <em>here</em> for you.</h2><p class="lead">To ensure your absolute comfort and seamless experience, our dedicated family concierge team is available to assist you throughout the celebrations. Please don't hesitate to reach out.</p></div>
   <div class="contacts io" id="contact-list" style="margin-top:2rem"></div>
   <p class="center io" style="margin-top:2rem;display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap"><a class="btn primary" id="rsvp-main" target="_blank" rel="noopener"></a><button class="btn ghost" id="ics"></button></p>
   <p class="center io" id="gift-note" style="margin-top:1.4rem;color:var(--faint);font-size:.9rem"></p>
@@ -290,7 +299,7 @@
   /* Hero */
   document.getElementById("hero").innerHTML = `
     <div class="ganesh rise">${W.wedding.ganesh}</div>
-    <p class="invite rise d1">${one.parents}<br>invite you to the wedding of their son</p>
+    <p class="invite rise d1">${W.wedding.shlokaSub}<br>${one.parents}<br>joyfully invite you to celebrate the wedding of their son</p>
     <h1 class="names rise d2">${one.first}<span class="amp">&amp;</span>${two.first}</h1>
     <p class="tagline rise d3">${heroTag}</p>
     ${heroSub ? `<p class="sub rise d3">${heroSub}</p>` : ""}
@@ -310,7 +319,7 @@
   document.getElementById("bnav").innerHTML = NAV.map(([id, l, i]) => `<a href="#${id}" data-id="${id}">${i}<span>${l}</span></a>`).join("");
 
   /* Countdown */
-  document.getElementById("cd-title").innerHTML = `<em>${fmtDate(W.wedding.date, "ord")}</em>`;
+  document.getElementById("cd-title").textContent = `${fmtDate(W.wedding.date, "ord")}, ${fmtTime(W.wedding.time)}`;
   const tiles = document.getElementById("tiles"), target = new Date(`${W.wedding.date}T${W.wedding.time}:00`);
   const tick = () => { const ms = Math.max(0, target - Date.now()); const d = Math.floor(ms / 864e5), h = Math.floor(ms % 864e5 / 36e5), mi = Math.floor(ms % 36e5 / 6e4), s = Math.floor(ms % 6e4 / 1e3);
     tiles.innerHTML = [[d, "days"], [h, "hours"], [mi, "min"], [s, "sec"]].map(([v, l]) => `<div class="tile glass"><b>${String(v).padStart(2, "0")}</b><small>${l}</small></div>`).join(""); };
@@ -325,7 +334,7 @@
     bidai: `<svg viewBox="0 0 24 24" fill="none" stroke="#FFE3A3" stroke-width="1.6"><path d="M3 17h18M5 17a7 7 0 0 1 14 0M12 5v3M5 9l2 2M19 9l-2 2"/></svg>`,
   };
   const stations = m => `<div class="stations">${m.stations.map(s => `<div class="station"><h4>${s.station}</h4><ul>${s.items.map(i => `<li>${i}</li>`).join("")}</ul></div>`).join("")}</div>`;
-  document.getElementById("ev-sub").textContent = `${fmtDate(D[0].day, "long")} to ${fmtDate(D.at(-1).day, "long")}`;
+  
   document.getElementById("rail").innerHTML = W.events.map(e => `
     <article class="ev glass rim" id="${e.id}">
       <div class="ico">${EICON[e.id] || EICON.tilak}</div>
@@ -336,11 +345,11 @@
       <p>${e.note}</p>
       ${e.timeline ? `<ul class="mini">${e.timeline.map(t => `<li><b>${t.at}</b><span>${t.what}</span></li>`).join("")}</ul>` : ""}
       ${mealsFor(e.id).map(m => `<details><summary>${m.title}</summary>${stations(m)}</details>`).join("")}
-      <div class="dress"><b>What to wear</b>${e.dress}${sw(e.palette)}</div>
+      <div class="dress"><b>Dress to celebrate</b>${e.dress}${sw(e.palette)}</div>
     </article>`).join("");
 
   /* Venue */
-  document.getElementById("venue-name").textContent = W.venue.name;
+  document.getElementById("venue-lead").textContent = `We are thrilled to host our celebrations at ${W.venue.name}, a space chosen for its beauty and warmth, ready to welcome our closest family and friends.`;
   document.getElementById("venue-address").textContent = W.venue.address;
   document.getElementById("venue-rows").innerHTML = `<div class="row"><b>Landmark</b><span>${W.venue.landmark}</span></div><div class="row"><b>Parking</b><span>${W.venue.parking}</span></div>`;
   const dir = document.getElementById("directions"); dir.href = directions(); dir.innerHTML = `${ICON.map} Open in Google Maps`;
@@ -367,9 +376,9 @@
   /* Contacts, RSVP, footer */
   const CL = contacts();
   document.getElementById("contact-list").innerHTML = CL.map(c => `<div class="contact glass"><div><small>${c.role}</small><b>${c.name}</b></div><a href="tel:${c.phone.replace(/\s/g, "")}">${ICON.phone}${c.phone}</a></div>`).join("");
-  if (!CL.length) document.getElementById("contacts-h").innerHTML = `Numbers to call, <em>coming soon</em>.`;
+  if (!CL.length) document.getElementById("contacts-h").innerHTML = `We're <em>here</em> for you.`;
   const rs = document.getElementById("rsvp-main"); if (hasRSVP()) { rs.href = rsvpLink(); rs.innerHTML = `${ICON.wa} RSVP on WhatsApp`; } else rs.remove();
-  const ics = document.getElementById("ics"); ics.innerHTML = `${ICON.cal} Add all to calendar`; ics.onclick = downloadICS;
+  const ics = document.getElementById("ics"); ics.innerHTML = `${ICON.cal} Add the celebrations to your calendar`; ics.onclick = downloadICS;
   document.getElementById("gift-note").textContent = W.copy.giftNote;
   document.getElementById("footer").innerHTML = `<div class="script">${heroTag}</div>${heroSub ? `<div class="tag">${heroSub}</div>` : ""}${W.couple.hashtag ? `<div class="tag" style="color:var(--gold-2);text-shadow:var(--glow-gold)">${W.couple.hashtag}</div>` : ""}<p class="meta">${one.full} &amp; ${two.full} · ${fmtDate(D[0].day, "short")} – ${fmtDate(D.at(-1).day, "short")} ${fmtDate(W.wedding.date, "year")}${cityDot}</p>`;
 

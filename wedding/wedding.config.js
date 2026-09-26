@@ -66,12 +66,12 @@ window.WEDDING = {
 
   // ── Stay ───────────────────────────────────────────────────────────────────
   stay: {
-    hotel: "Sree Raaga Resorts, on the property",
-    address: "The whole resort is ours for the three days: every room, the lawns, the banquet hall and the dining hall.",
+    hotel: "You are staying at Sree Raaga Resorts, right where the celebrations are.",
+    address: "For three days the whole resort is ours: every room, the lawns, the banquet hall and the dining hall. No shuttles, no traffic, just a short walk from your room to every ceremony.",
     checkIn: "Thu 10 Dec, from the morning (flexible to your arrival)",
     checkOut: "Fri 12 Dec, flexible to your train or flight",
-    note: "Your room is allotted at reception on arrival, against the guest list. Tea, coffee and cookies are available round the clock, in your room on request. December evenings drop to about 15 °C; bring a shawl for the sangeet and the bidai.",
-    shuttle: "Every event is on the property, a short walk from your room. Airport and station pick-ups are arranged on request.",
+    note: "Your room will be ready at reception when you arrive. December evenings in Bengaluru are cool, about 15 °C, so pack a shawl for the sangeet and the bidai.",
+    shuttle: "Airport and station pick-ups are ours to arrange; just tell us when you land.",
   },
 
   // ── Travel ─────────────────────────────────────────────────────────────────
@@ -220,7 +220,7 @@ window.WEDDING = {
       { station: "North",     items: ["Chole puri", "Paneer paratha", "Bread, butter, jam, toast"] },
     ]},
   ],
-  alwaysOn: "Tea, coffee and cookies, round the clock from the 10th till you leave, in your room on request.",
+  alwaysOn: "Chai, coffee and cookies are on all day and all night, from the moment you arrive until you leave, brought to your room whenever you ask.",
 
   // ── Words on the invitation & magazine ─────────────────────────────────────
   copy: {
