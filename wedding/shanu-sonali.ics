@@ -1,0 +1,86 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Shanu & Sonali//Wedding//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:Shanu & Sonali
+X-WR-TIMEZONE:Asia/Kolkata
+BEGIN:VTIMEZONE
+TZID:Asia/Kolkata
+BEGIN:STANDARD
+DTSTART:19700101T000000
+TZOFFSETFROM:+0530
+TZOFFSETTO:+0530
+TZNAME:IST
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+UID:tilak-2026-12-11@shanukisonali
+DTSTAMP:20260926T025109Z
+DTSTART;TZID=Asia/Kolkata:20261210T133000
+DTEND;TZID=Asia/Kolkata:20261210T153000
+SUMMARY:Tilak · Shanu & Sonali
+LOCATION:Sree Raaga Resorts\, No. 1246\, Budigere Bypass Road\, Devana
+ halli\, Bengaluru\, Karnataka 562129
+DESCRIPTION:The First Blessing. The bride’s family welcomes the groom 
+ with the tilak\, the blessing that opens the wedding. A fruit punch is
+  waiting as you arrive; lunch runs alongside the ceremony. Dress: Trad
+ itional and light: ivories\, creams\, pastel silks. Kurtas\, saris\, s
+ uits.
+END:VEVENT
+BEGIN:VEVENT
+UID:sangeet-2026-12-11@shanukisonali
+DTSTAMP:20260926T025109Z
+DTSTART;TZID=Asia/Kolkata:20261210T180000
+DTEND;TZID=Asia/Kolkata:20261210T230000
+SUMMARY:Sangeet & Engagement · Shanu & Sonali
+LOCATION:Sree Raaga Resorts\, No. 1246\, Budigere Bypass Road\, Devana
+ halli\, Bengaluru\, Karnataka 562129
+DESCRIPTION:Rings\, Then Dancing. The rings at 7. Family performances 
+ from 8\, sharp. Starters go round from 6:30 and dinner is served from 
+ 7:30\, so eat between dances. Dress: Jewel tones and shimmer: emerald\
+ , sapphire\, wine. Dance-proof footwear.
+END:VEVENT
+BEGIN:VEVENT
+UID:haldi-2026-12-11@shanukisonali
+DTSTAMP:20260926T025109Z
+DTSTART;TZID=Asia/Kolkata:20261211T110000
+DTEND;TZID=Asia/Kolkata:20261211T130000
+SUMMARY:Haldi · Shanu & Sonali
+LOCATION:Sree Raaga Resorts\, No. 1246\, Budigere Bypass Road\, Devana
+ halli\, Bengaluru\, Karnataka 562129
+DESCRIPTION:Turmeric & Marigold. Sit on the ground\, get your hands me
+ ssy\, and sing. Mint mojitos\, watermelon juice and cocktail samosas g
+ o round; lunch follows at 1. Dress: Yellows\, ivories\, whites. Cotton
+ s you don’t mind turmeric on.
+END:VEVENT
+BEGIN:VEVENT
+UID:wedding-2026-12-11@shanukisonali
+DTSTAMP:20260926T025109Z
+DTSTART;TZID=Asia/Kolkata:20261211T190000
+DTEND;TZID=Asia/Kolkata:20261211T235900
+SUMMARY:The Wedding · Shanu & Sonali
+LOCATION:Sree Raaga Resorts\, No. 1246\, Budigere Bypass Road\, Devana
+ halli\, Bengaluru\, Karnataka 562129
+DESCRIPTION:Baraat · Jaimala · Reception. The baraat arrives at 7 with
+  the band; come early if you are dancing in it. Jaimala at 8\, and the
+  reception runs from 8 onwards with dinner served across eighteen coun
+ ters till 11:30. The pheras follow later in the night; sit with us for
+  them\, it is the heart of the evening. Dress: Traditional. Reds\, gol
+ ds\, ivories. Silks\, bandhgalas\, sherwanis\, saris\, lehengas.
+END:VEVENT
+BEGIN:VEVENT
+UID:bidai-2026-12-11@shanukisonali
+DTSTAMP:20260926T025109Z
+DTSTART;TZID=Asia/Kolkata:20261212T050000
+DTEND;TZID=Asia/Kolkata:20261212T063000
+SUMMARY:Bidai · Shanu & Sonali
+LOCATION:Sree Raaga Resorts\, No. 1246\, Budigere Bypass Road\, Devana
+ halli\, Bengaluru\, Karnataka 562129
+DESCRIPTION:Before Sunrise. Before the sun is up\, the bride and groom
+  leave together. Bring a handkerchief. Tea and coffee are on all night
+ ; breakfast is laid out from 8 for everyone who stayed up\, and for ev
+ eryone who didn’t. Dress: Whatever you slept in\, plus a shawl. It wil
+ l be cold and it will be early.
+END:VEVENT
+END:VCALENDAR

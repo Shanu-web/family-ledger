@@ -6,7 +6,8 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 out="$(realpath -m "${1:-../shanu-sonali-site.zip}")"
 tmp="$(mktemp -d)"
-cp -r assets wedding.config.js index.html invitation.html guest.html magazine.html "$tmp/"
+node tools/make_ics.js >/dev/null
+cp -r assets wedding.config.js index.html invitation.html guest.html magazine.html shanu-sonali.ics _headers "$tmp/"
 rm -f "$tmp"/assets/qr-*.png "$tmp"/assets/qr-*.svg
 rm -f "$out"; (cd "$tmp" && zip -qr "$out" .)
 rm -rf "$tmp"

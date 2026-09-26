@@ -170,10 +170,22 @@
     L.push("END:VCALENDAR");
     return L.join("\r\n");
   }
+  // A real .ics file (written by tools/make_ics.js) works on iPhone, Android and desktop; the blob is only a fallback.
+  function icsURL() { return "shanu-sonali.ics"; }
   function downloadICS() {
-    const blob = new Blob([ics()], { type: "text/calendar" });
-    const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
-    a.download = `${W.couple.one.first}-${W.couple.two.first}-wedding.ics`; a.click();
+    const blob = new Blob([ics()], { type: "text/calendar;charset=utf-8" });
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.rel = "noopener";
+    a.download = `${W.couple.one.first}-${W.couple.two.first}-wedding.ics`; document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
+  }
+  // Google Calendar template link for one event (the wedding by default); times are IST.
+  function gcalLink(id) {
+    const e = W.events.find(x => x.id === id) || W.events.find(x => x.day === W.wedding.date) || W.events[0];
+    const st = e.day.replace(/-/g, "") + "T" + e.start.replace(":", "") + "00", en = e.day.replace(/-/g, "") + "T" + e.end.replace(":", "") + "00";
+    const all = W.events.map(x => `${fmtDate(x.day, "short")} ${fmtTime(x.start)} ${x.title}`).join("\n");
+    const q = new URLSearchParams({ action: "TEMPLATE", text: `${e.title} · ${W.couple.one.first} & ${W.couple.two.first}`, dates: `${st}/${en}`, ctz: "Asia/Kolkata",
+      location: `${W.venue.name}, ${W.venue.address}`, details: `${e.kicker}. ${e.note}\n\nAll the celebrations:\n${all}` });
+    return "https://calendar.google.com/calendar/render?" + q.toString();
   }
   function hasRSVP() { return !!(W.rsvp && W.rsvp.whatsapp); }
   function contacts() { return (W.contacts || []).filter(c => c.phone); }
@@ -201,5 +213,5 @@
   }
   const city = W.wedding.city || "";
   const cityDot = city ? " · " + city : "";
-  window.WX = { hasRSVP, contacts, cardFront, guestUrl, mealsFor, ganesha, ganeshaSVG, lotusSVG, paisleySVG, ornate, city, cityDot, W, fmtDate, fmtTime, days, sealSVG, corners, ICON, qrSVG, ics, downloadICS, rsvpLink, mapsEmbed, directions, swatches, countdown, parseISO };
+  window.WX = { icsURL, gcalLink, hasRSVP, contacts, cardFront, guestUrl, mealsFor, ganesha, ganeshaSVG, lotusSVG, paisleySVG, ornate, city, cityDot, W, fmtDate, fmtTime, days, sealSVG, corners, ICON, qrSVG, ics, downloadICS, rsvpLink, mapsEmbed, directions, swatches, countdown, parseISO };
 })();

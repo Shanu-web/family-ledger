@@ -280,7 +280,8 @@
 <section id="contacts"><div class="wrap narrow">
   <div class="center io"><p class="kicker">Your Hosts &amp; Concierge</p><h2 class="h2" id="contacts-h">We're <em>here</em> for you.</h2><p class="lead">To ensure your absolute comfort and seamless experience, our dedicated family concierge team is available to assist you throughout the celebrations. Please don't hesitate to reach out.</p></div>
   <div class="contacts io" id="contact-list" style="margin-top:2rem"></div>
-  <p class="center io" style="margin-top:2rem;display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap"><a class="btn primary" id="rsvp-main" target="_blank" rel="noopener"></a><button class="btn ghost" id="ics"></button></p>
+  <p class="center io" style="margin-top:2rem;display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap"><a class="btn primary" id="rsvp-main" target="_blank" rel="noopener"></a><a class="btn ghost" id="gcal" target="_blank" rel="noopener"></a><a class="btn ghost" id="ics" download="shanu-sonali.ics"></a></p>
+  <p class="center io" style="color:var(--faint);font-size:.8rem;margin-top:.6rem">Google Calendar opens the wedding evening with the full programme in its notes. The calendar file adds all five celebrations to Apple Calendar or Outlook.</p>
   <p class="center io" id="gift-note" style="margin-top:1.4rem;color:var(--faint);font-size:.9rem"></p>
 </div></section>
 
@@ -290,7 +291,7 @@
 <script src="assets/wedding.js"></script>
 <script>
 (function () {
-  const { W, fmtDate, fmtTime, days, mealsFor, ICON, downloadICS, rsvpLink, hasRSVP, contacts, mapsEmbed, directions, cityDot } = WX;
+  const { W, fmtDate, fmtTime, days, mealsFor, ICON, icsURL, gcalLink, rsvpLink, hasRSVP, contacts, mapsEmbed, directions, cityDot } = WX;
   const one = W.couple.one, two = W.couple.two;
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const D = days();
@@ -308,10 +309,9 @@
     <p class="when rise d4"><b>${fmtDate(D[0].day, "short")} – ${fmtDate(D.at(-1).day, "short")} ${fmtDate(W.wedding.date, "year")}</b><br>${W.venue.name}</p>
     <p class="where rise d4">${W.venue.address}</p>
     <div class="cta rise d5">
-      <button class="btn primary" id="ics-hero">${ICON.cal} Save the date</button>
+      <a class="btn primary" href="${gcalLink("wedding")}" target="_blank" rel="noopener">${ICON.cal} Save the date</a>
       <a class="btn ghost" href="${directions()}" target="_blank" rel="noopener">${ICON.map} Directions</a>
     </div>`;
-  document.getElementById("ics-hero").onclick = downloadICS;
 
   /* Bottom nav */
   const NAV = [["home", "Home", `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>`],
@@ -382,7 +382,8 @@
   document.getElementById("contact-list").innerHTML = CL.map(c => `<div class="contact glass"><div><small>${c.role}</small><b>${c.name}</b></div><a href="tel:${c.phone.replace(/\s/g, "")}">${ICON.phone}${c.phone}</a></div>`).join("");
   if (!CL.length) document.getElementById("contacts-h").innerHTML = `We're <em>here</em> for you.`;
   const rs = document.getElementById("rsvp-main"); if (hasRSVP()) { rs.href = rsvpLink(); rs.innerHTML = `${ICON.wa} RSVP on WhatsApp`; } else rs.remove();
-  const ics = document.getElementById("ics"); ics.innerHTML = `${ICON.cal} Add the celebrations to your calendar`; ics.onclick = downloadICS;
+  const gc = document.getElementById("gcal"); gc.href = gcalLink("wedding"); gc.innerHTML = `${ICON.cal} Google Calendar`;
+  const ics = document.getElementById("ics"); ics.href = icsURL(); ics.innerHTML = `${ICON.cal} Apple / Outlook (.ics)`;
   document.getElementById("gift-note").textContent = W.copy.giftNote;
   document.getElementById("footer").innerHTML = `<div class="script">${heroTag}</div>${heroSub ? `<div class="tag">${heroSub}</div>` : ""}${W.couple.hashtag ? `<div class="tag" style="color:var(--gold-2);text-shadow:var(--glow-gold)">${W.couple.hashtag}</div>` : ""}<p class="meta">${one.full} &amp; ${two.full} · ${fmtDate(D[0].day, "short")} – ${fmtDate(D.at(-1).day, "short")} ${fmtDate(W.wedding.date, "year")}${cityDot}</p>`;
 

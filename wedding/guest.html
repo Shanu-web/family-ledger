@@ -163,10 +163,9 @@
     <p class="countdown reveal d3" id="countdown"></p>
     <div class="actions reveal d4">
       ${hasRSVP() ? `<a class="btn" href="${rsvpLink()}" target="_blank" rel="noopener">${ICON.wa} RSVP on WhatsApp</a>` : ""}
-      <button class="btn${hasRSVP() ? " ghost" : ""}" id="ics">${ICON.cal} Add all to calendar</button>
+      <a class="btn${hasRSVP() ? " ghost" : ""}" href="shanu-sonali.ics" download="shanu-sonali.ics">${ICON.cal} Add all to calendar</a>
     </div>`;
   countdown(document.getElementById("countdown"));
-  document.getElementById("ics").onclick = downloadICS;
 
   const stations = m => `<div class="stations">${m.stations.map(s => `<div class="station"><h4>${s.station}</h4><ul>${s.items.map(i => `<li>${i}</li>`).join("")}</ul></div>`).join("")}</div>`;
   const mealBlock = m => `<div class="mealhead"><b>${m.title}</b><span>${fmtTime(m.start)} – ${fmtTime(m.end)}</span></div>${stations(m)}`;

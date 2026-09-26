@@ -128,10 +128,9 @@
   actions.innerHTML = `
     <a class="btn" href="guest.html">${ICON.map} Map, schedule &amp; menu</a>
     ${hasRSVP() ? `<a class="btn ghost" href="${rsvpLink()}" target="_blank" rel="noopener">${ICON.wa} RSVP on WhatsApp</a>` : ""}
-    <button class="btn ghost" id="ics">${ICON.cal} Add to calendar</button>
+    <a class="btn ghost" href="shanu-sonali.ics" download="shanu-sonali.ics">${ICON.cal} Add to calendar</a>
     <button class="btn ghost" id="share">${ICON.share} Share</button>
   `;
-  document.getElementById("ics").onclick = downloadICS;
   const share = document.getElementById("share");
   share.onclick = async () => {
     const data = { title: document.title, text: `${one.first} & ${two.first} are getting married — ${fmtDate(W.wedding.date, "long")}${cityDot}.`, url: location.href };
