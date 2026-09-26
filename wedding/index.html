@@ -7,7 +7,7 @@
 <meta name="description" content="Shanu weds Sonali · 10–12 December 2026 · Sree Raaga Resorts, Bengaluru. Tap to open the invitation.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Shanu & Sonali · 11 December 2026">
-<meta property="og:description" content="You are invited. Tap to open the card: the three days, the venue, the menus.">
+<meta property="og:description" content="Shanu ki Sona. Ab hamesha ki. Tap to open the card: the three days, the venue, the menus. #ShanuKiSona">
 <meta property="og:image" content="assets/og.jpg">
 <meta name="theme-color" content="#101A2B">
 <script src="wedding.config.js"></script>
@@ -187,6 +187,7 @@
     <p class="eyebrow gold">Until the baraat</p>
     <h2 class="h2 foil" id="cd-title" style="font-style:italic"></h2>
     <div class="tiles" id="tiles"></div>
+    <p class="lead italic" id="tagline" style="color:var(--gold-2);margin-top:var(--s-6)"></p>
   </div></section>
 
   <section class="section" id="schedule"><div class="wrap narrow">
@@ -327,6 +328,7 @@
 
   /* ── Countdown ─────────────────────────────────────────────────────── */
   document.getElementById("cd-title").textContent = `${fmtDate(W.wedding.date, "ord")}`;
+  document.getElementById("tagline").textContent = W.couple.tagline ? `${W.couple.tagline}  ${W.couple.hashtag}` : W.couple.hashtag;
   const tiles = document.getElementById("tiles"), target = new Date(`${W.wedding.date}T${W.wedding.time}:00`);
   function tick() {
     const ms = Math.max(0, target - Date.now());

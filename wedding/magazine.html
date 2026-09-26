@@ -297,7 +297,7 @@
   // 16 · Back cover
   P.push(page("backcover", `
     <div class="seal">${sealSVG()}</div>
-    <p class="lead italic" style="margin-top:4mm">${W.copy.thankYou}</p>
+    <p class="lead italic" style="margin-top:4mm">${W.couple.tagline || W.copy.thankYou}</p>
     <div class="qr">${qrSVG(guestUrl())}</div>
     <p class="eyebrow ink">Scan for the live schedule, map &amp; menus</p>
     <p class="meta">${guestUrl().replace(/^https?:\/\//, "")}</p>

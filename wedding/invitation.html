@@ -96,7 +96,7 @@
     ${ornate()}
     <div>
       <p class="eyebrow">The three days</p>
-      <h2 class="h3" style="font-style:italic">We would love you at all of them.</h2>
+      <h2 class="h3" style="font-style:italic">${W.couple.tagline || "We would love you at all of them."}</h2>
       ${oneVenue ? `<p class="meta" style="margin:var(--s-2) 0 0">All at ${W.venue.name}, ${W.venue.address}</p>` : ""}
       <div class="days">
         ${ds.map(d => `
