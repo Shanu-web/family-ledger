@@ -7,7 +7,7 @@
 <meta name="description" content="Shanu weds Sonali · 10–12 December 2026 · Sree Raaga Resorts, Bengaluru. Tap to open the invitation.">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Shanu & Sonali · 11 December 2026">
-<meta property="og:description" content="Shanu ki Sona. Ab hamesha ki. Tap to open the card: the three days, the venue, the menus. #ShanuKiSona">
+<meta property="og:description" content="Shehnai baji, Sonali aayi. Tap to open the card: the three days, the venue, the menus. #ShanuKiShehnai">
 <meta property="og:image" content="assets/og.jpg">
 <meta name="theme-color" content="#101A2B">
 <script src="wedding.config.js"></script>
@@ -328,7 +328,7 @@
 
   /* ── Countdown ─────────────────────────────────────────────────────── */
   document.getElementById("cd-title").textContent = `${fmtDate(W.wedding.date, "ord")}`;
-  document.getElementById("tagline").textContent = W.couple.tagline ? `${W.couple.tagline}  ${W.couple.hashtag}` : W.couple.hashtag;
+  document.getElementById("tagline").innerHTML = (W.couple.taglineHindi ? `<span class="devanagari" style="display:block;font-size:1.6rem;color:var(--gold-2)">${W.couple.taglineHindi}</span>` : "") + `${W.couple.tagline || ""} <span class="foil" style="font-family:var(--font-text);font-size:var(--fs-sm);letter-spacing:var(--track);text-transform:uppercase;margin-left:.5em">${W.couple.hashtag}</span>`;
   const tiles = document.getElementById("tiles"), target = new Date(`${W.wedding.date}T${W.wedding.time}:00`);
   function tick() {
     const ms = Math.max(0, target - Date.now());

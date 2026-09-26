@@ -297,7 +297,8 @@
   // 16 · Back cover
   P.push(page("backcover", `
     <div class="seal">${sealSVG()}</div>
-    <p class="lead italic" style="margin-top:4mm">${W.couple.tagline || W.copy.thankYou}</p>
+    ${W.couple.taglineHindi ? `<p class="devanagari" style="font-size:16pt;margin-top:4mm">${W.couple.taglineHindi}</p>` : ""}
+    <p class="lead italic" style="margin-top:2mm">${W.couple.tagline || W.copy.thankYou}</p>
     <div class="qr">${qrSVG(guestUrl())}</div>
     <p class="eyebrow ink">Scan for the live schedule, map &amp; menus</p>
     <p class="meta">${guestUrl().replace(/^https?:\/\//, "")}</p>

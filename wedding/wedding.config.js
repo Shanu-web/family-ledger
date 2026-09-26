@@ -34,8 +34,9 @@ window.WEDDING = {
       role: "daughter",
     },
     monogram: "S·S",
-    hashtag: "#ShanuKiSona",                       // alternates: #SonePeShanu · #SSquared · #ShanuFoundGold · #SonaKaShanu
-    tagline: "Shanu ki Sona. Ab hamesha ki.",      // pairs with the hashtag; shown on the card back, the site and the magazine
+    hashtag: "#ShanuKiShehnai",                    // alternates: #ShanuKaSaathSonaliKaHaath · #SaatPhereShanuSonali · #SonaliBaniShanuKi · #ShanuSangSonali
+    tagline: "Shehnai baji, Sonali aayi.",         // shown on the site; the Devanagari line below goes on the card back and the magazine
+    taglineHindi: "शहनाई बजी, सोनाली आई",
   },
 
   // ── Headline date & place (the wedding evening: baraat, jaimala, reception) ─
@@ -88,7 +89,7 @@ window.WEDDING = {
   ],
   // RSVP on WhatsApp: leave whatsapp "" and every RSVP button and bar stays hidden.
   // When ready: digits only with country code, e.g. "919876543210".
-  rsvp: { whatsapp: "", text: "Hi! RSVP for Shanu & Sonali’s wedding (#ShanuKiSona) — " },
+  rsvp: { whatsapp: "", text: "Hi! RSVP for Shanu & Sonali’s wedding (#ShanuKiShehnai) — " },
 
   // ── The events (the schedule, the dress codes, the menus) ─────────────────
   events: [
