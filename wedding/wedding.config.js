@@ -95,7 +95,7 @@ window.WEDDING = {
   // ── The events (the schedule, the dress codes, the menus) ─────────────────
   events: [
     {
-      id: "tilak", day: "2026-12-10", start: "12:00", end: "14:00",
+      id: "tilak", day: "2026-12-10", start: "12:00", end: "13:00",
       title: "Tilak", kicker: "The First Blessing",
       where: VENUE_NAME,
       dress: "Traditional and light: ivories, creams, pastel silks. Kurtas, saris, suits.",
