@@ -156,7 +156,8 @@ window.WEDDING = {
   meals: [
     { id: "lunch-10", day: "2026-12-10", start: "12:30", end: "15:00", title: "Lunch", for: "tilak", stations: [
       { station: "As you arrive", items: ["Fruit punch"] },
-      { station: "Beverage",      items: ["Jaljeera"] },
+      { station: "Beverages",     items: ["Jaljeera", "Watermelon juice"] },
+      { station: "Starter",       items: ["Paneer pakoda with green chutney"] },
       { station: "Main course",   items: ["Paneer lababdar", "Bharwa bhindi", "Kum palak (mushroom)", "Dal tadka", "Jeera rice, steamed rice"] },
       { station: "Breads",        items: ["Phulka", "Puri"] },
       { station: "Desserts",      items: ["Gulab jamun", "Rasgulla"] },

@@ -8,7 +8,7 @@ the planners only and never appear on a guest page.
 
 | Date | Service | Guests | Window | Staffing / counters |
 |---|---|---|---|---|
-| 10 Dec | Welcome drink, lunch, high tea | 120 | Lunch 12:30–3:00, high tea 4:00–6:00 | — |
+| 10 Dec | Welcome drink, lunch, high tea | 120 | Lunch 12:30–3:00, high tea 4:00–6:00 | Added since the 21 Sep menu: paneer pakoda with green chutney (starter), watermelon juice |
 | 10 Dec | Sangeet dinner | 120 | Starters 6:30, dinner 7:30–10:00 | 8 service staff; 10 counters, 2 staff each (juices, starters, chaat, soup, Chinese, breads, desserts, accompaniments, main course ×2) |
 | 11 Dec | Breakfast, haldi refreshments, lunch, high tea | 120 | Breakfast 8:00–10:30, haldi 11:00–1:00, lunch 1:00–3:00, high tea 4:00–6:00 | Refreshment-counter décor and watermelon carving at the haldi |
 | 11 Dec | Wedding dinner | 250 | 7:00–11:30, continuous replenishment | 10 service staff; 18 LED counters, 2 staff each |
