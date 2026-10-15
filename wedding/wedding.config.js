@@ -53,7 +53,7 @@ window.WEDDING = {
   // ── Public URL of the guest page (this is what the QR encodes) ─────────────
   // TODO: deploy this folder and put its final address here, e.g.
   //   https://<app-host>/wedding/guest.html
-  guestUrl: "https://example.com/wedding/guest.html",
+  guestUrl: "https://frolicking-sherbet-a248fe.netlify.app/",
 
   // ── Venue ──────────────────────────────────────────────────────────────────
   venue: {
