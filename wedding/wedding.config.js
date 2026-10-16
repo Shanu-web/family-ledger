@@ -39,10 +39,10 @@ window.WEDDING = {
     taglineSub: "The Shanu & Sonali Story",
   },
 
-  // ── Headline date & place (the wedding evening: baraat, varmala, reception, pheras) ─
+  // ── Headline date & place (the wedding evening: baraat, jaimala, reception) ─
   wedding: {
     date: "2026-12-11",                 // ISO, local time. Countdown + calendar use this.
-    time: "18:00",
+    time: "19:00",
     city: VENUE_CITY,
     ganesh: "॥ श्री गणेशाय नमः ॥",
     ganeshImage: "assets/ganesha.jpg",   // the photo at the top of the card; set to "" to use the line drawing instead
@@ -126,16 +126,18 @@ window.WEDDING = {
       note: "Sit on the ground, get your hands messy, and sing. Mint mojitos, watermelon juice and cocktail samosas go round; lunch follows at 1.",
     },
     {
-      id: "wedding", day: "2026-12-11", start: "18:00", end: "23:59",
-      title: "The Wedding", kicker: "Baraat · Varmala · Reception · Pheras",
+      id: "wedding", day: "2026-12-11", start: "19:00", end: "23:59",
+      title: "The Wedding", kicker: "Baraat · Jaimala · Reception",
       where: VENUE_NAME,
       dress: "Traditional. Reds, golds, ivories. Silks, bandhgalas, sherwanis, saris, lehengas.",
       palette: ["#6E1E2B", "#B8935A", "#F6F1E7"],
-      note: "The baraat arrives at 6 with the band; come early if you are dancing in it. Varmala at 7, followed by the reception, with dinner served across eighteen counters till 11:30. The pheras begin at 10:30 and carry on into the night; sit with us for them, it is the heart of the evening.",
+      note: "The baraat arrives at 7 with the band; come early if you are dancing in it. Jaimala at 8, and the reception runs from 8 onwards with dinner served across eighteen counters till 11:30. The pheras follow later in the night; sit with us for them, it is the heart of the evening.",
       timeline: [
-        { at: "18:00", what: "Baraat" },
-        { at: "19:00", what: "Varmala, followed by the reception" },
-        { at: "22:30", what: "Pheras, onwards" },
+        { at: "19:00", what: "Baraat arrives; swagat at the gate. Dinner counters open" },
+        { at: "20:00", what: "Jaimala" },
+        { at: "20:00", what: "Reception, onwards" },
+        { at: "23:30", what: "Dinner service closes" },
+        { at: "Late",  what: "Pheras at the mandap" },
       ],
     },
     {

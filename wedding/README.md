@@ -25,8 +25,8 @@ page updates. No build step.
 
 What is already in: the venue, both families with parents, brothers and home addresses,
 the monogram S·S, the hashtag, and the three days (10 Dec tilak 11:45 am and
-sangeet + engagement 6 pm; 11 Dec haldi 11 am, baraat 6 pm, varmala 7 pm followed
-by the reception, pheras from 10:30 pm; 12 Dec bidai before sunrise).
+sangeet + engagement 6 pm; 11 Dec haldi 11 am and baraat 7 pm with jaimala and
+reception from 8 pm; 12 Dec bidai before sunrise).
 
 Still marked `TODO` in the config, in order of urgency:
 
