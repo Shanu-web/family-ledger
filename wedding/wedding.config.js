@@ -30,7 +30,7 @@ window.WEDDING = {
       siblings: "Vikash Mohan",
       familyLine: "and the entire Mohan family",
       familyName: "The Mohans",
-      address: "501-A1, Prasad Nagar, Wadgaon Sheri, Pune 411014, Maharashtra",
+      address: "Prasad Nagar, Wadgaon Sheri, Pune 411014, Maharashtra",
       role: "daughter",
     },
     monogram: "S·S",
